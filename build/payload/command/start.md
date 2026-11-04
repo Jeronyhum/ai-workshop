@@ -65,7 +65,8 @@ argument-hint: 만들고 싶은 것 한 줄 (비우면 PROJECT_INTENT에서 시�
   `{"tier": {"type": "choice", "instructions": "이 서브태스크를 안정적으로
   해낼 수 있는 가장 싼 티어를 골라라. 난이도, 비용효율성, 프롬프트 캐시
   재사용(같은 긴 컨텍스트를 반복하면 같은 모델 유지가 유리하다)을 함께
-  고려해라.", "criteria": {"flash": "기계적·대량·반복", "gemma": "긴
+  고려해라. 노력 단계는 flash·gemma 티어에서 high가 상한이다 (max 실측:
+  사고가 출력 예산을 전부 소진해 답 없이 종료).", "criteria": {"flash": "기계적·대량·반복", "gemma": "긴
   읽기·초벌 정리", "haiku": "가벼운 판단", "luna": "중간 난이도 일반",
   "advisor": "이미 2회 실패한 국소 문제만"}}}`
   응답은 `answers.tier.choice`에 티어 이름이 온다.
