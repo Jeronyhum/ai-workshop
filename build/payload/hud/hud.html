@@ -54,6 +54,7 @@
   <div class="foot">
     <span id="session"></span>
     <span id="cached"></span>
+    <span id="usage"></span>
     <span id="headroom"></span>
   </div>
 </div>
@@ -102,6 +103,10 @@
       } else {
         $("ctx").textContent = "-";
         $("cached").textContent = x.error || "";
+      }
+      const u = d.usage || {};
+      if (u.ok) {
+        $("usage").textContent = "누적 " + short(u.total) + " 토큰 · 캐시 적중 " + u.cacheRatio.toFixed(1) + "%";
       }
       $("headroom").textContent = new Date(d.at).toLocaleTimeString("ko-KR");
     } catch (e) {

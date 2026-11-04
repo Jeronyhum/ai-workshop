@@ -34,6 +34,9 @@ async function gw(path, { method = "POST", body } = {}) {
   const init = {
     method,
     headers: { Authorization: "Bearer " + apiKey() },
+    // Fail inside the MCP timeout (opencode allows 120s for this server) instead of
+    // hanging until opencode cuts the call after credits were charged.
+    signal: AbortSignal.timeout(90000),
   };
   if (body !== undefined) {
     init.headers["Content-Type"] = "application/json";

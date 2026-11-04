@@ -15,7 +15,7 @@
 2. SSU BAZE API 키 입력 (https://ssu.factchat.bot/dashboard/developers 에서 발급, 화면에서만 입력)
 3. 게이트웨이 전 모델(61개) + MCP(35+) 설정을 라이브 카탈로그에서 생성
 4. 크레딧/컨텍스트 HUD (Windows WPF 바 / 그 외 브라우저 대시보드)
-5. 토큰 절감: Serena + Headroom (MCP 등록)
+5. 코드 도구: Serena (MCP 등록, 심볼 단위 탐색·편집) + graphify (구조 지도 스킬)
 6. 워크플로: pstack 58 스킬 (cursor/plugins 기준) + spec-kit
 7. vibe-coach 코치 스킬 — 첫 대화에서 의도·유사제품·API 비용을 먼저 묻는다
 
@@ -45,7 +45,3 @@ SSU_DRY_RUN=1 SSU_SKIP_APPS=1 SSU_SKIP_TOOLS=1 SSU_ROOT=<임시폴더> SSU_ARGS=
 ```
 
 API 키는 파일·로그에 평문 기록 금지. `.env`(SSU_API_KEY)와 환경변수로만 흘린다.
-
-## MIND FIELD exhibition archive
-
-`mind-field-archive/`: a non-linear archive of the AI vibe-coding workshop. Run it with `cd mind-field-archive && python3 -m http.server 8766`. Credits are in `mind-field-archive/CREDITS.md`, and the review prompt is in `mind-field-archive/review-meta-prompt.md`.

@@ -22,6 +22,35 @@ function Get-Status {
     catch { return $null }
 }
 
+# The status call can block for seconds (credits fetch allows 8s). Running it on the
+# UI thread froze the bar every cycle, so ticks poll a background job instead: start
+# one when none is running, apply its result when it lands.
+$script:statusJob = $null
+function Poll-Status {
+    if ($script:statusJob) {
+        if ($script:statusJob.State -eq "Completed") {
+            $job = $script:statusJob
+            $script:statusJob = $null
+            try {
+                $out = Receive-Job $job -ErrorAction Stop
+                Remove-Job $job -Force -ErrorAction SilentlyContinue
+                if ($out) { return ($out | ConvertFrom-Json) }
+            }
+            catch { return $null }
+        }
+        else { return "pending" }
+    }
+    $script:statusJob = Start-Job -ScriptBlock {
+        param($nodeExe, $scriptPath)
+        try {
+            $o = & $nodeExe --no-warnings $scriptPath 2>$null
+            if ($o) { $o }
+        }
+        catch { }
+    } -ArgumentList $script:node, $script:statusScript
+    return "pending"
+}
+
 function Format-Num([double]$n) {
     if ($n -ge 1000000) { return "{0:N1}M" -f ($n / 1000000) }
     if ($n -ge 1000) { return "{0:N0}k" -f ($n / 1000) }
@@ -141,13 +170,12 @@ $border.Cursor = [System.Windows.Input.Cursors]::SizeAll
 $border.Add_MouseLeftButtonDown({ try { $win.DragMove() } catch { } })
 
 # ---------- update ----------
-function Update-View {
-    $s = Get-Status
+function Apply-Status($s) {
     if (-not $s) {
         $creditsValue.Text = "-"
-        $creditsPct.Text = "(node 또는 status.mjs 없음)"
+        $creditsPct.Text = "(상태 조회 실패)"
         $ctxValue.Text = "-"
-        $ctxLine.Text = "OpenCode를 한 번 실행하면 세션이 생깁니다"
+        $ctxLine.Text = "node·status.mjs·세션 DB 중 하나에 문제가 있습니다. 터미널에서 node hud/status.mjs 로 확인하세요"
         return
     }
 
@@ -177,7 +205,11 @@ function Update-View {
             $col = Get-LevelColor (100 - $p)
             $kbar.inner.Background = New-Object System.Windows.Media.SolidColorBrush ([Windows.Media.ColorConverter]::ConvertFromString($col))
             $kbar.inner.Width = [Math]::Max(0, [Math]::Min(250, 250 * $p / 100))
-            $ctxLine.Text = "세션 {0}   캐시 {1}   남은 창 {2:N0}%" -f ([string]$s.context.session).Substring(0, 12), (Format-Num $s.context.cached), (100 - $p)
+            $line = "세션 {0}   캐시 {1}   남은 창 {2:N0}%" -f ([string]$s.context.session).Substring(0, 12), (Format-Num $s.context.cached), (100 - $p)
+            if ($s.usage -and $s.usage.ok) {
+                $line += "   누적 {0} 토큰 · 캐시 적중 {1:N1}%" -f (Format-Num $s.usage.total), [double]$s.usage.cacheRatio
+            }
+            $ctxLine.Text = $line
         }
         else {
             $ctxValue.Text = (Format-Num $used) + " tokens"
@@ -186,11 +218,18 @@ function Update-View {
     }
     else {
         $ctxValue.Text = "-"
-        $ctxLine.Text = "$($s.context.error)"
+        if ($s.context -and $s.context.error) { $ctxLine.Text = "$($s.context.error)" }
+        else { $ctxLine.Text = "OpenCode를 한 번 실행하면 세션이 생깁니다" }
     }
 }
 
-Update-View
+function Update-View {
+    $r = Poll-Status
+    if ($r -eq "pending") { return }
+    Apply-Status $r
+}
+
+Apply-Status (Get-Status)
 if ($Once) {
     $creditsValue.Text
     $ctxValue.Text

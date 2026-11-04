@@ -1,6 +1,6 @@
-param(
-    [string]$Key = $env:SSU_KEY,
-    [string]$Root = $(if ($env:SSU_ROOT) { $env:SSU_ROOT } else { Join-Path $env:USERPROFILE ".config\opencode" }),
+﻿param(
+    [string]$Key = $(if ($env:SSU_API_KEY) { $env:SSU_API_KEY } elseif ($env:SSU_KEY) { $env:SSU_KEY } else { "" }),
+    [string]$Root = $(if ($env:SSU_CONFIG_DIR) { $env:SSU_CONFIG_DIR } elseif ($env:SSU_ROOT) { $env:SSU_ROOT } else { Join-Path $env:USERPROFILE ".config\opencode" }),
     [switch]$DryRun,
     [switch]$SkipApps,
     [switch]$SkipTools
@@ -61,6 +61,13 @@ function Ensure-WingetPackage($id, $label) {
     Warn "$label 설치 실패 (code $($p.ExitCode)). 직접 실행: winget install --id $id -e"
 }
 
+function Read-KeyInteractive($prompt) {
+    $sec = Read-Host $prompt -AsSecureString
+    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+    try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
+    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+}
+
 function Ask-Key {
     if ($Key) { return $Key }
     if ($DryRun) { return "sk-dry-run" }
@@ -68,10 +75,9 @@ function Ask-Key {
     Say "SSU 대시보드에서 API 키를 발급받아 붙여넣으세요."
     Say "  https://ssu.factchat.bot/dashboard/developers  ->  Keys  ->  Create key"
     Say "  입력한 키는 화면에 보이지 않습니다."
-    $sec = Read-Host "API 키" -AsSecureString
-    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
-    try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
-    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+    # Open the dashboard for them — creating the key is the one manual step.
+    try { Start-Process "https://ssu.factchat.bot/dashboard/developers" } catch {}
+    return Read-KeyInteractive "API 키"
 }
 
 function Test-Key($k) {
@@ -156,10 +162,21 @@ else {
     if (Have uv) { Ok ((uv --version) -replace "uv ", "uv ") }
     else { Step "uv 설치 중"; Ensure-WingetPackage "astral-sh.uv" "uv" }
 
-    Step "OpenCode Desktop 설치 중"
-    Ensure-WingetPackage "SST.OpenCodeDesktop" "OpenCode Desktop"
-    Step "OpenCode CLI 설치 중"
-    Ensure-WingetPackage "SST.opencode" "OpenCode CLI"
+    # Journey rule: if the app is already there, skip the install entirely.
+    $ocDesktop = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\OpenCode\OpenCode.exe"),
+        (Join-Path $env:LOCALAPPDATA "OpenCode\OpenCode.exe")
+    ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($ocDesktop) { Ok "OpenCode Desktop 이미 설치됨" }
+    else {
+        Step "OpenCode Desktop 설치 중"
+        Ensure-WingetPackage "SST.OpenCodeDesktop" "OpenCode Desktop"
+    }
+    if (Have opencode) { Ok "OpenCode CLI 이미 설치됨" }
+    else {
+        Step "OpenCode CLI 설치 중"
+        Ensure-WingetPackage "SST.opencode" "OpenCode CLI"
+    }
 
     Refresh-Path
 }
@@ -182,7 +199,10 @@ while (-not $check.ok -and $tries -lt 3) {
     else {
         Fail "키 확인 실패 (HTTP $($check.code)). 네트워크 또는 게이트웨이 상태를 확인하세요."
     }
-    $apiKey = Ask-Key
+    # Always ask for a FRESH key here. Ask-Key would return the same $Key that just
+    # failed (when it came from -Key/env) and burn all retries on an identical check.
+    if ($DryRun) { break }
+    $apiKey = Read-KeyInteractive "새 API 키"
     if (-not $apiKey) { exit 1 }
     $check = Test-Key $apiKey
     $tries++
@@ -210,11 +230,13 @@ if ($DryRun) {
 }
 else {
     New-Item -ItemType Directory -Path $Root -Force | Out-Null
-    foreach ($d in @("hud", "mcp", "skill", "command")) {
-        $src = Join-Path $payload $d
+    # Payload folders are singular (skill/command); opencode's documented layout is
+    # plural (skills/commands). Singular still loads in 1.19.x, plural is the safe form.
+    foreach ($pair in @(@("hud", "hud"), @("mcp", "mcp"), @("skill", "skills"), @("command", "commands"))) {
+        $src = Join-Path $payload $pair[0]
         if (Test-Path $src) {
-            New-Item -ItemType Directory -Path (Join-Path $Root $d) -Force | Out-Null
-            Copy-Item (Join-Path $src "*") (Join-Path $Root $d) -Recurse -Force
+            New-Item -ItemType Directory -Path (Join-Path $Root $pair[1]) -Force | Out-Null
+            Copy-Item (Join-Path $src "*") (Join-Path $Root $pair[1]) -Recurse -Force
         }
     }
     foreach ($f in @("gen_config.mjs", "normalize_skills.mjs", "AGENTS.md")) {
@@ -257,20 +279,19 @@ else {
     }
     $gen = Join-Path $Root "gen_config.mjs"
     $serenaExe = ""
-    $headroomExe = ""
     if (Have serena) { $serenaExe = (Get-Command serena).Source }
-    if (Have headroom) { $headroomExe = (Get-Command headroom).Source }
     Step "게이트웨이에서 모델 목록을 받는 중 (10초 이내)"
-    & node $gen $apiKey $Root $serenaExe $headroomExe
-    if ($LASTEXITCODE -ne 0) {
+    $r = Invoke-Native "node" @($gen, $apiKey, $Root, $serenaExe)
+    if ($r.out) { $r.out -split "`r?`n" | ForEach-Object { Say "    $_" } }
+    if ($r.code -ne 0) {
         Fail "모델 설정 생성 실패. 키와 네트워크를 확인하세요."
         exit 1
     }
     Ok "opencode.jsonc 생성"
 }
 
-# ---------------- 5. 토큰 절감 레이어 ----------------
-Head "5/7 토큰 절감 레이어 (Serena + Headroom)"
+# ---------------- 5. 코드 도구 ----------------
+Head "5/7 코드 도구 (Serena + graphify)"
 if ($SkipTools) {
     Warn "건너뜁니다 (-SkipTools)"
 }
@@ -280,7 +301,6 @@ elseif ($DryRun) {
 elseif (-not (Have uv)) {
     Warn "uv가 없어 건너뜁니다. 설치 후 다시 실행하거나 직접 실행하세요."
     Say "    uv tool install -p 3.13 serena-agent"
-    Say "    uv tool install --python 3.13 `"headroom-ai[all]`""
 }
 else {
     Step "Serena 설치 중 (심볼 단위 코드 탐색, 1~2분)"
@@ -288,31 +308,38 @@ else {
     if ($r.code -eq 0) { Ok "Serena 설치" }
     else { Warn "Serena 설치 실패 (code $($r.code)): $(Tail $r.out 2)" }
 
-    Step "Headroom 설치 중 (프롬프트 압축, 1~3분)"
-    $r = Invoke-Native "uv" @("tool", "install", "--python", "3.13", "headroom-ai[all]")
-    if ($r.code -eq 0) { Ok "Headroom 설치" }
-    else { Warn "Headroom 설치 실패 (code $($r.code)): $(Tail $r.out 2)" }
-
     Refresh-Path
     $serenaExe = ""
-    $headroomExe = ""
     if (Have serena) { $serenaExe = (Get-Command serena).Source }
     else {
         $guess = Join-Path $env:USERPROFILE ".local\bin\serena.exe"
         if (Test-Path $guess) { $serenaExe = $guess }
     }
-    if (Have headroom) { $headroomExe = (Get-Command headroom).Source }
-    else {
-        $guess = Join-Path $env:USERPROFILE ".local\bin\headroom.exe"
-        if (Test-Path $guess) { $headroomExe = $guess }
-    }
 
-    if ($serenaExe -or $headroomExe) {
+    if ($serenaExe) {
         Step "설정에 MCP 서버 등록"
-        & node $gen $apiKey $Root $serenaExe $headroomExe 2>&1 | Out-Null
-        if ($serenaExe) { Ok "Serena MCP 등록" } else { Warn "Serena 실행 파일을 찾지 못했습니다" }
-        if ($headroomExe) { Ok "Headroom MCP 등록" } else { Warn "Headroom 실행 파일을 찾지 못했습니다" }
+        # The re-run result decides whether "MCP 등록" may be claimed. Discarding its
+        # output/exit code (the old `2>&1 | Out-Null`) printed [OK] for registrations
+        # that never landed — and under EAP=Stop a warning-only run could kill the
+        # installer before sections 6-7. Invoke-Native avoids both.
+        $r = Invoke-Native "node" @($gen, $apiKey, $Root, $serenaExe)
+        if ($r.code -eq 0) { Ok "Serena MCP 등록" }
+        else {
+            Warn "MCP 등록을 위한 설정 재생성 실패 (모델 설정은 그대로입니다): $(Tail $r.out 2)"
+        }
     }
+    else { Warn "Serena 실행 파일을 찾지 못했습니다" }
+
+    Step "graphify 설치 중 (프로젝트 구조 지도)"
+    $r = Invoke-Native "uv" @("tool", "install", "graphifyy")
+    if ($r.code -eq 0) {
+        Refresh-Path
+        # Drops the graphify skill + hook into the opencode config dir.
+        $r2 = Invoke-Native "graphify" @("install", "--platform", "opencode")
+        if ($r2.code -eq 0) { Ok "graphify 설치 (스킬 등록 포함)" }
+        else { Warn "graphify 스킬 등록 실패. 세션에서 graphify install --platform opencode 를 실행하세요" }
+    }
+    else { Warn "graphify 설치 실패 (code $($r.code)): $(Tail $r.out 2)" }
 }
 
 # ---------------- 6. 스킬 팩 (pstack / spec-kit) ----------------
@@ -335,13 +362,14 @@ else {
         $skillsSrc = Join-Path $vendor "pstack\skills"
         if (Test-Path $skillsSrc) {
             $norm = Join-Path $Root "normalize_skills.mjs"
-            & node $norm $skillsSrc (Join-Path $Root "skill")
-            if ($LASTEXITCODE -eq 0) {
+            $r = Invoke-Native "node" @($norm, $skillsSrc, (Join-Path $Root "skills"))
+            if ($r.out) { $r.out -split "`r?`n" | ForEach-Object { Say "    $_" } }
+            if ($r.code -eq 0) {
                 $ver = "?"
                 try { $ver = (Get-Content -Raw (Join-Path $vendor "pstack\plugin.json") | ConvertFrom-Json).version } catch { }
                 Ok "pstack 스킬 등록 (v$ver). opencode 명령: /poteto"
             }
-            else { Warn "pstack 스킬 정규화 실패" }
+            else { Warn "pstack 스킬 일부가 건너뛰어졌습니다 (위 skip 줄 확인). 나머지는 등록됐습니다" }
         }
         else { Warn "pstack 복제 실패 - 스킬을 건너뜁니다" }
     }

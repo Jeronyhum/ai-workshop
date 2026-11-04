@@ -61,6 +61,10 @@ function copyDir(from, to) {
 }
 
 const results = [];
+const seen = new Map();
+// opencode only loads skills whose name matches this pattern (max 64 chars);
+// anything else is dropped silently by opencode, so it must be dropped loudly here.
+const NAME_OK = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
   const skillFile = path.join(src, entry.name, "SKILL.md");
@@ -76,6 +80,16 @@ for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
   const withName = /^name\s*:/m.test(clean) ? clean : "name: " + entry.name + "\n" + clean;
   const nameMatch = withName.match(/^name\s*:\s*(.+)$/m);
   const name = (nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, "") : entry.name) || entry.name;
+
+  if (!NAME_OK.test(name) || name.length > 64) {
+    results.push({ name: entry.name, skipped: `invalid skill name "${name}" (opencode would not load it)` });
+    continue;
+  }
+  if (seen.has(name)) {
+    results.push({ name: entry.name, skipped: `duplicate skill name "${name}" (already from ${seen.get(name)})` });
+    continue;
+  }
+  seen.set(name, entry.name);
 
   const outDir = path.join(dest, name);
   const text = "---\n" + withName + "\n---\n\n" + body.replace(/^\n+/, "");
@@ -95,5 +109,9 @@ for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
 
 const ok = results.filter((r) => !r.skipped).length;
 const dropped = results.filter((r) => r.dropped).length;
-for (const r of results) if (r.skipped) console.log(`  skip ${r.name}: ${r.skipped}`);
+const skipped = results.filter((r) => r.skipped);
+for (const r of skipped) console.log(`  skip ${r.name}: ${r.skipped}`);
 console.log(`skills: ${ok} installed, ${dropped} normalized${dry ? " (dry run)" : ""}`);
+// A partial install must be visible to the caller: installers warn on this exit code
+// instead of printing an unconditional [OK] for skills that never landed.
+if (skipped.length) process.exitCode = 1;

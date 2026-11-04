@@ -2,13 +2,13 @@
 description: pstack의 poteto-mode를 opencode에서 실행합니다 (엄격한 엔지니어링 워크플로)
 ---
 
-pstack 스킬은 `~/.config/opencode/skill/<이름>/SKILL.md` 에 설치되어 있다. Cursor 전용 표기를 opencode 표기로 바꿔서 진행한다.
+pstack 스킬은 `~/.config/opencode/skills/<이름>/SKILL.md` 에 설치되어 있다. Cursor 전용 표기를 opencode 표기로 바꿔서 진행한다.
 
 ## 실행 방법
 
 1. `skill` 도구로 `poteto-mode` 를 로드하고, 그 지시를 그대로 따른다.
 2. `poteto-mode` 가 다른 스킬(`how`, `why`, `architect`, `tdd`, `unslop`, `principle-*` 등)을 부르면 같은 방식으로 `skill` 도구로 로드한다. 파일을 직접 읽지 않는다.
-3. `poteto-mode` 가 상대 경로 `../<name>/SKILL.md` 를 언급하면, 그건 같은 스킬 루트의 형제 폴더다. 실제 경로는 `~/.config/opencode/skill/<name>/SKILL.md`.
+3. `poteto-mode` 가 상대 경로 `../<name>/SKILL.md` 를 언급하면, 그건 같은 스킬 루트의 형제 폴더다. 실제 경로는 `~/.config/opencode/skills/<name>/SKILL.md`.
 
 ## 표기 변환 (Cursor → opencode)
 

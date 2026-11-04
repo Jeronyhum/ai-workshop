@@ -1,7 +1,7 @@
 # HANDOFF: SSU x OpenCode 원클릭 설치기
 
 작성일: 2026-11-04
-상태: 실기계 검증 통과, 잔여 작업 2건
+상태: 실기계 검증 통과, 잔여 작업 2건 → **2026-11-04 재검증에서 전면 수정됨. 아래 §9를 먼저 읽을 것**
 인수자가 참조할 최우선 파일: `build\ssu-opencode-setup.cmd` (납품물 한 개 파일)
 
 ---
@@ -120,3 +120,62 @@ SSU_SKIP_APPS=1 SSU_ARGS=test cmd /c ssu-opencode-setup.cmd
 
 이 문서 위 컨텍스트는 요약본(conversation summary)에서 정리했다. 요약본이 세션에
 보존되어 있다면 함께 참조할 것.
+
+---
+
+## 9. 2026-11-04 재검증·수정 기록 (이 절이 §4보다 최신이며 우선한다)
+
+재검증 방법: OpenCode 1.19.5를 실설치하고 `opencode models` / `opencode debug
+config` / 로컬 목 서버로 생성 설정을 실측. 명세는 `specs/001-oneclick-installer/`.
+
+### §4 검증의 한계 (정정)
+
+§4의 "generated == live"는 **파일에 적힌 개수**의 대조였고, OpenCode 로더가
+설정을 실제로 읽는지는 검증하지 않았다. 모델 직접 호출을 하지 않는다는 원문
+지시(§2) 때문에 호출 경로의 결함이 남았다. 실측 결과:
+
+1. **스키마 키 오류**: `providers`(복수)·`package`·`settings`·`mcp.servers`는
+   로더가 조용히 버린다. 설치가 끝나도 모델 목록이 비어 있는 상태였다.
+   → `provider`·`npm`·`options`·flat `mcp`로 교체.
+2. **variants 배열은 하드 에러**: 객체 맵이어야 한다. `capabilities` 블록과
+   `cost.cache` 중첩형, 모델 레벨 `reasoningField`도 로더가 제거한다.
+   → `modalities`·`reasoning`·`cost.cache_read/cache_write`로 교체.
+3. **키 치환 불가**: `{env:SSU_API_KEY}`는 설정 폴더의 .env로 해석되지 않는다
+   (목 서버 실측: 인증 헤더 없이 요청 전송). → 생성 설정에 키를 직접 넣고
+   파일 0600. .env는 bridge/HUD 전용으로 유지.
+4. **MCP 기본 타임아웃 5초**: Exa 등 장시간 도구가 과금 후 절단될 수 있었다.
+   → bridge·원격 120초, serena·headroom 60초 명시.
+
+### 함께 고친 것
+
+- install.sh: BOM 제거(셰뱅 파손), 드라이런이 실제로 설치하던 문제와 종료
+  크래시, Linux Desktop 미설치(CLI만), apt `node` 오패키지, 복사·재생성
+  실패 침묵, §5 잔여 작업 1(시딩 라벨 폴백) — **해소됨**.
+- install.ps1: SSU_API_KEY/SSU_CONFIG_DIR 이름 통일, 실패한 키 재검증 루프,
+  재생성 결과 검사(Invoke-Native), 레포 파일 자체에 BOM 부착.
+- 설치 폴더를 문서상의 복수형(skills/, commands/)으로 통일.
+- normalize_skills: 이름 규칙 검증·중복 검출·부분 실패 종료 코드.
+- status.mjs: DB 실패가 크레딧 표시까지 지우던 문제, 컨텍스트 과소 합산.
+- hud.ps1: UI 스레드 블로킹을 백그라운드 잡으로 교체.
+- 빌드: build.ps1의 타인 경로 하드코딩 제거, .cmd 래퍼가 실패 시에만 죽던
+  문제(install.ps1을 -File 자식 프로세스로 실행), 유닉스 부트스트랩의 GNU
+  base64 CR 실패. 교차 플랫폼 정본 빌더 `build/build.mjs` 신설.
+
+### 남은 검증 (키·실기계 필요)
+
+- 실키로 SC-001/002: 모델 전수 나열 + 실제 호출 응답 확인.
+- Windows 실기계에서 새 .cmd(배치 래퍼 변경분) 실행 확인.
+
+### 추가 결정 (2026-11-04, 소유자 지시)
+
+- **Headroom 제거.** MCP 서버로만 등록된 구성에서는 자동 압축이 일어나지
+  않았고(에이전트가 압축 도구를 스스로 호출해야 하며 AGENTS.md에 운용 지침도
+  없었다), headroom-ai[all] 설치가 수 GB로 무거웠다. gen_config·install.ps1·
+  install.sh·README·명세에서 제거하고 재빌드했다. Serena는 유지 — 심볼 단위
+  탐색으로 읽는 양 자체를 줄이는 방식이고 AGENTS.md에 운용 규칙이 있다.
+- **graphify 추가.** PyPI `graphifyy`를 uv tool로 설치하고
+  `graphify install --platform opencode`로 스킬+훅을 등록한다 (MCP 아님).
+- **AGENTS.md 재구성.** 코치(의도) → spec-kit(명세) → graphify(지도) →
+  Serena(정밀 작업) → pstack(규율) → 검증의 단일 워크플로로 라우팅.
+- **여정 정합.** OpenCode가 있으면 설치 생략, 키 입력 시 대시보드 자동
+  열기, HUD에 누적 토큰·프롬프트 캐시 적중률 표시 (status.mjs usage 집계).

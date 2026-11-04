@@ -1,6 +1,8 @@
 // Builds opencode.jsonc from the live SSU (BAZE) gateway catalog.
-// Usage: node gen_config.mjs <api-key> <config-dir> [serenaPath] [headroomPath]
-//   serenaPath / headroomPath: absolute path to the executable, or "" to skip.
+// Usage: node gen_config.mjs <api-key> <config-dir> [serenaPath]
+//   serenaPath: absolute path to the executable, or "" to skip.
+//   (Headroom was removed 2026-11-04 by owner decision: registered as MCP only it
+//   never compressed anything automatically, and the [all] install weighs gigabytes.)
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,9 +10,9 @@ import path from "node:path";
 const key = process.argv[2];
 const dir = process.argv[3] || path.join(os.homedir(), ".config", "opencode");
 const serenaPath = (process.argv[4] || "").trim();
-const headroomPath = (process.argv[5] || "").trim();
 
-const BASE = "https://factchat-cloud.mindlogic.ai/v1/gateway";
+const BASE = process.env.SSU_GATEWAY_BASE || "https://factchat-cloud.mindlogic.ai/v1/gateway";
+const ORIGIN = new URL(BASE).origin;
 const CONTEXT_CAP = 500000;
 const DEFAULT_OUTPUT = 32768;
 
@@ -115,35 +117,35 @@ function entry(id, lane) {
 
   const p = d.pricing || {};
   if (p.input != null && p.output != null) {
+    // opencode schema: flat cache_read / cache_write (a nested `cache` object is stripped).
     const cost = { input: p.input, output: p.output };
-    const cache = {};
-    if (p.cache_read != null) cache.read = p.cache_read;
-    if (p.cache_write != null) cache.write = p.cache_write;
-    if (Object.keys(cache).length) cost.cache = cache;
+    if (p.cache_read != null) cost.cache_read = p.cache_read;
+    if (p.cache_write != null) cost.cache_write = p.cache_write;
     m.cost = cost;
   }
 
-  const caps = {};
-  if (isVision(id)) caps.input = ["text", "image"];
   const efforts = NO_THINKING.has(id)
     ? null
     : lane === "claude"
       ? ["low", "medium", "high", "xhigh", "max"]
       : ["low", "medium", "high"];
-  if (efforts) caps.reasoning = { supported: true, effort: efforts };
-  if (Object.keys(caps).length) m.capabilities = caps;
+  // opencode model fields are `modalities` / `reasoning` / `attachment` — there is no
+  // `capabilities` block (it is stripped silently) and no model-level `reasoningField`.
+  if (isVision(id)) {
+    m.modalities = { input: ["text", "image"], output: ["text"] };
+    m.attachment = true;
+  }
+  if (efforts) m.reasoning = true;
 
   if (efforts) {
+    // opencode variants are an object map {name: options}; an array is a hard config error.
+    const variant = (make) => Object.fromEntries(efforts.map((e) => [e, make(e)]));
     if (lane === "claude") {
-      m.variants = efforts.map((e) => ({
-        id: e,
-        body: { thinking: { type: "adaptive" }, output_config: { effort: e } },
-      }));
+      m.variants = variant((e) => ({ thinking: { type: "adaptive" }, output_config: { effort: e } }));
     } else if (lane === "openai") {
-      m.variants = efforts.map((e) => ({ id: e, body: { reasoning: { effort: e } } }));
+      m.variants = variant((e) => ({ reasoning: { effort: e } }));
     } else {
-      m.reasoningField = "reasoning_content";
-      m.variants = efforts.map((e) => ({ id: e, body: { reasoning_effort: e } }));
+      m.variants = variant((e) => ({ reasoning_effort: e }));
     }
   }
   return m;
@@ -162,33 +164,45 @@ for (const id of ids) {
   else compat[id] = entry(id, "compat");
 }
 
+// opencode 1.19.x ground truth (verified with `opencode debug config` / `opencode run`):
+// the top-level key is `provider` (singular) — `providers` is ignored with no error, so
+// every model silently vanishes. The package key is `npm` and the settings key is
+// `options`; `package`/`settings` are stripped, leaving a provider that cannot call out.
+// The API key is embedded literally: `{env:SSU_API_KEY}` is NOT resolved from the config
+// dir's .env file (measured: requests went out with no Authorization header), while the
+// key in the process environment works. The installers keep a 0600 .env next to this
+// file for ssu-bridge/HUD, which read it themselves; this file gets mode 0600 too.
 const providers = {};
 if (Object.keys(claude).length) {
   providers["factchat-claude"] = {
     name: "BAZE (Claude)",
-    package: "@ai-sdk/anthropic",
-    settings: { baseURL: BASE + "/claude/v1", apiKey: "{env:SSU_API_KEY}" },
+    npm: "@ai-sdk/anthropic",
+    options: { baseURL: BASE + "/claude/v1", apiKey: key },
     models: claude,
   };
 }
 if (Object.keys(openai).length) {
   providers["factchat-openai"] = {
     name: "BAZE (GPT)",
-    package: "@ai-sdk/openai",
-    settings: { baseURL: BASE, apiKey: "{env:SSU_API_KEY}" },
+    npm: "@ai-sdk/openai",
+    options: { baseURL: BASE, apiKey: key },
     models: openai,
   };
 }
 if (Object.keys(compat).length) {
   providers.factchat = {
     name: "BAZE",
-    package: "@ai-sdk/openai-compatible",
-    settings: { baseURL: BASE, apiKey: "{env:SSU_API_KEY}" },
+    npm: "@ai-sdk/openai-compatible",
+    options: { baseURL: BASE, apiKey: key },
     models: compat,
   };
 }
 
 // ---------- MCP ----------
+// opencode's `mcp` is a flat map of server names (no `servers` wrapper — that only
+// worked through an undocumented tolerance). `timeout` matters: opencode's default
+// MCP request timeout is 5000ms, and Exa deep search / answers routinely exceed it,
+// which would cut the call after the gateway already charged credits.
 const servers = {};
 
 try {
@@ -197,8 +211,9 @@ try {
     if (!s?.slug || !s?.url) continue;
     servers[s.slug] = {
       type: "remote",
-      url: "https://factchat-cloud.mindlogic.ai" + s.url,
-      headers: { Authorization: "Bearer {env:SSU_API_KEY}" },
+      url: ORIGIN + s.url,
+      headers: { Authorization: "Bearer " + key },
+      timeout: 120000,
     };
   }
 } catch (e) {
@@ -208,29 +223,21 @@ try {
 servers["ssu-bridge"] = {
   type: "local",
   command: ["node", path.join(dir, "mcp", "ssu-bridge.mjs")],
-  enabled: true,
+  timeout: 120000,
 };
 
 if (serenaPath) {
   servers.serena = {
     type: "local",
     command: [serenaPath, "start-mcp-server", "--context", "ide", "--project-from-cwd"],
-    enabled: true,
-  };
-}
-
-if (headroomPath) {
-  servers.headroom = {
-    type: "local",
-    command: [headroomPath, "mcp", "serve"],
-    enabled: true,
+    timeout: 60000,
   };
 }
 
 const cfg = {
   $schema: "https://opencode.ai/config.json",
-  providers,
-  mcp: { servers },
+  provider: providers,
+  mcp: servers,
 };
 
 const target = path.join(dir, "opencode.jsonc");
@@ -243,9 +250,12 @@ if (fs.existsSync(jsonTwin)) {
   console.error("note: opencode.json renamed to .bak (jsonc takes precedence)");
 }
 
-fs.writeFileSync(target, JSON.stringify(cfg, null, 2), "utf8");
+fs.writeFileSync(target, JSON.stringify(cfg, null, 2), { encoding: "utf8", mode: 0o600 });
+try {
+  fs.chmodSync(target, 0o600); // tightens a pre-existing file too; the config embeds the key
+} catch {}
 
 const total = Object.keys(claude).length + Object.keys(openai).length + Object.keys(compat).length;
 console.log(`models: claude ${Object.keys(claude).length} / gpt ${Object.keys(openai).length} / compat ${Object.keys(compat).length} = ${total}`);
-console.log(`mcp: gateway ${Object.keys(servers).length - 1 - (serenaPath ? 1 : 0) - (headroomPath ? 1 : 0)} + bridge${serenaPath ? " + serena" : ""}${headroomPath ? " + headroom" : ""}`);
+console.log(`mcp: gateway ${Object.keys(servers).length - 1 - (serenaPath ? 1 : 0)} + bridge${serenaPath ? " + serena" : ""}`);
 if (failures.length) console.error(`warning: ${failures.length} model detail(s) failed, kept with default limits: ${failures.slice(0, 5).join(", ")}`);

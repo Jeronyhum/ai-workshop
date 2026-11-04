@@ -61,7 +61,7 @@ function limits() {
   const map = {};
   try {
     const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "opencode.jsonc"), "utf8"));
-    for (const prov of Object.values(cfg.providers || {})) {
+    for (const prov of Object.values(cfg.provider || cfg.providers || {})) {
       for (const [id, m] of Object.entries(prov.models || {})) {
         const ctx = m?.limit?.context;
         if (typeof ctx === "number") map[id] = ctx;
@@ -82,41 +82,54 @@ function contextInfo() {
   let db;
   try {
     db = new DatabaseSync(DB, { readOnly: true });
-  } catch {
-    try {
-      db = new DatabaseSync(DB);
-    } catch (e) {
-      return { ok: false, error: "db open failed: " + String(e?.message || e) };
-    }
+  } catch (e) {
+    // Read-only is a hard rule here (see header): never fall back to a writable open,
+    // and never let a DB problem kill the whole status line — credits must still print.
+    return { ok: false, error: "db open failed: " + String(e?.message || e) };
   }
-  const session = db
-    .prepare(
-      "select id, title, model, cost, time_updated from session where time_archived is null order by time_updated desc limit 1",
-    )
-    .get();
-  if (!session) return { ok: false, error: "no session yet" };
+  let session;
+  let msg;
+  try {
+    session = db
+      .prepare(
+        "select id, title, model, cost, time_updated from session where time_archived is null order by time_updated desc limit 1",
+      )
+      .get();
+    if (!session) return { ok: false, error: "no session yet" };
+    msg = db
+      .prepare(
+        "select data from message where session_id = ? and json_extract(data,'$.tokens.input') > 0 order by time_updated desc limit 1",
+      )
+      .get(session.id);
+  } catch (e) {
+    return { ok: false, error: "db query failed: " + String(e?.message || e) };
+  }
 
   let model = {};
   try {
     model = JSON.parse(session.model || "{}");
   } catch {}
 
-  const msg = db
-    .prepare(
-      "select data from message where session_id = ? and json_extract(data,'$.tokens.input') > 0 order by time_updated desc limit 1",
-    )
-    .get(session.id);
-
   let input = 0;
   let cached = 0;
+  let used = 0;
   if (msg) {
     try {
       const d = JSON.parse(msg.data);
-      input = Number(d?.tokens?.input || 0);
-      cached = Number(d?.tokens?.cache?.read || 0);
+      const t = d?.tokens || {};
+      input = Number(t.input || 0);
+      cached = Number(t.cache?.read || 0);
+      // The window holds the whole last step, not just its prompt: count output,
+      // reasoning and cache writes too, or the bar always reads low.
+      used =
+        Number(t.total || 0) ||
+        input +
+          Number(t.output || 0) +
+          Number(t.reasoning || 0) +
+          cached +
+          Number(t.cache?.write || 0);
     } catch {}
   }
-  const used = input + cached;
   const limit = limits()[model.id] || 0;
   return {
     ok: true,
@@ -134,6 +147,53 @@ function contextInfo() {
   };
 }
 
+// All-time token usage + prompt-cache hit ratio, aggregated from the local
+// session DB. cacheRatio = cache.read / (input + cache.read): input in
+// opencode's accounting is the uncached part of the prompt, so the ratio is
+// the share of prompt tokens served from cache.
+function usageInfo() {
+  if (!fs.existsSync(DB)) return { ok: false, error: "opencode.db not found" };
+  if (!DatabaseSync) return { ok: false, error: "node:sqlite unavailable (need Node 22.5+)" };
+  let db;
+  try {
+    db = new DatabaseSync(DB, { readOnly: true });
+  } catch (e) {
+    return { ok: false, error: "db open failed: " + String(e?.message || e) };
+  }
+  try {
+    const m = db
+      .prepare(
+        `select count(*) as steps,
+           coalesce(sum(json_extract(data,'$.tokens.input')),0) as inp,
+           coalesce(sum(json_extract(data,'$.tokens.output')),0) as outp,
+           coalesce(sum(json_extract(data,'$.tokens.reasoning')),0) as rea,
+           coalesce(sum(json_extract(data,'$.tokens.cache.read')),0) as cr,
+           coalesce(sum(json_extract(data,'$.tokens.cache.write')),0) as cw
+         from message
+         where json_extract(data,'$.tokens.input') is not null`,
+      )
+      .get();
+    const s = db.prepare("select coalesce(sum(cost),0) as cost, count(*) as sessions from session").get();
+    const prompt = m.inp + m.cr;
+    return {
+      ok: true,
+      steps: m.steps,
+      sessions: s.sessions,
+      input: m.inp,
+      output: m.outp,
+      reasoning: m.rea,
+      cacheRead: m.cr,
+      cacheWrite: m.cw,
+      total: m.inp + m.outp + m.rea + m.cr + m.cw,
+      cacheRatio: prompt > 0 ? Math.round((m.cr / prompt) * 1000) / 10 : 0,
+      cost: s.cost,
+    };
+  } catch (e) {
+    return { ok: false, error: "db query failed: " + String(e?.message || e) };
+  }
+}
+
 const key = apiKey();
 const [cred, ctx] = await Promise.all([credits(key), Promise.resolve().then(contextInfo)]);
-console.log(JSON.stringify({ ok: true, credits: cred, context: ctx, at: Date.now() }));
+const usage = await Promise.resolve().then(usageInfo).catch((e) => ({ ok: false, error: String(e?.message || e) }));
+console.log(JSON.stringify({ ok: true, credits: cred, context: ctx, usage, at: Date.now() }));

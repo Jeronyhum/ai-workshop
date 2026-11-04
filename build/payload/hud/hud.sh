@@ -16,7 +16,22 @@ SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT INT TERM
 
 URL="http://127.0.0.1:${PORT}/"
-sleep 1
+
+# Wait until the server actually answers instead of guessing with a fixed sleep:
+# a slow first start used to open the browser onto a connection-refused page.
+ready=0
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo "HUD 서버가 시작되지 않았습니다. 위 메시지를 확인하세요." >&2
+    exit 1
+  fi
+  if (command -v curl >/dev/null 2>&1 && curl -fsS -m 1 "$URL" >/dev/null 2>&1) || \
+     (command -v wget >/dev/null 2>&1 && wget -q -T 1 -O /dev/null "$URL"); then
+    ready=1; break
+  fi
+  sleep 0.5
+done
+[ "$ready" = "1" ] || echo "서버 응답이 느립니다. 잠시 뒤 여세요: $URL"
 
 if command -v open >/dev/null 2>&1; then
   open "$URL"

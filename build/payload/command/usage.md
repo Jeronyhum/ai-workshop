@@ -4,6 +4,10 @@ description: 모델별·일자별 크레딧 사용 내역을 조회합니다 (�
 
 `ssu-bridge` MCP 서버의 `usage` 도구를 호출한다.
 
+사용자 입력: $ARGUMENTS
+
+입력이 비어 있으면 아래 기본값으로 조회한다. "이번 달", "지난주", "10월"처럼 기간이 적혀 있으면 `start_date`/`end_date`로 변환해 넣는다. "일자별"이 적혀 있으면 `by=day`를 쓴다.
+
 - 기본: `by=model`, `scope=key`
 - 일자별: `by=day`
 - 기간 지정: `start_date` / `end_date` (YYYY-MM-DD, 최대 92일)

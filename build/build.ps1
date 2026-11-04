@@ -1,8 +1,12 @@
 ﻿# Assembles the single-file installer: ssu-opencode-setup.cmd
 # Layout: polyglot header -> batch bootstrap -> base64 zip -> unix bootstrap
+# Paths are relative to this script (an earlier version hardcoded the original
+# author's C:\Users\sonar temp dir, so the build only worked on his machine).
+# NOTE: build.mjs is the canonical builder (runs anywhere Node runs). Keep the
+# header/tail text below in sync with it.
 $ErrorActionPreference = "Stop"
 
-$build = "C:\Users\sonar\AppData\Local\Temp\opencode\build"
+$build = $PSScriptRoot
 $stage = Join-Path $build "stage"
 $out = Join-Path $build "ssu-opencode-setup.cmd"
 $zip = Join-Path $build "payload.zip"
@@ -57,6 +61,15 @@ foreach ($f in $ps1s) {
 }
 Write-Host "ps1 files: $($ps1s.Count), BOM added to $bomAdded"
 
+# install.sh must NOT carry a BOM: it breaks the shebang (kernel cannot find the
+# interpreter). Fail the build instead of shipping a broken unix installer.
+$shStage = Join-Path $stage "install.sh"
+$shBytes = [IO.File]::ReadAllBytes($shStage)
+if ($shBytes.Length -ge 3 -and $shBytes[0] -eq 0xEF -and $shBytes[1] -eq 0xBB -and $shBytes[2] -eq 0xBF) {
+    Write-Host "install.sh starts with a UTF-8 BOM - remove it before building" -ForegroundColor Red
+    exit 1
+}
+
 # ---------- zip ----------
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -83,14 +96,27 @@ echo.
 echo   SSU x OpenCode setup
 echo   Keep this window open until it finishes.
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=$env:SSU_SELF; $t=[IO.File]::ReadAllText($s); $m=[regex]::Match($t,'(?s)===PAYLOAD-BEGIN===[ \t\r]*\n(.*?)\n===PAYLOAD-END==='); if(-not $m.Success){Write-Host '  [X] Installer is corrupted (no payload)' -ForegroundColor Red; exit 1}; $z=Join-Path $env:TEMP ('ssu-setup-'+[guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $z -Force | Out-Null; [IO.File]::WriteAllBytes((Join-Path $z 'p.zip'),[Convert]::FromBase64String($m.Groups[1].Value)); Expand-Archive -Path (Join-Path $z 'p.zip') -DestinationPath $z -Force; & (Join-Path $z 'install.ps1'); $code = if ($LASTEXITCODE) { $LASTEXITCODE } elseif (-not $?) { 1 } else { 0 };Write-Host ''; Write-Host ('  installer exit code: ' + $code); if(-not $env:SSU_KEEP){Remove-Item -Recurse -Force $z -ErrorAction SilentlyContinue}; exit $code"
+set "SSU_DIR_FILE=%TEMP%\ssu-setup-dir.txt"
+if exist "%SSU_DIR_FILE%" del "%SSU_DIR_FILE%" >nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=$env:SSU_SELF; $t=[IO.File]::ReadAllText($s); $m=[regex]::Match($t,'(?s)===PAYLOAD-BEGIN===[ \t\r]*\n(.*?)\n===PAYLOAD-END==='); if(-not $m.Success){Write-Host '  [X] Installer is corrupted (no payload)' -ForegroundColor Red; exit 1}; $z=Join-Path $env:TEMP ('ssu-setup-'+[guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $z -Force | Out-Null; [IO.File]::WriteAllBytes((Join-Path $z 'p.zip'),[Convert]::FromBase64String($m.Groups[1].Value)); Expand-Archive -Path (Join-Path $z 'p.zip') -DestinationPath $z -Force; [IO.File]::WriteAllText($env:SSU_DIR_FILE,$z)"
+if not exist "%SSU_DIR_FILE%" goto ssu_fail
+set /p SSU_DIR=<"%SSU_DIR_FILE%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SSU_DIR%\install.ps1"
 set "RC=%ERRORLEVEL%"
+if not defined SSU_KEEP rmdir /s /q "%SSU_DIR%" >nul 2>&1
+del "%SSU_DIR_FILE%" >nul 2>&1
 echo.
-if "%RC%"=="0" (echo   Done. You can close this window.) else (echo   Something failed. Read the messages above.)
+if "%RC%"=="0" (echo   Done. You can close this window.) else (echo   Something failed (code %RC%). Read the messages above.)
 echo.
 if not defined SSU_ARGS pause
 endlocal
 exit /b %RC%
+:ssu_fail
+echo   [X] Extraction failed. The file may be corrupted - download it again.
+echo.
+if not defined SSU_ARGS pause
+endlocal
+exit /b 1
 ===PAYLOAD-BEGIN===
 '@
 
@@ -105,19 +131,26 @@ SELF="${SSU_SELF:-$0}"
 TMPDIR_SSU="$(mktemp -d 2>/dev/null || mktemp -d -t ssu)"
 trap 'rm -rf "$TMPDIR_SSU"' EXIT
 
+fail() { echo "설치 파일을 풀지 못했습니다. 파일이 손상됐을 수 있으니 다시 받아주세요. ($1)" >&2; exit 1; }
+
 if command -v base64 >/dev/null 2>&1; then
-  sed -n '/^===PAYLOAD-BEGIN===/,/^===PAYLOAD-END===/p' "$SELF" | sed '1d;$d' | base64 --decode > "$TMPDIR_SSU/p.zip" 2>/dev/null \
-    || sed -n '/^===PAYLOAD-BEGIN===/,/^===PAYLOAD-END===/p' "$SELF" | sed '1d;$d' | base64 -D > "$TMPDIR_SSU/p.zip"
+  # tr -d '\r' first: the payload lines end in CRLF and GNU base64 rejects CRs
+  # (the BSD/macOS decoder tolerates them, which is how this used to pass unnoticed).
+  sed -n '/^===PAYLOAD-BEGIN===/,/^===PAYLOAD-END===/p' "$SELF" | sed '1d;$d' | tr -d '\r' | base64 --decode > "$TMPDIR_SSU/p.zip" 2>/dev/null \
+    || sed -n '/^===PAYLOAD-BEGIN===/,/^===PAYLOAD-END===/p' "$SELF" | sed '1d;$d' | tr -d '\r' | base64 -D > "$TMPDIR_SSU/p.zip" \
+    || fail "base64 decode"
 else
   echo "base64 명령이 없습니다." >&2
   exit 1
 fi
+[ -s "$TMPDIR_SSU/p.zip" ] || fail "empty payload"
 
 if command -v unzip >/dev/null 2>&1; then
-  unzip -q "$TMPDIR_SSU/p.zip" -d "$TMPDIR_SSU/x"
+  unzip -q "$TMPDIR_SSU/p.zip" -d "$TMPDIR_SSU/x" || fail "unzip"
 else
-  python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$TMPDIR_SSU/p.zip" "$TMPDIR_SSU/x"
+  python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$TMPDIR_SSU/p.zip" "$TMPDIR_SSU/x" || fail "python zipfile"
 fi
+[ -f "$TMPDIR_SSU/x/install.sh" ] || fail "install.sh missing after extract"
 
 SSU_PAYLOAD="$TMPDIR_SSU/x/payload" bash "$TMPDIR_SSU/x/install.sh"
 '@
