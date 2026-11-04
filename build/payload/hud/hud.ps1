@@ -173,6 +173,10 @@ $close.VerticalAlignment = "Top"
 $close.Cursor = [System.Windows.Input.Cursors]::Hand
 $close.ToolTip = "닫기 (Esc)"
 $close.Add_MouseLeftButtonUp({ $win.Close() })
+# The bar's DragMove sits on MouseLeftButtonDown and would otherwise eat
+# this click before MouseLeftButtonUp ever fires — the real reason the X
+# felt dead on the first build. Mark the press handled so it stays a click.
+$close.Add_MouseLeftButtonDown({ $_.Handled = $true })
 $grid.Children.Add($close) | Out-Null
 
 $border.Cursor = [System.Windows.Input.Cursors]::SizeAll

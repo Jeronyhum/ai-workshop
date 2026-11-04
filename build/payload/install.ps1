@@ -685,6 +685,14 @@ if (-not $DryRun) {
     # HUD 시작프로그램 등록
     $hud = Join-Path $Root "hud\hud.ps1"
     if (Test-Path $hud) {
+        # A HUD started by an earlier install is still running the OLD code
+        # in memory — it ignores the new close paths and the instance lock.
+        # Re-runs must retire it, or the student sees a bar that won't die.
+        try {
+            Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction Stop |
+                Where-Object { $_.CommandLine -like "*hud.ps1*" } |
+                ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+        } catch {}
         try {
             $startup = [Environment]::GetFolderPath("Startup")
             $lnk = Join-Path $startup "SSU HUD.lnk"
