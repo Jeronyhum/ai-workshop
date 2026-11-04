@@ -1,0 +1,2 @@
+# Keep every file byte-exact: the polyglot installer requires CRLF and UTF-8 BOM in .ps1 files.
+* -text
