@@ -232,7 +232,7 @@ else {
     New-Item -ItemType Directory -Path $Root -Force | Out-Null
     # Payload folders are singular (skill/command); opencode's documented layout is
     # plural (skills/commands). Singular still loads in 1.19.x, plural is the safe form.
-    foreach ($pair in @(@("hud", "hud"), @("mcp", "mcp"), @("skill", "skills"), @("command", "commands"))) {
+    foreach ($pair in @(@("hud", "hud"), @("mcp", "mcp"), @("skill", "skills"), @("command", "commands"), @("plugins", "plugins"))) {
         $src = Join-Path $payload $pair[0]
         if (Test-Path $src) {
             New-Item -ItemType Directory -Path (Join-Path $Root $pair[1]) -Force | Out-Null

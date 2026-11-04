@@ -132,6 +132,16 @@ ssu-bridge, pstack 스킬이 확인되고 `/credits`가 실제 잔액을 답하�
   (cache.read / (input + cache.read))이 포함돼야 한다.
 - **FR-015**: OpenCode(데스크톱·CLI)가 이미 설치돼 있으면 해당 설치를
   건너뛰고, 키 입력 단계에서는 게이트웨이 대시보드를 브라우저로 열어준다.
+- **FR-016**: `/start` 명령이 탐정(경쟁 가설 → 가장 값싼 판별자 → 갱신;
+  원문/해석 라벨 분리) → 메타인지(WORKFRAME) → 명세 → 분해·라우팅 →
+  실행 → 막힘 시 advisor 국소 개입 → 검증·회고의 자율 프레임워크를
+  실행해야 한다. 구조는 Harness²(google-research/harness2)의 8개
+  구성요소 조립과 교훈 축적을 따른다.
+- **FR-017**: gen_config는 라이브 카탈로그에서 티어 모델(flash/haiku/
+  luna/gemma/advisor)을 골라 서브에이전트로 등록해야 하고, 라우팅은
+  난이도·비용효율성·프롬프트 캐시 재사용을 기준으로 Jev(`decide` 도구와
+  jev-router 플러그인 훅)가 판정해야 한다. 플러그인은 fail-open이어야
+  한다 (판정 실패 시 원래 호출 유지).
 - **FR-008**: 컨텍스트 상한은 500k로 캡한다. HUD는 크레딧과 컨텍스트를 각각
   독립적으로 조회해 한쪽 실패가 다른 쪽을 지우지 않는다.
 - **FR-009**: pstack 스킬은 name+description만 남기는 정규화를 거쳐 설치하되,

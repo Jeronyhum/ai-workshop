@@ -179,3 +179,9 @@ config` / 로컬 목 서버로 생성 설정을 실측. 명세는 `specs/001-one
   Serena(정밀 작업) → pstack(규율) → 검증의 단일 워크플로로 라우팅.
 - **여정 정합.** OpenCode가 있으면 설치 생략, 키 입력 시 대시보드 자동
   열기, HUD에 누적 토큰·프롬프트 캐시 적중률 표시 (status.mjs usage 집계).
+- **/start 자율 프레임워크 추가.** 탐정 → 메타인지(WORKFRAME, Harness²
+  8요소) → 명세 → 분해·라우팅 → 실행 → 검증·회고. gen_config가 카탈로그
+  에서 티어 에이전트(w-flash/w-gemma/w-haiku/w-luna/advisor)를 등록하고,
+  라우팅은 난이도·비용효율성·캐시 재사용 기준으로 Jev가 판정한다
+  (decide 도구 + fail-open 훅 plugins/jev-router.js). pstack은 poteto-mode
+  플레이북 중심의 규율 레이어로 AGENTS.md에서 재편.

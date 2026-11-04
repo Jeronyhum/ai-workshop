@@ -77,3 +77,19 @@
 - [x] T038 토큰·캐시 측정 — status.mjs에 usage 집계(누적 input/output/
   reasoning/cache read·write, 비용 합, 캐시 적중률 = read/(input+read))를
   추가하고 HUD(HTML·WPF 양쪽)에 표시. 합성 DB로 계산 검증(적중률 85%).
+- [x] T039 /start 자율 프레임워크 (2026-11-04 소유자 지시) —
+  command/start.md: 탐정(경쟁 가설→최저가 판별자→갱신, 원문/해석 라벨) →
+  메타인지·WORKFRAME(Harness² 8요소 조립) → speckit → 분해·라우팅 →
+  실행 → advisor 국소 개입 → 검증·회고(교훈 축적).
+- [x] T040 티어 서브에이전트 — gen_config가 라이브 카탈로그에서 이름·
+  가격으로 flash(최저가)/haiku/luna/gemma(4 우선)/advisor(프론티어 최고가)
+  를 골라 agent로 등록. 목 카탈로그 9모델로 선택 결과와 debug config
+  로딩까지 검증.
+- [x] T041 Jev 라우팅 레이어 — 판단 기준은 난이도·비용효율성·캐시
+  재사용. 1차는 /start가 decide 도구로, 2차는 plugins/jev-router.js가
+  Task 호출마다 /decisions/(jev-latest)로 판정·재배정·로깅. fail-open을
+  스텁 서버와 무응답 서버로 각각 검증 (advisor 호출은 재배정 제외).
+- [x] T042 pstack 역할 재편 — README(cursor/plugins, poteto) 기준으로
+  poteto-mode 플레이북 + 단계 스킬 + principle을 규율 레이어로 재정의하고
+  AGENTS.md에 반영. poteto-mode의 서브에이전트 effort 개념은 티어
+  라우팅으로 대응시킴.

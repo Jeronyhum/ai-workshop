@@ -18,6 +18,10 @@
 5. 코드 도구: Serena (MCP 등록, 심볼 단위 탐색·편집) + graphify (구조 지도 스킬)
 6. 워크플로: pstack 58 스킬 (cursor/plugins 기준) + spec-kit
 7. vibe-coach 코치 스킬 — 첫 대화에서 의도·유사제품·API 비용을 먼저 묻는다
+8. `/start` 자율 작업 프레임워크 — 탐정(의도 확정) → 메타인지·작업 프레임 →
+   명세 → Jev 동적 라우팅(난이도·비용·캐시 고려)으로 티어 서브에이전트
+   (flash/gemma/haiku/luna) 배정 → 막히면 advisor가 국소만 개입 → 검증·회고.
+   Task 호출마다 Jev가 재배정을 판정하는 `jev-router` 플러그인 포함
 
 ## 저장소 구조
 

@@ -213,7 +213,7 @@ else
   # Payload folders are singular (skill/command); opencode's documented layout is
   # plural (skills/commands). Singular still loads in 1.19.x, plural is the safe form.
   copy_fail=0
-  for pair in "hud:hud" "mcp:mcp" "skill:skills" "command:commands"; do
+  for pair in "hud:hud" "mcp:mcp" "skill:skills" "command:commands" "plugins:plugins"; do
     src="${pair%%:*}"; dst="${pair##*:}"
     if [ -d "$PAYLOAD/$src" ]; then
       mkdir -p "$ROOT/$dst"
@@ -231,7 +231,7 @@ else
   done
   [ "$copy_fail" = "0" ] || { err "파일 복사가 일부 실패했습니다. 디스크 공간·권한을 확인하고 다시 실행하세요."; exit 1; }
   # Verify the pieces the first session depends on actually landed.
-  for must in "hud/status.mjs" "mcp/ssu-bridge.mjs" "skills/vibe-coach/SKILL.md" "commands/credits.md" "gen_config.mjs"; do
+  for must in "hud/status.mjs" "mcp/ssu-bridge.mjs" "skills/vibe-coach/SKILL.md" "commands/credits.md" "commands/start.md" "plugins/jev-router.js" "gen_config.mjs"; do
     [ -f "$ROOT/$must" ] || { err "설치 확인 실패: $must 가 없습니다"; exit 1; }
   done
   ok "HUD·MCP 브리지·스킬·명령 복사 + 확인"

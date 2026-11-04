@@ -198,6 +198,76 @@ if (Object.keys(compat).length) {
   };
 }
 
+// ---------- Subagent tiers (dynamic routing pool) ----------
+// /start routes subtasks to tier agents by difficulty, cost efficiency and
+// prompt-cache reuse. Tiers are picked from the LIVE catalog by name; a tier
+// whose family is absent from the catalog is simply not emitted (the /start
+// playbook falls back to its rules table in that case).
+const allChat = [];
+for (const [prov, p] of Object.entries(providers)) {
+  for (const [id, m] of Object.entries(p.models || {})) {
+    allChat.push({ prov, id, costIn: Number(m?.cost?.input || 0) });
+  }
+}
+const byCostAsc = (a, b) => a.costIn - b.costIn;
+function pickTier(re, { exclude = null, cheapest = true, prefer = null } = {}) {
+  let c = allChat.filter((m) => re.test(m.id) && !(exclude && exclude.test(m.id)));
+  if (prefer) {
+    const p = c.filter((m) => prefer.test(m.id));
+    if (p.length) c = p;
+  }
+  if (!c.length) return null;
+  c.sort(cheapest ? byCostAsc : (a, b) => b.costIn - a.costIn);
+  return c[0];
+}
+const NOT_FRONTIER = /mini|nano|flash|haiku|luna|gemma|decision/i;
+const tierModels = {
+  "w-flash": pickTier(/flash/i),
+  "w-haiku": pickTier(/haiku/i),
+  "w-luna": pickTier(/luna/i, { exclude: /decision/i }),
+  "w-gemma": pickTier(/gemma/i, { prefer: /gemma[-_ ]?4|gemma4/i }),
+  advisor: pickTier(/opus|gpt-6|gpt-5/i, { exclude: NOT_FRONTIER, cheapest: false }) ||
+    pickTier(/./, { cheapest: false }),
+};
+const AGENT_DEFS = {
+  "w-flash": {
+    description: "가장 빠르고 싼 워커 (중국 오픈웨이트 flash 계열). 대량·단순·반복 작업, 초안 생성, 목록 처리에 쓴다.",
+    prompt:
+      "You are a fast, cheap worker agent. Do exactly the assigned subtask, keep output compact, and report blockers verbatim instead of guessing. Do not expand scope.",
+  },
+  "w-haiku": {
+    description: "가볍고 빠른 균형 워커. 요약·분류·작은 코드 수정·문서 정리에 쓴다.",
+    prompt:
+      "You are a light, fast worker agent. Do exactly the assigned subtask, keep output compact, and report blockers verbatim instead of guessing. Do not expand scope.",
+  },
+  "w-luna": {
+    description: "중간 난이도 워커. 일반적인 구현·분석·리서치 종합에 쓴다.",
+    prompt:
+      "You are a mid-tier worker agent. Do exactly the assigned subtask with care, verify your own output once, and report blockers verbatim. Do not expand scope.",
+  },
+  "w-gemma": {
+    description: "오픈웨이트 워커 (Gemma 계열). 긴 글 읽기·대규모 컨텍스트 훑기·초벌 정리에 쓴다.",
+    prompt:
+      "You are an open-weight worker agent for long-context reading and first-pass organization. Do exactly the assigned subtask and report blockers verbatim. Do not expand scope.",
+  },
+  advisor: {
+    description: "최상위 어드바이저. 작업이 막힌 국소 부위에만 짧게 개입해 방향과 해법을 제시한다. 직접 전체를 다시 하지 않는다.",
+    prompt:
+      "You are a senior advisor. You receive a small stuck-point package (goal, failing spot, exact error, attempts). Give a diagnosis and concrete next steps for that local problem only. Do not redo the whole task.",
+  },
+};
+const agents = {};
+for (const [name, def] of Object.entries(AGENT_DEFS)) {
+  const t = tierModels[name];
+  if (!t) continue;
+  agents[name] = {
+    description: def.description,
+    mode: "subagent",
+    model: `${t.prov}/${t.id}`,
+    prompt: def.prompt,
+  };
+}
+
 // ---------- MCP ----------
 // opencode's `mcp` is a flat map of server names (no `servers` wrapper — that only
 // worked through an undocumented tolerance). `timeout` matters: opencode's default
@@ -239,6 +309,7 @@ const cfg = {
   provider: providers,
   mcp: servers,
 };
+if (Object.keys(agents).length) cfg.agent = agents;
 
 const target = path.join(dir, "opencode.jsonc");
 fs.mkdirSync(dir, { recursive: true });
@@ -258,4 +329,5 @@ try {
 const total = Object.keys(claude).length + Object.keys(openai).length + Object.keys(compat).length;
 console.log(`models: claude ${Object.keys(claude).length} / gpt ${Object.keys(openai).length} / compat ${Object.keys(compat).length} = ${total}`);
 console.log(`mcp: gateway ${Object.keys(servers).length - 1 - (serenaPath ? 1 : 0)} + bridge${serenaPath ? " + serena" : ""}`);
+console.log(`agents: ${Object.entries(agents).map(([n, a]) => `${n}=${a.model}`).join(", ") || "(티어 모델을 카탈로그에서 찾지 못함)"}`);
 if (failures.length) console.error(`warning: ${failures.length} model detail(s) failed, kept with default limits: ${failures.slice(0, 5).join(", ")}`);

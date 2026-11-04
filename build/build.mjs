@@ -22,7 +22,8 @@ const REQUIRED = [
   "payload/skill/vibe-coach/SKILL.md",
   "payload/command/credits.md", "payload/command/usage.md",
   "payload/command/websearch.md", "payload/command/decide.md",
-  "payload/command/poteto.md",
+  "payload/command/poteto.md", "payload/command/start.md",
+  "payload/plugins/jev-router.js",
 ];
 
 // ---------- stage (in memory: map of archive path -> Buffer) ----------
