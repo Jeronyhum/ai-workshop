@@ -1490,3 +1490,7 @@ body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off 
 .bar-mark span { font-family: var(--f-latin); font-weight: 500; letter-spacing: .01em; }
 .cluster, .fr-label { font-weight: 500; }
 .zone-title span { letter-spacing: var(--ls-tight); }
+.tip-v small, .ex-voice small { display: block; margin-bottom: 2px; font-family: var(--f-text); font-size: .78em; font-weight: 500; letter-spacing: 0; color: var(--fog); }
+.rm-hero[data-kind="story"] .st-lead { padding: 0; margin: 0; }
+.rm-hero[data-kind="story"] .st-lead h2 { margin: 0; }
+.st-layer { padding-top: .9cqi; font-size: 2.3cqi; }

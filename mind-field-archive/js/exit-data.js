@@ -77,9 +77,6 @@
     links: [
       { label: "설치 파일", file: "ssu-opencode-setup.cmd", rel: "../build/ssu-opencode-setup.cmd" },
       { label: "AI 작업 규칙", file: "AGENTS.md", rel: "../build/payload/AGENTS.md" },
-      { label: "인계 문서 (결정 이력과 남은 일)", file: "HANDOFF.md", rel: "../build/HANDOFF.md" },
-      { label: "빌더", file: "build.mjs", rel: "../build/build.mjs" },
-      { label: "설치기 명세", file: "spec.md", rel: "../specs/001-oneclick-installer/spec.md" },
       { label: "저장소 안내", file: "README.md", rel: "../README.md" },
     ],
     github: "https://github.com/Jeronyhum/ai-workshop/tree/main/build",

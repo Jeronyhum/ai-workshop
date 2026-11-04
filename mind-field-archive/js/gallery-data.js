@@ -73,7 +73,7 @@ window.AR.gallery = {
    "linkKind": "X 원본",
    "src": "refs/drive/usecases/OpenAI_2097374640582668336_*",
    "category": "showcase",
-   "reason": "가장 많이 공유된 게시물(좋아요 119,905)의 소용돌이 렌더. 감사 B-0 정정과 함께 싣는다",
+   "reason": "가장 많이 공유된 게시물(좋아요 119,905)의 소용돌이 렌더. 바닥의 정정 조각(나비에-스토크스)과 함께 싣는다",
    "media": [
     {
      "type": "img",

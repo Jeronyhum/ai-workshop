@@ -135,7 +135,7 @@ for i, d in deg.items():
 slots = data.get("assetSlots", {})
 for a in data["assets"]:
     if a["slot"] not in slots: fails.append(f"floor texture uses unknown slot {a['slot']}")
-    if a["cap"] != "생성 이미지 · 디자인 에셋": fails.append(f"asset {a['slot']}: wrong caption")
+    if a["cap"] != "AI로 만든 배경 그림 · 근거 자료 아님": fails.append(f"asset {a['slot']}: wrong caption (generated images must say they are not evidence)")
 for k, sl in slots.items():
     if sl.get("fallback") and not (ARC / sl["fallback"]).exists(): fails.append(f"slot {k}: missing fallback {sl['fallback']}")
     if k in data.get("assetsReadyList", []) and not (ARC / sl["file"]).exists(): fails.append(f"slot {k}: marked ready but {sl['file']} is missing")
@@ -357,6 +357,38 @@ for f in sorted(ARC.glob("css/*.css")):
         if re.search(r"var\(--serif", ln): fails.append(f"font: the removed serif stack is used at {f.relative_to(ARC)}:{i}")
 for f in sorted((ARC / "fonts").glob("*.woff2")):
     if SERIFISH.search(f.stem): fails.append(f"font: serif or brush file shipped: fonts/{f.name}")
+
+# v6 (민성 t1195u): the site is public. No internal or behind-the-scenes wording reaches a visitor: who drafted what
+# (narration, transcript, owner, the agents that built it), audit and fact-check process words and codes, block ids,
+# decision ids, research-file credits, internal paths, dev notes. Two scans: (1) every visitor-facing data field
+# (source objects, ids, paths and slugs are skipped); (2) the UI code with comments stripped, every human string literal
+# (one with a space or Hangul). tools/test_v6.py also scans the rendered pages.
+INTERNAL = re.compile(r"민성|나레이션|전사본|소유자|(?i:\bowner\b|transcript)|사실\s?검증|fact[\s-]?gate|팩트\s?게이트|사실 게이트|감수|감독관"
+    r"|감사\s?(?:[A-Z(]|범위|판정|커버리지|이후|가 )|(?<![\w-])[ABCEOU]-\d{1,2}(?![\w-])|\bMuse\b|\bDots\b|\bt1\d{3}u\b|package_1105|refs/"
+    r"|mind-field-archive|\bTODO\b|FIXME|기획자의 원문|마스터프롬프트|[12]부 조사|워크숍 조사 자료|조사 파일|1차 조사|보완 조사|이 아카이브의 기록|원본 파일 위치"
+    r"|(?:Grok|그록|Muse|Dots|Claude|클로드)\s?(?:이|가)?\s?(?:검토했|리뷰했|정리했|작성했|만들었|감수)")
+VSKIP = {"s", "src", "f", "l", "g", "id", "url", "slot", "file", "fallback", "key", "zone", "kind", "type", "st", "cluster", "ring", "metaphor",
+         "poster", "capSrc", "koSrc", "toolsSrc", "match", "at", "polar", "cell", "anchor", "piece", "exampleSrc", "rel", "where", "family", "group_key"}
+def vwalk(o, where):
+    if isinstance(o, str):
+        if (" " in o or re.search(r"[가-힣]", o)) and INTERNAL.search(o): fails.append(f"public text: internal wording at {where}: {o[:70]}")
+    elif isinstance(o, list):
+        for i, x in enumerate(o): vwalk(x, f"{where}[{i}]")
+    elif isinstance(o, dict):
+        for k, v in o.items():
+            if k not in VSKIP: vwalk(v, f"{where}.{k}")
+for k in ("pieces", "zones", "clusters", "rings", "assets", "threads", "status", "viz", "explain", "glossary", "exit", "gallery", "acts"):
+    vwalk(data.get(k), k)
+UI = ["index.html"] + [f"js/{n}" for n in ("app.js", "render.js", "story.js", "explain.js", "gallery.js", "exit.js", "terms.js", "field.js")]
+LIT = re.compile(r'"(?:[^"\\\n]|\\.)*"|\'(?:[^\'\\\n]|\\.)*\'|`(?:[^`\\]|\\.)*`', re.S)
+for rel in UI:
+    code = (ARC / rel).read_text(encoding="utf-8")
+    code = re.sub(r"<!--.*?-->", "", code, flags=re.S) if rel.endswith(".html") else re.sub(r"/\*.*?\*/", "", code, flags=re.S)
+    if not rel.endswith(".html"): code = re.sub(r"(?m)(^|[^:\"'`\\])//[^\n]*", r"\1", code)
+    texts = [re.sub(r"\$\{[^}]*\}", " ", m.group(0)[1:-1]) for m in LIT.finditer(code)] if not rel.endswith(".html") else [re.sub(r"<script.*?</script>", "", code, flags=re.S)]
+    for t in texts:
+        if (" " in t or re.search(r"[가-힣]", t)) and INTERNAL.search(t):
+            fails.append(f"public text: internal wording in {rel}: {INTERNAL.search(t).group(0)} … {t.strip()[:60]}")
 
 links = sorted({l["url"] for p in data["pieces"] for l in p.get("links", [])} | {m["by"]["url"] for p in data["pieces"] for m in p.get("media", []) if m.get("by")})
 print(f"{len(data['pieces'])} pieces, {len(data['threads'])} threads, {len(links)} distinct external links")

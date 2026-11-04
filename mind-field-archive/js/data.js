@@ -64,12 +64,12 @@
   /* Generated images: design assets only, never evidence. */
   /* Floor textures by slot (js/assets.js decides between the delivered file and its generated fallback). */
   AR.assets = [
-    { slot: "dots-field-scatter", zone: "p1", cap: "생성 이미지 · 디자인 에셋" },
-    { slot: "muse-corridor-ember", zone: "br", cap: "생성 이미지 · 디자인 에셋" },
-    { slot: "muse2-field-manifold", zone: "p2", cls: "is-base", cap: "생성 이미지 · 디자인 에셋" },
-    { slot: "muse-drawing-floor", zone: "p2", cap: "생성 이미지 · 디자인 에셋" },
-    { slot: "muse2-horizon-rings", zone: "p2", cls: "zone-band", cap: "생성 이미지 · 디자인 에셋" },
-    { slot: "dots2-seam-ember-to-lattice", zone: "p2", seam: true, cap: "생성 이미지 · 디자인 에셋" },
+    { slot: "dots-field-scatter", zone: "p1", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "muse-corridor-ember", zone: "br", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "muse2-field-manifold", zone: "p2", cls: "is-base", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "muse-drawing-floor", zone: "p2", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "muse2-horizon-rings", zone: "p2", cls: "zone-band", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "dots2-seam-ember-to-lattice", zone: "p2", seam: true, cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
   ];
 
   /* Pieces. Part 1 sits on a scattered 5×6 field (col,row); the bridge stacks in the corridor;
@@ -89,7 +89,7 @@
       rows: [
         { st: "verified", t: "안드레 카파시(Andrej Karpathy)가 2025년 2월 2일 X 게시물에서 \"vibe coding\"이라는 말을 처음 썼다.", s: { f: FC, s: "1. 바이브코딩 기원", l: 31 } },
         { st: "verified", t: "그 게시물의 정의: \"fully give in to the vibes, embrace exponentials, and forget that the code even exists\"", s: { f: FC, s: "1. 바이브코딩 기원", l: 32 } },
-        { st: "verified", t: "'느적 코딩'은 카파시의 표현이 아니라 강의자(민성)의 한국어 의역이다.", s: { f: FC, s: "E-1", l: 119 } },
+        { st: "verified", t: "'느적 코딩'은 카파시의 표현이 아니라 이 워크숍에서 붙인 우리말 의역이다.", s: { f: FC, s: "E-1", l: 119 } },
       ],
       src: [{ f: BL, s: "C-01", l: 48 }, { f: FC, s: "E-1", l: 117 }],
       links: [{ kind: "X 게시물", label: "@karpathy: \"vibe coding\" (2025-02-02)", url: "https://x.com/karpathy/status/1886192184808149383" },
@@ -206,7 +206,7 @@
       vis: { type: "harness" },
       st: "verified",
       rows: [
-        { st: "conditional", t: "컨텍스트가 길어질수록 성능이 떨어지는 현상이 보고된다 (민성의 말로 '컨텍스트 부식'). 몇 %에서 시작되는지는 확인된 수치가 없다.", s: { f: FC, s: "O-12", l: 287 } },
+        { st: "conditional", t: "컨텍스트가 길어질수록 성능이 떨어지는 현상이 보고된다. 이 워크숍에서는 '컨텍스트 부식'이라고 부른다. 몇 %에서 시작되는지는 확인된 수치가 없다.", s: { f: FC, s: "O-12", l: 287 } },
         { st: "verified", t: "100만 토큰은 영문 약 75만 단어, 책 10권 안팎이다.", s: { f: FC, s: "O-8", l: 263 } },
       ],
       src: [{ f: BL, s: "C-10", l: 175 }, { f: FC, s: "O-8, O-12", l: 285 }],
@@ -352,7 +352,7 @@
       title: "출시 영상을 만드는 모델",
       lede: "\"Opus 5.5 can now make launch videos.\"",
       st: "unverified",
-      cond: "제조사나 감사가 확인한 사실이 아니라 X 게시물의 설명이다.",
+      cond: "제조사가 확인한 사실이 아니라 X 게시물의 설명이다.",
       rows: [
         { st: "unverified", t: "\"Opus 5.5 builds the scenes, animations and transitions directly inside motion.\"", s: { f: XP, by: "@motion_so" } },
         { st: "unverified", t: "\"Carry Me\": 전 프레임을 코드로 그린 4분 뮤직비디오. Opus 5.5가 Claude Code에서 감독.", s: { f: P + "디자인레퍼런스.md", s: "§3", l: 54 } },
@@ -480,7 +480,7 @@
         { who: "중국 상무부", t: "\"증류는 미국 기업을 포함해 전 세계가 쓰는 중립적이고 보편적인 산업 관행이며, 미국 기업들도 중국 모델을 대량 증류하고 있다\"", s: { f: S3, s: "§4-3", l: 155 } },
       ],
       st: "verified",
-      cond: "양측을 함께 실을 때만 확정으로 취급한다. 한쪽만 보여 주지 않는다.",
+      cond: "양쪽 목소리를 함께 실을 때만 사실로 다룬다. 한쪽만 보여 주지 않는다.",
       src: [{ f: S3, s: "§4-3", g: "감사 B-1 :136" }],
       links: [
         { kind: "공식", label: "CISA advisory AA26-251A", url: "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-251a" },
@@ -720,12 +720,11 @@
     },
     {
       id: "gap141", zone: "p1", cluster: "일", cell: [1, 4], w: 380, kind: "gap",
-      title: "비어 있던 자리: 달라진 공채",
-      lede: "원문이 짚은 \"기업 AI 업무역량테스트, AI 면접 등 달라진 공채 방식\"은 1차 조사 9개 파일 어디에도 없었다.",
+      title: "달라진 공채: AI 역량검사와 AI 면접",
+      lede: "취업 준비에 바로 닿는 변화다. 채용 절차 안에도 AI가 들어왔다.",
       st: "unverified",
-      cond: "감사가 지목한 실질 누락이다. 아래 수치는 감사 이후의 보완 조사에서 나왔고, 감사 판정을 받지 않았다.",
+      cond: "응답 기업 396곳의 조사 결과라, 전체 기업으로 넓혀 읽지 않는다.",
       rows: [
-        { st: "unverified", t: "감사 (a) 1-41: 누락. \"학생 대상 발표의 취업 연결고리인데 비어 있음\"", s: { f: AU, s: "(a) 1-41", l: 68 } },
         { st: "conditional", t: "고용노동부·한국고용정보원 「2025년 기업 채용동향조사」: 응답 396곳 중 21.7%(86곳)가 공식 채용 절차에 AI 도입, 그중 AI 기반 인적성·역량검사 69.8%.", s: { f: PD, s: "보완", l: 97 } },
       ],
       src: [{ f: AU, s: "(a) 1-41, (c) 1", l: 68 }],
@@ -738,12 +737,12 @@
       title: "신입의 사다리",
       fig: { v: "37.1→26.8", u: "%", cap: "개발자 공고 중 신입 지원 가능 비중" },
       st: "conditional",
-      cond: "PD수첩 제작진과 언더스코어의 자체 분석이며 학술 검증(피어리뷰)을 거친 통계는 아니다. 감사(11-03) 이후의 보완 조사라 감사 판정이 없다.",
+      cond: "PD수첩 제작진과 언더스코어의 자체 분석이며 학술 검증(피어리뷰)을 거친 통계는 아니다.",
       rows: [
         { st: "conditional", t: "채용공고 1,041만여 건 분석 (2019.7~2025.1): 개발자 공고 중 신입 지원 가능 비중 37.1% → 26.8%.", s: { f: PD, s: "확정 수치표", l: 113 } },
       ],
       media: [
-        { type: "img", src: "media/bennie-postings.jpg", by: x("bennie_chen", "2086740865221845057"), cap: "게시 이미지 제목: \"Job postings by seniority: high vs. low AI exposure\" (그래프에 Revelio Labs 표기). 감사 범위 밖." },
+        { type: "img", src: "media/bennie-postings.jpg", by: x("bennie_chen", "2086740865221845057"), cap: "게시 이미지 제목: \"Job postings by seniority: high vs. low AI exposure\" (그래프에 Revelio Labs 표기)." },
       ],
       src: [{ f: PD, s: "§1", l: 11, g: "보완 조사, 감사 이후" }],
       links: [
@@ -851,7 +850,7 @@
       title: "다리 A: 벤치마크에서 검증 습관으로",
       quote: "AI는 초안을 전문가처럼 뽑지만, 틀린 숫자도 전문가처럼 자신 있게 뽑는다는 겁니다. 그래서 기업들이 이제 'AI로 만든 결과물'이 아니라 'AI 결과를 검증하는 과정'을 시험으로 봅니다. 2부에서는 그 과정을 직접 해 봅니다 — 시키는 법이 아니라, 검증하는 법부터요.",
       st: "unverified",
-      cond: "발표용 전환 문장이다. 사실 주장이 아니며 감사 범위 밖이다.",
+      cond: "발표에서 다음 이야기로 넘어가는 문장이다. 사실 주장이 아니다.",
       src: [{ f: ME, s: "§5 다리 A", l: 133, g: "감사 범위 밖" }],
       links: [],
     },
@@ -860,7 +859,7 @@
       title: "다리 C: 스웜에서 내 에이전트로",
       quote: "저 스웜과 여러분이 이따 돌릴 에이전트는 원리가 같습니다. 차이는 하나 — 목표를 누가, 얼마나 정확히 정했고, 중간에 누가 검증하느냐.",
       st: "unverified",
-      cond: "발표용 전환 문장이다. 사실 주장이 아니며 감사 범위 밖이다.",
+      cond: "발표에서 다음 이야기로 넘어가는 문장이다. 사실 주장이 아니다.",
       src: [{ f: ME, s: "§5 다리 C", l: 139, g: "감사 범위 밖" }],
       links: [],
     },
@@ -869,7 +868,7 @@
       title: "다리 E: 오늘 만든 결과물",
       quote: "오늘 실습에서 쓰는 도구가 집에 가서도 그대로 씁니다. 오늘 만든 결과물이 오늘로 끝나는 게 아니라, 여러분의 첫 'AI와 일한 기록'이 됩니다.",
       st: "unverified",
-      cond: "발표용 전환 문장이다. 무료 지원의 사실관계는 \"무료로 시작하는 길\" 조각에서 감사 기준으로 확인한다.",
+      cond: "발표에서 다음 이야기로 넘어가는 문장이다. 무료 지원의 사실관계는 \"무료로 시작하는 길\" 조각에서 확인할 수 있다.",
       src: [{ f: ME, s: "§5 다리 E", l: 145, g: "감사 범위 밖" }],
       links: [],
     },
@@ -970,7 +969,7 @@
         ["슬래시 명령어", "/로 부르는 단축 명령 (스킬도 여기서 부른다)", 171],
       ],
       st: "conditional",
-      cond: "감사의 사실 판정(B-1~B-3) 대상이 아닌 용어 풀이다. 감사 커버리지 2-18·2-19에서 \"조사됨\", 공식 문서 기반.",
+      cond: "사실 주장이 아니라 용어 풀이입니다. 공식 문서를 바탕으로 했습니다.",
       src: [{ f: T3, s: "요약표", l: 153, g: "감사 (a) 2-18, 2-19" }],
       links: [
         { kind: "공식", label: "Claude Code: skills", url: "https://code.claude.com/docs/en/skills" },
@@ -1065,7 +1064,7 @@
       title: "노드가 일하고, 엣지가 넘기고, 상태가 흐른다",
       lede: "\"시스템 지능은 에이전트 수를 늘리는 것과 같지 않다\"",
       st: "verified",
-      cond: "조사 파일의 판정은 [유행어 주의]: 실천은 2024년부터 있었고 용어는 2026년 중반에 뒤늦게 붙었다.",
+      cond: "유행어 주의: 실천은 2024년부터 있었고, 용어는 2026년 중반에 뒤늦게 붙었다.",
       rows: [
         { st: "verified", t: "LangChain (2026-07-22): Nodes가 일을 하고, Edges가 전이를 정의하고, State가 그래프를 따라 흐른다.", s: { f: T1, s: "§5", l: 124 } },
         { st: "verified", t: "\"그래프는 루프를 대체하지 않는다. 그래프는 프로세스들 사이의 관계를 설계하고, 각 노드는 여전히 완전한 루프를 돌 수 있다.\"", s: { f: T1, s: "§5", l: 128 } },
@@ -1118,7 +1117,7 @@
     {
       id: "free", zone: "p2", at: [4640, 4560], w: 420, kind: "sheet",
       title: "무료로 시작하는 길",
-      lede: "공식으로 확인된 것만 확정으로 적고, 수치가 없는 한도는 \"비공개\"로 남긴다.",
+      lede: "공식으로 확인된 것만 적고, 수치가 없는 한도는 \"비공개\"로 남긴다.",
       st: "verified",
       rows: [
         { st: "verified", t: "모두의 AI 실험실: 1인당 4만원 상당 토큰 지원 (NIA 공식 안내).", s: { f: AU, s: "B-1", l: 133 } },
@@ -1136,17 +1135,17 @@
     {
       id: "self", zone: "p2", at: [4660, 600], w: 420, kind: "media",
       title: "이 아카이브를 만든 재료",
-      lede: "모션 값은 참고 영상의 프레임에서 읽었고, 바닥 질감은 생성 이미지다.",
+      lede: "움직임의 값은 참고 영상의 프레임에서 읽었고, 바닥 질감은 AI로 만든 그림이다.",
       st: "unverified",
-      cond: "디자인 레퍼런스의 기록이다. 게시물·영상은 맥락이지 증거가 아니다.",
+      cond: "디자인 참고 자료다. 게시물과 영상은 맥락일 뿐 증거가 아니다.",
       rows: [
         { st: "unverified", t: "숫자 굴림: 500ms, cubic-bezier(0.34, 1.45, 0.64, 1), 거리 8px, 간격 70ms (Jakubantalik MOTION.CSS 패널).", s: { f: "refs/drive/style-synthesis.md", s: "§6.2", l: 121 } },
         { st: "unverified", t: "목록 진입: \"stagger 30ms · spring 140/15\", \"Exits faster than it enters\" (animate-ui 주석).", s: { f: "refs/drive/style-synthesis.md", s: "§6.2", l: 123 } },
-        { st: "unverified", t: "생성 이미지 3장은 바닥 질감으로만 쓴다. 증거가 아니다.", s: { f: "archive/README.md", s: "에셋 출처" } },
+        { st: "unverified", t: "AI로 만든 그림 3장은 바닥 질감으로만 쓴다. 증거가 아니다.", s: { f: "archive/README.md", s: "에셋 출처" } },
       ],
       media: [
         { type: "video", src: "media/enesozturk-spec.mp4", poster: "media/enesozturk-spec.jpg", by: x("enesozturkdev", "2114035471953326126"), cap: "\"documents a component's architecture into a spec sheet\"", capSrc: XP },
-        { type: "img", src: "assets/gen-drawing-threads.jpg", gen: true, cap: "생성 이미지 · 디자인 에셋" },
+        { type: "img", src: "assets/gen-drawing-threads.jpg", gen: true, cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
       ],
       src: [{ f: "refs/drive/style-synthesis.md", s: "§6.2", l: 121, g: "감사 범위 밖" }],
       links: [x("enesozturkdev", "2114035471953326126"), x("animate_ui", "2111882479774896338")],
@@ -1427,10 +1426,11 @@
   AR.threadSrc = { paradigmGaps: { f: T1, s: "§9", l: 221 } };
 
   AR.status = {
-    verified:    { word: "확정",   mark: "●", note: "공식·1차 자료로 확인된 내용", audit: "감수 판정 B-1" },
-    conditional: { word: "단서",   mark: "◐", note: "조건이 붙은 내용. 조건을 함께 읽어야 합니다", audit: "감수 판정 B-2 또는 출처가 밝힌 조건" },
-    unverified:  { word: "미확인", mark: "○", note: "게시물·이미지·카피. 분위기를 보여 줄 뿐 증거가 아닙니다", audit: "감수 범위 밖" },
-    excluded:    { word: "제외",   mark: "⊘", note: "사실로 쓰지 않는 주장", audit: "감수 판정 B-3" },
-    corrected:   { word: "정정",   mark: "/", note: "원래 표현이 전제부터 틀려서 고친 것", audit: "감수 판정 B-0" },
+    /* v6 (t1195u): words a public visitor reads at a glance; the audit sections stay in the comments above */
+    verified:    { word: "확인됨",   mark: "●", note: "공식 발표나 1차 자료로 확인한 내용이에요" },
+    conditional: { word: "조건부",   mark: "◐", note: "조건이 붙은 내용이에요. 조건을 함께 읽어 주세요" },
+    unverified:  { word: "미확인",   mark: "○", note: "게시물과 이미지 속 주장이에요. 분위기를 보여 줄 뿐 증거는 아니에요" },
+    excluded:    { word: "근거 부족", mark: "⊘", note: "근거가 부족해 사실로 쓰지 않는 주장이에요" },
+    corrected:   { word: "정정",     mark: "/", note: "널리 퍼진 표현이 틀려서 바로잡은 내용이에요" },
   };
 })();

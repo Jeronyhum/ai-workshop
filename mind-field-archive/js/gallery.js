@@ -20,7 +20,7 @@
 
   /* posts that are also on the floor, and the audit's word where it applies */
   const PIECE = {
-    "d-OpenAI-2097374640582668336": { id: "science", gate: "감수 판정(정정): 밀레니엄 문제 본체가 아니라 강제 있는 NS에 대한 주장 단계" },
+    "d-OpenAI-2097374640582668336": { id: "science", gate: "바로잡은 내용: 밀레니엄 문제 자체가 아니라, 외력이 있는 나비에-스토크스 방정식에 대한 주장 단계예요" },
     "d-zealcaiden-2117359490257629331": { id: "claudia" },
     "d-motion_so-2107136416342061418": { id: "motionso" },
     "d-PrimeIntellect-2108672479007047952": { id: "graph" },
@@ -151,7 +151,7 @@
       </header>
       <div class="gl-sticky"><nav class="gl-bar" aria-label="묶음으로 이동, 칸 너비는 건수 비율">${bar}</nav><button type="button" class="btn btn-quiet gl-x" data-close>바닥으로 <kbd>Esc</kbd></button></div>
       ${secHTML}
-      <footer class="gl-foot"><p class="q-src">출처: 워크숍 자료에 모인 사례, X 게시물, 공식 웹 사례. 고른 기준과 이유, 원본 파일 위치는 이 아카이브의 기록(README)에 있습니다.</p></footer>`;
+      <footer class="gl-foot"><p class="q-src">출처: 워크숍 자료에 모인 사례, X 게시물, 공식 웹 사례. 카드마다 원 게시물로 가는 링크가 있습니다.</p></footer>`;
     built = true;
   }
   let built = false, opener = null;

@@ -138,11 +138,11 @@ with serve() as url, browser() as b:
 
     # ── internal paths are hidden from visitors (blind P1 #11, persona P1) ──
     ev("ARchive.openRoom('accounting')"); pg.wait_for_timeout(800)
-    shown = ev("(() => { const out = []; const tw = document.createTreeWalker(document.getElementById('room-in'), NodeFilter.SHOW_TEXT); for (let t = tw.nextNode(); t; t = tw.nextNode()) { const e = t.parentElement; if (e.closest('details:not([open])')) continue; if (/refs\\/|\\.md\\b|:\\d{2,}|감사 B-/.test(t.textContent)) out.push(t.textContent.trim().slice(0, 40)); } return out; })()")
-    R.ok("rooms show readable credits; file paths wait behind 출처 상세", not shown, str(shown[:4]))
-    R.ok("…and the files are still one click away", ev("!!document.querySelector('#room details.rm-srcfull') && /P1_/.test(document.querySelector('#room details.rm-srcfull').textContent)"))
+    shown = ev("(() => { const out = []; const tw = document.createTreeWalker(document.getElementById('room-in'), NodeFilter.SHOW_TEXT); for (let t = tw.nextNode(); t; t = tw.nextNode()) { const e = t.parentElement; if (/refs\\/|\\.md\\b|:\\d{2,}|감사 B-/.test(t.textContent)) out.push(t.textContent.trim().slice(0, 40)); } return out; })()")
+    R.ok("rooms show no file paths, line numbers or audit codes, open or folded", not shown, str(shown[:4]))
+    R.ok("…and no '출처 상세' panel of research files: a room's sources are its public links", not ev("document.querySelector('#room details.rm-srcfull')") and ev("[...document.querySelectorAll('#room .rm-src h3')].map(h => h.textContent).includes('출처')"))
     pg.keyboard.press("Escape"); pg.wait_for_timeout(500)
-    R.ok("the HUD and the list show credits, not file names", not ev("/\\.md\\b/.test(document.getElementById('hud').textContent + document.getElementById('index-list').textContent)"))
+    R.ok("the HUD and the list show no file names or research credits", not ev("/\\.md\\b|조사 ·|용어집|감수/.test(document.getElementById('hud').textContent + document.getElementById('index-list').textContent)"))
     # ── DCinside (muse #4, dots #2) ──
     for pid, post in (("kostat", "1509631"), ("bok", "1499916")):
         ev(f"ARchive.openRoom('{pid}')"); pg.wait_for_timeout(600)
@@ -247,6 +247,34 @@ with serve() as url, browser() as b:
     R.ok("no console errors or warnings, no failed requests (session 4)", not pg.errs, "; ".join(pg.errs[:4]))
     pg.context.close()
 
+# ── public text (민성 t1195u): no internal wording anywhere a visitor can reach, rendered ──
+INTERNAL = r"민성|나레이션|전사본|소유자|transcript|사실\s?검증|fact[\s-]?gate|감수|감독관|감사\s?(?:[A-Z(]|범위|판정|이후)|(?<![\w-])[ABCEOU]-\d{1,2}(?![\w-])|\bMuse\b|\bDots\b|muse2?-|dots2?-|package_1105|refs/|archive/|materials/|\.md :|[12]부 조사|워크숍 조사 자료|이 아카이브의 기록|기획자의 원문|\bTODO\b"
+GRAB = """(root) => { const out = []; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let t = w.nextNode(); t; t = w.nextNode()) { const p = t.parentElement; if (p && !p.closest('script,style') && t.textContent.trim()) out.push(t.textContent.trim()); }
+  root.querySelectorAll('[aria-label],[alt],[title]').forEach(e => ['aria-label','alt','title'].forEach(a => e.getAttribute(a) && out.push(e.getAttribute(a)))); return out; }"""
+with serve() as url, browser() as b:
+    pg = page(b, url); ev = pg.evaluate
+    ev("(() => { window.__grab = " + GRAB + "; })()")
+    seen = set(ev("__grab(document.body)"))
+    for pid in ev("ARchive.pieces.map(p => p.id)"):
+        ev(f"ARchive.setCurrent('{pid}', {{glide: false}})"); seen.update(ev("__grab(document.getElementById('hud'))"))
+        ev(f"ARchive.openRoom('{pid}')"); pg.wait_for_timeout(60); seen.update(ev("__grab(document.getElementById('room'))"))
+    pg.keyboard.press("Escape"); settle(pg)
+    ev("ARG.open()"); pg.wait_for_timeout(500); seen.update(ev("__grab(document.getElementById('gallery'))")); pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
+    for t in ("terms", "setup", "flow", "path-auto"):
+        ev(f"ARE.open('{t}')"); pg.wait_for_timeout(250); seen.update(ev("__grab(document.getElementById('exit'))"))
+    ev("ARE.close()"); ev("ARchive.openRoom('harness')"); pg.wait_for_timeout(300)
+    for tid in ev("AR.glossary.map(g => g.id)"):
+        ev(f"(() => {{ const b = document.createElement('button'); b.className = 'term'; b.dataset.term = '{tid}'; b.textContent = 'x'; document.querySelector('#room .rm-hero, #room .xr').append(b); b.focus(); }})()")
+        pg.wait_for_timeout(40); seen.update(ev("__grab(document.getElementById('term-tip'))"))
+    pg.keyboard.press("Escape"); seen.update(ev("__grab(document.getElementById('index'))")); seen.update(ev("__grab(document.getElementById('keys'))"))
+    import re as _re
+    bad = sorted({t[:70] for t in seen if _re.search(INTERNAL, t)})
+    R.ok(f"public text: none of {len(seen)} rendered strings (floor, 63 rooms, HUD, gallery, exit, popovers, list) has internal wording", not bad, str(bad[:4]))
+    R.ok("public text: quotes are attributed as part of the talk, not to a narrator", ev("[...document.querySelectorAll('#world .st-voice footer')].every(f => f.textContent === '워크숍 발표에서')") and ev("document.querySelectorAll('#world .st-voice footer').length") > 5)
+    R.ok("no console errors or warnings, no failed requests (session 5)", not pg.errs, "; ".join(pg.errs[:4]))
+    pg.context.close()
+
 # ── check.py on a clean checkout (dots #3) ──
 tmp = pathlib.Path(tempfile.mkdtemp())
 dst = tmp / "repo/mind-field-archive"
@@ -259,6 +287,11 @@ shutil.copytree(ARC, bad, ignore=shutil.ignore_patterns("media", "shots", "fonts
 (bad / "js/data.js").write_text((bad / "js/data.js").read_text(encoding="utf-8") + "\n/* GPT-5가 IMO 금메달 */\n", encoding="utf-8")
 r2 = subprocess.run([sys.executable, "tools/check.py"], cwd=bad, capture_output=True, text=True)
 R.ok("fact gate: putting \"GPT-5 IMO 금메달\" back makes check.py fail", r2.returncode == 1 and "fact gate: 'GPT-5 IMO gold'" in r2.stdout, r2.stdout[-200:])
+pub = tmp / "repo3/mind-field-archive"
+shutil.copytree(ARC, pub, ignore=shutil.ignore_patterns("media", "shots", "fonts-src", "lod", "assets"))
+(pub / "js/story.js").write_text((pub / "js/story.js").read_text(encoding="utf-8").replace("<footer>워크숍 발표에서</footer>", "<footer>민성의 나레이션</footer>"), encoding="utf-8")
+r3 = subprocess.run([sys.executable, "tools/check.py"], cwd=pub, capture_output=True, text=True)
+R.ok("public text: putting '민성의 나레이션' back makes check.py fail", r3.returncode == 1 and "public text: internal wording in js/story.js" in r3.stdout, r3.stdout[-200:])
 shutil.rmtree(tmp, ignore_errors=True)
 sys.exit(0 if R.report() else 1)
 

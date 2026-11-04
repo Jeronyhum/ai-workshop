@@ -12,7 +12,7 @@
   /* display text: straight quotes become typographic ones; attribute values use raw() */
   const esc = (s) => raw(String(s ?? "").replace(/"([^"]*)"/g, "“$1”").replace(/(^|[\s(\[「])'([^']*)'/g, "$1‘$2’"));
   R.esc = esc; R.raw = raw;
-  const base = (f) => String(f).split("/").pop();
+
   const num = (v) => (typeof v === "number" ? v.toLocaleString("en-US") : esc(v));
   const tierOf = (p) => (A.layout[p.id] || {}).tier || 2;
   R.tier = tierOf;
@@ -21,26 +21,8 @@
     const s = A.status[st];
     return `<span class="st${small ? " st-s" : ""}" data-st="${st}" title="${raw(s.note)}"><span class="sr-only">${s.mark} </span>${s.word}</span>`;
   };
-  R.ref = (s) => (s ? [base(s.f), s.s, s.l ? ":" + s.l : "", s.by && !s.l && !s.s ? s.by : ""].filter(Boolean).join(" ") : "");
-  const refFull = (s) => {
-    const path = /^(refs|archive)\//.test(s.f) ? s.f : "refs/drive/" + s.f;
-    return [path, s.s, s.l ? ":" + s.l : "", s.by && !s.l ? `(${s.by})` : ""].filter(Boolean).join(" ");
-  };
-  R.refFull = refFull;
-  /* v6: visitors see who said it, not where the file sits. File names, sections, line numbers and audit codes stay
-     in the data (and behind "출처 상세" in each room); the floor, HUD, list and facts show a readable credit. */
-  const SRC = [
-    [/P1_사무직벤치마크/, "1부 조사 · 사무직과 벤치마크"], [/P1_과학난제와지표/, "1부 조사 · 과학 난제와 지표"], [/P1_시장산업/, "1부 조사 · 시장과 산업"],
-    [/P1_해킹보안/, "1부 조사 · 해킹과 보안"], [/P1_인물과역사/, "1부 조사 · 인물과 역사"], [/P2_엔지니어링패러다임/, "2부 조사 · 엔지니어링 패러다임"],
-    [/P2_에이전트진화와실전/, "2부 조사 · 에이전트의 진화와 실전"], [/P2_용어와필수개념/, "2부 용어집"], [/감독관_감사/, "감수 판정"],
-    [/학생의미_메타/, "학생에게 주는 의미 정리"], [/보완_PD수첩_통계검증/, "보완 조사 · 통계 검증"], [/패키지_빌드브리프/, "워크숍 구성 메모"],
-    [/마스터프롬프트_원문/, "기획자의 원문"], [/dots_꼬리질문/, "꼬리 질문 메모"], [/x-opus-motion-prompts/, "X 게시물 모음 · 모션 프롬프트"],
-    [/style-synthesis/, "디자인 레퍼런스 정리"], [/ui_review_/, "독립 검토서"], [/x-frontier-cases/, "X 사례 모음"], [/archive\/README/, "이 아카이브의 기록"],
-    [/보완_전사본_근본내용_블록/, "민성의 나레이션 (전사본)"], [/보완_전사본_사실검증/, "전사본 사실 검증"], [/보완_전사본_메타와꼬리질문/, "전사본 메타 분석"],
-    [/\.(jpg|png|mp4)$/, "X 게시 이미지"],
-  ];
-  R.srcLabel = (s) => { if (!s) return ""; const hit = SRC.find(([re]) => re.test(s.f)); return hit ? hit[1] : "워크숍 조사 자료"; };
-  R.srcFull = refFull;
+  /* v6 (민성 t1195u): the site is public. Visitors see the status of each statement and its public sources (the links in
+     each room); research files, line numbers, audit codes and who drafted what stay in the data and the README only. */
   /* the one legend for the status marks, in plain words */
   R.legend = (cls = "") => `<dl class="legend-st ${cls}">${["verified", "conditional", "unverified", "corrected", "excluded"].map((k) => `<div><dt>${R.st(k, true)}</dt><dd>${esc(A.status[k].note)}</dd></div>`).join("")}</dl>`;
   const zoneName = (z) => A.zones[z].name;
@@ -48,7 +30,7 @@
   R.where = where;
 
   /* quiet provenance: shape + word + file, low contrast */
-  const quiet = (p) => `<p class="q">${R.st(p.st, true)}<span class="q-src">${esc(R.srcLabel(p.src[0]))}</span></p>`;
+  const quiet = (p) => `<p class="q">${R.st(p.st, true)}</p>`;
 
   /* digits roll in the room (Jakubantalik MOTION.CSS: 500ms, overshoot, 70ms apart); a Korean qualifier stays small */
   const digits = (v) => {
@@ -108,13 +90,13 @@
 
   /* ── shared parts ───────────────────────────────── */
   function pairHTML(pair, room) {
-    if (!pair || !pair.claim || !pair.counter) return `<div class="refusal" role="note"><b>짝 없음</b><p>조건 쌍의 한쪽만으로는 싣지 않습니다. 감사 B-2가 쌍 제시를 요구합니다.</p></div>`;
+    if (!pair || !pair.claim || !pair.counter) return `<div class="refusal" role="note"><b>짝 없음</b><p>조건이 붙은 숫자는 짝이 되는 숫자와 함께일 때만 싣습니다.</p></div>`;
     const side = (d, cls) => `
       <div class="dip-side ${cls}">
         <p class="dip-num"><b>${digits(d.v)}</b><small>${esc(d.u)}</small></p>
         <p class="dip-who">${esc(d.who)}</p>
         <p class="dip-what">${esc(d.what)}</p>
-        ${room ? `<p class="dip-vs">${esc(d.vs)}</p>${d.conds ? `<ul class="dip-conds">${d.conds.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}<p class="q">${R.st(d.st, true)}<span class="q-src">${esc(R.srcLabel(d.s))}</span></p>` : `<p class="q">${R.st(d.st, true)}</p>`}
+        ${room ? `<p class="dip-vs">${esc(d.vs)}</p>${d.conds ? `<ul class="dip-conds">${d.conds.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}<p class="q">${R.st(d.st, true)}</p>` : `<p class="q">${R.st(d.st, true)}</p>`}
       </div>`;
     return `<div class="dip">${side(pair.claim, "is-claim")}<div class="dip-mid" aria-hidden="true"><span>쌍으로만</span></div>${side(pair.counter, "is-counter")}</div>`;
   }
@@ -122,14 +104,14 @@
     return `<div class="cx${big ? " is-big" : ""}"><p class="cx-from"><s>${esc(c.from)}</s></p><p class="cx-to">${esc(c.to)}</p>${big ? `<p class="cx-why">${esc(c.why)}</p>` : ""}</div>`;
   }
   function voicesHTML(v, big) {
-    if (!v || v.length < 2) return `<div class="refusal" role="note"><b>한쪽 목소리</b><p>양측을 함께 실을 때만 확정입니다.</p></div>`;
-    return `<div class="voices${big ? " is-big" : ""}">${v.map((s) => `<blockquote><p class="vc-who">${esc(s.who)}</p>${big ? `<p class="vc-t">${esc(s.t)}</p><p class="q"><span class="q-src">${esc(R.srcLabel(s.s))}</span></p>` : ""}</blockquote>`).join("")}</div>`;
+    if (!v || v.length < 2) return `<div class="refusal" role="note"><b>한쪽 목소리</b><p>양쪽 목소리를 함께 실을 때만 사실로 다룹니다.</p></div>`;
+    return `<div class="voices${big ? " is-big" : ""}">${v.map((s) => `<blockquote><p class="vc-who">${esc(s.who)}</p>${big ? `<p class="vc-t">${esc(s.t)}</p>` : ""}</blockquote>`).join("")}</div>`;
   }
   function chartHTML(c, big) {
     if (c.type === "bars") {
       return `<figure class="ch ch-bars" role="img" aria-label="${raw(c.unit)}: ${c.rows.map((r) => `${r.k} ${num(r.v)}`).join(", ")}">
         ${c.rows.map((r, i) => `<div class="ch-row" style="--v:${(r.v / c.max) * 100}%;--i:${i}"><span>${esc(r.k)}</span><i></i><b>${num(r.v)}${c.max <= 100 ? "%" : ""}</b></div>`).join("")}
-        <figcaption>${esc(c.unit)}${big ? ` <span class="q-src">${esc(R.srcLabel(c.s))}</span>` : ""}</figcaption></figure>`;
+        <figcaption>${esc(c.unit)}</figcaption></figure>`;
     }
     if (c.type === "line") {
       const w = 300, h = 160, pad = 28;
@@ -139,13 +121,13 @@
           <line class="ch-ceil" x1="${pad}" x2="${w - pad}" y1="${pad}" y2="${pad}"/>
           <polyline points="${pts.map((p) => p.join(",")).join(" ")}" pathLength="1"/>
           ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="5"/><text x="${p[0]}" y="${p[1] - 12}" text-anchor="middle">${c.rows[i].approx ? "약 " : ""}${c.rows[i].v}</text><text class="ch-k" x="${p[0]}" y="${h - 6}" text-anchor="middle">${esc(c.rows[i].k)}</text>`).join("")}
-        </svg><figcaption>${esc(c.unit)}${big ? ` <span class="q-src">${esc(R.srcLabel(c.s))}</span>` : ""}</figcaption></figure>`;
+        </svg><figcaption>${esc(c.unit)}</figcaption></figure>`;
     }
     if (c.type === "price") {
       const max = Math.max(...c.rows.map((r) => r.v));
       return `<figure class="ch ch-price" role="img" aria-label="${raw(c.unit)}: ${c.rows.map((r) => `${r.k} ${r.m} $${r.v}`).join(", ")}">
         ${c.rows.map((r, i) => `<div class="ch-row${r.hi ? " is-hi" : ""}" style="--v:${(r.v / max) * 100}%;--i:${i}"><span>${big ? `${esc(r.k)} ` : ""}${esc(r.m)}</span><i></i><b>$${r.v}${big ? ` / $${r.o}` : ""}</b></div>`).join("")}
-        <figcaption>${esc(c.unit)}${big ? " / 출력" : ""}${big ? ` <span class="q-src">${esc(R.srcLabel(c.s))}</span>` : ""}</figcaption></figure>`;
+        <figcaption>${esc(c.unit)}${big ? " / 출력" : ""}</figcaption></figure>`;
     }
     return "";
   }
@@ -157,13 +139,13 @@
       return `<div class="scr is-video"><video ${ambient ? 'class="amb" muted loop' : "controls"} playsinline preload="none" poster="${raw(lp.src)}"${lp.attrs} src="${raw(m.src)}" aria-label="${raw(m.by ? m.by.label + " 게시 영상" : "영상")}"></video>${ambient ? `<span class="scr-play" aria-hidden="true"></span>` : ""}</div>`;
     }
     const li = controls ? { src: m.src, attrs: "" } : A.lodImg(m.src);  /* the floor starts on a small copy */
-    return `<div class="scr${m.gen ? " is-gen" : ""}"><img src="${raw(li.src)}"${li.attrs} alt="${raw(m.gen ? "생성 이미지, 디자인 에셋" : (m.by ? m.by.label + " 게시 이미지. " : "") + m.cap)}" loading="lazy" decoding="async"></div>`;
+    return `<div class="scr${m.gen ? " is-gen" : ""}"><img src="${raw(li.src)}"${li.attrs} alt="${raw(m.gen ? "AI로 만든 배경 그림 (근거 자료 아님)" : (m.by ? m.by.label + " 게시 이미지. " : "") + m.cap)}" loading="lazy" decoding="async"></div>`;
   }
   R.screen = screen;
   function credit(m) {
     const by = m.by ? `<a class="cr-by" href="${raw(m.by.url)}" target="_blank" rel="noopener noreferrer">${esc(m.by.kind)} ${esc(m.by.label)}</a>` : "";
     const tag = m.gen ? `<span class="gen-tag">${esc(m.cap)}</span>` : R.st("unverified", true);
-    return `<figcaption class="cr">${tag}${m.gen ? "" : `<span class="cr-cap">${esc(m.cap)}</span>`}${by}${m.capSrc ? `<span class="q-src">문구 출처: ${esc(/^https?:/.test(m.capSrc) ? "원 게시물" : R.srcLabel({ f: m.capSrc }))}</span>` : ""}</figcaption>`;
+    return `<figcaption class="cr">${tag}${m.gen ? "" : `<span class="cr-cap">${esc(m.cap)}</span>`}${by}${m.capSrc && /^https?:/.test(m.capSrc) ? `<span class="q-src">문구 출처: 원 게시물</span>` : ""}</figcaption>`;
   }
   const emphasize = (text, em) => {
     const t = esc(text); if (!em) return t;
@@ -238,7 +220,7 @@
 
   /* thumbnail for neighbour tiles and the HUD */
   R.thumb = (p) => {
-    if (p.kind === "story") return `<span class="th-story"><b>${esc(p.cluster)}</b><small>민성의 이야기</small></span>`;
+    if (p.kind === "story") return `<span class="th-story"><b>${esc(p.cluster)}</b><small>1부 여는 장면</small></span>`;
     if (R.xThumb && A.explain && A.explain[p.id]) return R.xThumb(p);
     if (p.media && p.media[0]) return `<span class="th-img"><img src="${raw(mediaSrc(p.media[0]))}" alt="" loading="lazy"></span>`;
     if (p.fig) return `<span class="th-fig">${esc(p.fig.v)}<small>${esc(p.fig.u)}</small></span>`;
@@ -261,7 +243,7 @@
       case "chart": return `<div class="hero-split">${figure(p.fig, "is-hero")}${chartHTML(p.chart, true)}</div>`;
       case "stat": return p.id === "bok" ? `<div class="hero-split">${figure(p.fig, "is-hero")}<div class="pl-dots">${bokField()}</div></div>` : figure(p.fig, "is-hero") + (p.corr ? corrHTML(p.corr, true) : "");
       case "glossary": return `<dl class="gloss">${p.terms.map((t) => `<div><dt>${esc(t[0])}</dt><dd>${esc(t[1])}</dd></div>`).join("")}</dl>`;
-      case "gap": return `<div class="gap-frame"><span>감사 (a) 1-41: 누락</span></div>`;
+      case "gap": return `<div class="gap-frame"><span>채용 절차에 들어온 AI</span></div>`;
       case "media": return `<div class="hero-media">${p.fig ? figure(p.fig, "is-hero") : ""}${screen(p.media[0], { controls: true })}${credit(p.media[0])}</div>`;
       default: return p.media ? `<div class="hero-media">${screen(p.media[0], { controls: true })}${credit(p.media[0])}</div>` : `<p class="pull is-hero${/^["“]/.test(p.lede || "") ? " is-q" : ""}">${esc(p.lede)}</p>`;
     }
@@ -273,8 +255,8 @@
     const restMedia = (p.media || []).slice(heroMedia ? 1 : 0);
     const ledeInHero = t === 1 || (!p.media && ["sheet", "drawing"].includes(p.kind));
     const rows = (p.rows || []).map((r, i) => `
-      <li class="fact" style="--i:${i}">${R.st(r.st, true)}<p class="fact-t">${r.st === "excluded" ? `<s>${esc(r.t)}</s>` : esc(r.t)}</p><p class="q-src">${esc(R.srcLabel(r.s))}</p></li>`).join("");
-    const timeline = p.timeline && !xr ? `<section class="rm-tl" aria-label="종합 타임라인"><h3>날짜가 있는 사건만</h3><ol>${p.timeline.map((x, i) => `<li style="--i:${i}"><time>${esc(x[0])}</time><span>${esc(x[1])}</span></li>`).join("")}</ol><p class="q-src">${esc(R.srcLabel({ f: "P2_엔지니어링패러다임.md" }))}</p></section>` : "";
+      <li class="fact" style="--i:${i}">${R.st(r.st, true)}<p class="fact-t">${r.st === "excluded" ? `<s>${esc(r.t)}</s>` : esc(r.t)}</p></li>`).join("");
+    const timeline = p.timeline && !xr ? `<section class="rm-tl" aria-label="종합 타임라인"><h3>날짜가 있는 사건만</h3><ol>${p.timeline.map((x, i) => `<li style="--i:${i}"><time>${esc(x[0])}</time><span>${esc(x[1])}</span></li>`).join("")}</ol></section>` : "";
     const groups = {};
     (p.links || []).forEach((l) => (groups[l.kind] ||= []).push(l));
     const order = ["공식", "논문", "기사", "YouTube", "X 원본", "X 게시물", "커뮤니티 게시물"];
@@ -297,21 +279,20 @@
         ${p.lede ? `<p class="rm-take">${esc(p.lede)}</p>` : ""}
         ${p.cond ? `<p class="rm-cond">${esc(p.cond)}</p>` : ""}
         ${rows ? `<ul class="facts">${rows}</ul>` : ""}</details>` : `
-      <div class="rm-lead">
+      ${p.kind === "story" ? "" : `<div class="rm-lead">
         <h2 id="room-title">${esc(p.title)}</h2>
         ${p.lede && !ledeInHero ? `<p class="rm-take">${esc(p.lede)}</p>` : ""}
         ${p.cond ? `<p class="rm-cond">${esc(p.cond)}</p>` : ""}
-      </div>
+      </div>`}
       ${rows ? `<ul class="facts">${rows}</ul>` : ""}`}
       ${restMedia.length ? `<section class="rm-media" aria-label="자료 이미지와 영상">${restMedia.map((m) => `<figure class="mi">${screen(m, { controls: true })}${credit(m)}</figure>`).join("")}</section>` : ""}
       ${timeline}
       <footer class="rm-src">
         <p class="rm-st">${R.st(p.st, true)}<span>${esc(s.note)}</span></p>
         <div class="rm-src-cols">
-          <section aria-label="출처"><h3>출처</h3><ul>${[...new Set(p.src.map((x) => R.srcLabel(x)))].map((l) => `<li>${esc(l)}</li>`).join("")}</ul>
-            <details class="rm-srcfull"><summary>출처 상세 (조사 파일과 줄 번호)</summary><ul>${p.src.map((x) => `<li><span class="q-ref">${esc(refFull(x))}</span>${x.g ? ` <span class="gate">${esc(x.g.replace(/감사/g, "감수 판정"))}</span>` : ""}</li>`).join("")}${(p.rows || []).map((r) => `<li><span class="q-ref">${esc(refFull(r.s))}</span></li>`).join("")}</ul></details>
+          <section aria-label="표시 읽는 법"><h3>표시 읽는 법</h3>
             ${R.legend("is-room")}</section>
-          ${links ? `<section aria-label="연결 자료"><h3>연결 자료</h3>${links}</section>` : ""}
+          ${links ? `<section aria-label="출처"><h3>출처</h3>${links}</section>` : ""}
         </div>
       </footer>
       <nav class="rm-near" aria-label="이웃 조각">
@@ -322,6 +303,6 @@
 
   R.row = (p) => `
     <li class="ix-row" data-zone="${p.zone}" data-tier="${tierOf(p)}"><button type="button" data-open="${p.id}">
-      ${R.st(p.st, true)}<span class="ix-t">${esc(p.title)}</span><span class="ix-ref">${esc(R.srcLabel(p.src[0]))}</span>
+      ${R.st(p.st, true)}<span class="ix-t">${esc(p.title)}</span>
     </button></li>`;
 })();

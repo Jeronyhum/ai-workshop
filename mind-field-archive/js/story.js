@@ -9,12 +9,12 @@
   /* the transcript is read with the fact check's speech-recognition table (보완_전사본_사실검증.md (e)): LMM is LLM.
      " · " joins verbatim fragments of one line; on screen the gap is an ellipsis. */
   const said = (t) => t.replace(/LMM/g, "LLM").replace(/컨테스트/g, "컨텍스트").split(" · ").join(" … ");
-  const voice = (v, cls = "") => `<blockquote class="st-voice ${cls}"><p>${esc(said(v.t))}</p><footer>민성의 나레이션</footer></blockquote>`;
+  const voice = (v, cls = "") => `<blockquote class="st-voice ${cls}"><p>${esc(said(v.t))}</p><footer>워크숍 발표에서</footer></blockquote>`;
   const T = (x, y, t, cls = "", anchor = "middle") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${esc(t)}</text>`;
   const svg = (vb, body, label, cls = "") => `<svg class="st-svg ${cls}" viewBox="${vb}" role="img" aria-label="${R.raw(label)}">${body}</svg>`;
 
   /* ── 1. date: the day the word was coined ── */
-  const date = (v) => `<div class="st-date"><p class="st-d">${esc(v.d)}</p><p class="st-en" lang="en">${esc(v.en)}</p><p class="st-ko"><span>민성의 의역</span><b>${esc(v.ko)}</b></p></div>`;
+  const date = (v) => `<div class="st-date"><p class="st-d">${esc(v.d)}</p><p class="st-en" lang="en">${esc(v.en)}</p><p class="st-ko"><span>우리말로</span><b>${esc(v.ko)}</b></p></div>`;
 
   /* ── 2. model: the model inside its chat environment, and three dates ── */
   function model(v) {
@@ -81,7 +81,7 @@
   const define = (p) => `<div class="st-define"><p class="st-pre">${esc(p.vis.pre.t)},</p>
       <p class="st-def">${esc(said(p.voice[0].t)).replace("목적", "<b>목적</b>").replace("루프", "<b>루프</b>")}</p>
       <svg class="st-orbit" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="86"/><path d="M186 100 l-10 -12 M186 100 l10 -12"/><circle class="st-runner" cx="100" cy="14" r="7"/></svg>
-      <p class="st-post">${esc(said(p.voice[1].t))}</p><p class="st-by">민성의 정의</p></div>`;
+      <p class="st-post">${esc(said(p.voice[1].t))}</p><p class="st-by">이 워크숍의 정의</p></div>`;
 
   /* ── 7. harness (metaphor 2): the bridle on a horse's head, the reins, and the one lane ahead ── */
   function harness() {
@@ -173,7 +173,7 @@
   /* ── 12. intent: goal, done-condition, and the why at the centre ── */
   const intent = (p) => `<div class="st-intent">
       <div class="st-layers" aria-hidden="true">${p.vis.layers.map((l, i) => `<span class="st-layer" style="--i:${i}">${esc(l)}</span>`).join("")}<b>왜?</b></div>
-      <p class="st-thesis">${esc(said(p.voice[0].t))}</p><p class="st-by">민성의 테제</p></div>`;
+      <p class="st-thesis">${esc(said(p.voice[0].t))}</p><p class="st-by">이 워크숍의 결론</p></div>`;
 
   const VIS = { date: (p) => date(p.vis), model: (p) => model(p.vis), tide: (p) => tide(p.vis), deeper: (p) => deeper(p.vis), fork: (p) => fork(p.vis),
     define, harness: () => harness(), anatomy: (p) => anatomy(p.vis), climb: (p) => climb(p.vis), guardrail: () => guardrail(), rules: (p) => rules(p.vis), intent };
@@ -188,7 +188,9 @@
   R.storyPlate = (p) => `<div class="pl pl-story">${p.vis ? `<div class="pl-vis">${vis(p)}</div>` : ""}<h3 class="pl-title" id="t-${p.id}">${esc(p.title)}</h3>${first(p)}</div>`;
   R.storyNote = (p) => `<div class="nt nt-story"><p class="nt-t" id="t-${p.id}">${esc(p.title)}</p>${first(p)}</div>`;
   /* room: the picture, then every line of his on this block; the facts follow in the usual list */
-  R.storyHero = (p) => `${vis(p)}<div class="st-voices">${(p.voice || []).filter((v, i) => !(ownsVoice(p) && i === 0 && p.vis.type === "intent")).map((v) => voice(v)).join("")}</div>
+  /* the room opens on the title (and its one line or condition), then the picture, then every line of the talk */
+  R.storyHero = (p) => `<div class="rm-lead st-lead"><h2 id="room-title">${esc(p.title)}</h2>${p.lede ? `<p class="rm-take">${esc(p.lede)}</p>` : ""}${p.cond ? `<p class="rm-cond">${esc(p.cond)}</p>` : ""}</div>
+      ${vis(p)}<div class="st-voices">${(p.voice || []).filter((v, i) => !(ownsVoice(p) && i === 0 && p.vis.type === "intent")).map((v) => voice(v)).join("")}</div>
       ${p.id === "s-intent" ? `<p class="st-go"><button type="button" class="btn btn-acid" data-exit="flow">출구에서 시작하기: 의도 → 명세 → 검증</button></p>` : ""}
       ${p.id === "s-security" ? `<p class="st-go"><button type="button" class="btn" data-exit="setup">출구: 설치와 API 키 다루기</button></p>` : ""}`;
   R.said = said;

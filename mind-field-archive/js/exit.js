@@ -38,7 +38,6 @@
     agentsmd: '<path d="M11 6h18l8 8v28H11z"/><path d="M29 6v8h8"/><path d="M17 34l5-14 5 14M19 29h6"/>',
   };
   const glyph = (k, cls = "ex-glyph") => (G[k] ? `<svg class="${cls}" viewBox="0 0 48 48" aria-hidden="true" focusable="false">${G[k]}</svg>` : "");
-  const credit = (g) => (g.s ? (/^ai-workshop\//.test(g.s.f) ? "근거: 워크숍 설치기 저장소" : `근거: ${R.srcLabel(g.s)}`) : "일반 설명 (자료에 정의 없음)");
   const chip = (id, focusable = true) => { const g = term(id); return g ? (focusable ? `<button type="button" class="term chip" data-term="${id}" aria-describedby="term-tip">${glyph(id, "chip-g")}${esc(g.term)}</button>` : `<span class="chip">${glyph(id, "chip-g")}${esc(g.term)}</span>`) : ""; };
   const stepById = (id) => E.install.steps.find((s) => s.id === id) || E.flow.find((f) => f.id === id);
 
@@ -96,7 +95,7 @@
       </header>
       <section class="ex-sec" id="ex-terms" aria-labelledby="ex-terms-h">
         <h3 id="ex-terms-h">먼저 알아 둘 낱말 <small>${core.length}개. 사이트 어디서든 점선 밑줄 낱말에 마우스를 올리거나 Tab으로 가면 같은 설명이 뜹니다</small></h3>
-        <ul class="ex-terms">${core.map((g) => `<li class="ex-term" id="term-${g.id}">${glyph(g.id)}<h4>${esc(g.term)}</h4><p>${esc(g.plain)}</p>${g.voice ? `<p class="ex-voice">민성: “${esc((R.said || ((t) => t))(g.voice.t))}”</p>` : ""}<small>${esc(credit(g))}</small></li>`).join("")}</ul>
+        <ul class="ex-terms">${core.map((g) => `<li class="ex-term" id="term-${g.id}">${glyph(g.id)}<h4>${esc(g.term)}</h4><p>${esc(g.plain)}</p>${g.voice ? `<p class="ex-voice"><small>발표에서</small>“${esc((R.said || ((t) => t))(g.voice.t))}”</p>` : ""}</li>`).join("")}</ul>
       </section>
       <section class="ex-sec" id="ex-setup" aria-labelledby="ex-setup-h">
         <h3 id="ex-setup-h">원클릭 설치기 <small>OpenCode · 워크숍 저장소 <code>build/</code></small></h3>
@@ -111,7 +110,7 @@
       </section>
       <section class="ex-sec" id="ex-flow" aria-labelledby="ex-flow-h">
         <h3 id="ex-flow-h">AI와 일하는 한 바퀴 <small>설치기가 넣어 두는 AGENTS.md의 “${esc(E.flowName.t)}”</small></h3>
-        ${E.why ? `<blockquote class="ex-why"><p>“${esc((R.said || ((t) => t))(E.why.t))}”</p><footer>민성의 테제, 1부 여는 이야기의 끝 <button type="button" class="btn btn-quiet" data-piece-go="${E.why.piece}">바닥에서 보기</button></footer></blockquote>` : ""}
+        ${E.why ? `<blockquote class="ex-why"><p>“${esc((R.said || ((t) => t))(E.why.t))}”</p><footer>1부 이야기의 마지막 말 <button type="button" class="btn btn-quiet" data-piece-go="${E.why.piece}">바닥에서 보기</button></footer></blockquote>` : ""}
         <div class="ex-flow">
           <svg class="ex-wheel" viewBox="0 0 520 520" aria-hidden="true">${arcs}${pts.map(([x, y, f], i) => `<g style="--i:${i}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="44"/><text x="${x.toFixed(1)}" y="${(y + 2).toFixed(1)}" text-anchor="middle">${esc(f.k)}</text><text class="w-tool" x="${x.toFixed(1)}" y="${(y + 24).toFixed(1)}" text-anchor="middle">${esc(f.tool)}</text></g>`).join("")}<text class="w-c" x="${c}" y="${c + 8}" text-anchor="middle">한 바퀴</text></svg>
           <ol class="ex-flow-list">${loop.map((f, i) => `<li id="ex-${f.id}"><i>${i + 1}</i><div><b>${esc(f.k)} <span>${esc(f.tool)}</span></b><p>${esc(f.plain)}</p><small>AGENTS.md: “${esc(f.t)}”</small></div></li>`).join("")}</ol>
@@ -119,9 +118,9 @@
       </section>
       <section class="ex-sec ex-files" aria-labelledby="ex-files-h">
         <h3 id="ex-files-h">설치기 파일</h3>
-        <ul>${E.links.map((l) => `<li><a href="${raw(l.rel)}"><b>${esc(l.label)}</b><code>${esc(l.rel)}</code></a></li>`).join("")}</ul>
+        <ul>${E.links.map((l) => `<li><a href="${raw(l.rel)}"><b>${esc(l.label)}</b><code>${esc(l.file)}</code></a></li>`).join("")}</ul>
         <p class="ex-gh"><a href="${raw(E.github)}" target="_blank" rel="noopener noreferrer">GitHub에서 보기: Jeronyhum/ai-workshop · build/</a></p>
-        <p class="ex-note">상대 링크는 공개 저장소 안에서(mind-field-archive/ 옆의 build/) 열립니다. 이 사이트에는 키나 비밀값을 하나도 담지 않았습니다.</p>
+        <p class="ex-note">위 파일 링크는 저장소를 내려받은 컴퓨터에서 열립니다. 온라인에서는 GitHub 링크로 보세요. 이 사이트에는 키나 비밀값을 하나도 담지 않았습니다.</p>
       </section>`;
     built = true;
   }

@@ -322,7 +322,7 @@
       <path class="a" d="${rr(244, 136, 112, 28, 14)}"/>${[[258, 278], [286, 306], [314, 328], [336, 344]].map(([a, b]) => `<path class="a" d="M${a} 150 H${b}"/>`).join("")}</svg>`;
 
   /* ── rooms: the figure stays, the steps scroll past it ── */
-  const ref = (s) => `<p class="q-src">${esc(/^ai-workshop\//.test(s.f) ? "워크숍 설치기 저장소" : R.srcLabel(s))}</p>`;
+  const ref = () => "";  /* v6 (t1195u): no research-file credits in public view; each room lists its public sources */
   const quote = (st) => {
     const qs = st.q ? [].concat(st.q) : [st.line];
     return `<details class="xr-q"><summary>원문</summary><blockquote>${qs.map((q) => `<p>${esc(q)}</p>`).join("")}</blockquote>${ref(st.s)}</details>`;
@@ -431,7 +431,7 @@
     const ex = A.explain[p.id], out = [];
     const sec = (cls, h, body, foot) => `<section class="xr-x ${cls}"><h3>${h}</h3>${body}${foot ? `<div class="xr-foot">${foot}</div>` : ""}</section>`;
     if (p.id === "paradigm") {
-      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("dots2-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p><p class="q-src">${esc(R.srcLabel(ex.gaps.s))}</p>`));
+      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("dots2-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p>`));
       out.push(sec("xr-tl", "날짜가 있는 사건만", timeline(ex), `<p class="legend">줄은 표의 ‘단계’ 칸에 있는 낱말로 나눴습니다. 날짜가 월까지만 있으면 그달 15일에, 기간이면 첫날에 표시했습니다. 아래는 2025년 5월~2026년 9월을 확대한 것입니다.</p><details class="xr-q"><summary>사건 목록</summary><ol class="xr-tl-list">${ex.timeline.rows.map((r) => `<li><time>${esc(r[0])}</time> ${esc(r[1])} <span>${esc(r[2])}</span></li>`).join("")}</ol>${ref(ex.timeline.s)}</details>`));
     }
     if (p.id === "loop") out.push(sec("xr-kinds xm-wrap", esc(ex.kinds.label), loopKinds(ex), `<details class="xr-q"><summary>원문</summary><blockquote>${ex.kinds.rows.map((r) => `<p>${esc(r.t)}</p>`).join("")}</blockquote>${ref(ex.kinds.s)}</details>`));

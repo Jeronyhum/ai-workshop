@@ -80,9 +80,8 @@
   function show(el) {
     clearTimeout(hideT);
     const g = Gl.find((x) => x.id === el.dataset.term); if (!g) return;
-    const credit = g.s ? (/^ai-workshop\//.test(g.s.f) ? "근거: 워크숍 설치기 저장소" : `근거: ${R.srcLabel(g.s)}`) : "일반 설명";
     const said = R.said || ((t) => t);
-    tip.innerHTML = `<b class="tip-t">${esc(g.term)}</b><span class="tip-d">${esc(g.plain)}</span>${g.voice ? `<span class="tip-v">민성: “${esc(said(g.voice.t))}”</span>` : ""}<small class="tip-s">${esc(credit)}</small>`;
+    tip.innerHTML = `<b class="tip-t">${esc(g.term)}</b><span class="tip-d">${esc(g.plain)}</span>${g.voice ? `<span class="tip-v"><small>발표에서</small>“${esc(said(g.voice.t))}”</span>` : ""}`;
     if (!tip.matches(":popover-open")) tip.showPopover();
     curEl && curEl.removeAttribute("data-open");
     curEl = el; el.setAttribute("data-open", "");

@@ -71,7 +71,7 @@
     /* one caption per zone, listing the files actually shown there (a slot with no file and no fallback shows nothing) */
     const assetCaps = Object.keys(z).map((k) => {
       const shown = A.assets.filter((a) => a.zone === k && A.asset(a.slot));
-      return shown.length ? `<span class="asset-cap" style="left:${z[k].x + 28}px;top:${H - 80}px">${shown[0].cap} <span>${shown.map((a) => A.asset(a.slot)).join(" · ")}</span></span>` : "";
+      return shown.length ? `<span class="asset-cap" style="left:${z[k].x + 28}px;top:${H - 80}px">${shown[0].cap}</span>` : "";  /* v6 (t1195u): no file names in public view */
     }).join("");
     const clusters = A.clusters.map((c) => `<span class="cluster" style="left:${c.x}px;top:${c.y}px" aria-hidden="true">${c.name}</span>`).join("")
       /* v6 (전사본): the three acts of 민성's story head their columns, numbered in his order */
@@ -89,10 +89,9 @@
     const ringLabels = A.rings.bands.map((b, i) => {
       return `<span class="fr-label" style="left:${A.rings.cx + 22}px;top:${A.rings.cy - b.r + 14}px" aria-hidden="true"><b>${b.name}</b> <i>${b.axis}</i></span>`;
     }).join("");
-    const plaque = `<figure class="plaque" style="left:${A.plaque.x}px;top:${A.plaque.y}px">
-      <blockquote><p>${R.esc(A.plaque.text)}</p></blockquote>
-      <figcaption>${R.esc(A.plaque.src.by)}</figcaption>
-    </figure>`;
+    /* v6 (민성 t1195u): the planner's original brief no longer hangs on the bridge; the site is public and the brief was
+       an instruction to the people and tools that built it. The spark of the first screen keeps its spot. */
+    const plaque = "";
     const threadSvg = `<svg class="threads" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"></svg>`;
     const pcs = pieces.map((p) => `
       <div class="pc${mat(p) === "paper" ? " on-paper" : ""}" role="button" id="pc-${p.id}" data-id="${p.id}" data-kind="${p.kind}" data-zone="${p.zone}" data-mat="${mat(p)}" data-tier="${p.tier}"${p.kind === "story" ? ` data-act="${(A.acts || []).findIndex((a) => a.name === p.cluster) + 1}"` : ""} tabindex="-1"
@@ -267,7 +266,7 @@
     if (announce) live.textContent = `${A.zones[p.zone].name} ${p.title}. ${A.status[p.st].word}. 이웃 ${near.get(id).length}개.`;
   }
   function paintHud(p) {
-    $("#hud-now").innerHTML = `<p class="hud-where">${A.zones[p.zone].name}</p><p class="hud-t">${R.esc(p.title)}</p><p class="hud-src">${R.st(p.st, true)} <span>${R.esc(R.srcLabel(p.src[0]))}</span></p>`;
+    $("#hud-now").innerHTML = `<p class="hud-where">${A.zones[p.zone].name}</p><p class="hud-t">${R.esc(p.title)}</p><p class="hud-src">${R.st(p.st, true)}</p>`;
     const next = nextNeighbour(p.id);
     $("#hud-now").insertAdjacentHTML("beforeend", next ? `<p class="hud-tab"><kbd>Tab</kbd> ${R.esc(byId.get(next).title)}</p>` : "");
     $("#hud-next").innerHTML = nearOf(p.id).map((n) => `<li${n.id === next ? ' class="is-next"' : ""}><button type="button" data-go="${n.id}" data-zone="${n.p.zone}"><span>${R.esc(n.p.title)}</span><small>${R.esc(n.why)}</small></button></li>`).join("");
