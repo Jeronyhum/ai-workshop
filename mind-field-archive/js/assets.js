@@ -1,36 +1,36 @@
-/* Design-asset slots (archive/asset-prompts.md), mapped to the v2 layout.
-   Every slot names the file Dots or Muse will deliver (v4 adds the muse2- and dots2- slots) and an existing generated image to use until then.
+/* Design-asset slots, mapped to the v2 layout.
+   Every slot names its generated image and an existing generated image to use until then.
    READY lists the slots whose file is in assets/. tools/assets.py rewrites it by scanning assets/, so dropping in
-   a muse-*.jpg or dots-*.jpg and running `python3 tools/assets.py` is all it takes. A slot that is ready but whose
+   an art-*.jpg and running `python3 tools/assets.py` is all it takes. A slot that is ready but whose
    file then fails to load still falls back (onerror). Generated images are design assets, never evidence. */
 (function () {
   const AR = (window.AR = window.AR || {});
   AR.assetSlots = {
-    "dots-field-scatter":  { file: "assets/dots-field-scatter.jpg",  fallback: "assets/gen-field-fragments.jpg", where: "1부 바닥 질감 (.zone-p1 .zone-tex)" },
-    "dots-room-field":     { file: "assets/dots-room-field.jpg",     fallback: "assets/gen-field-fragments.jpg", where: "1부 방 배경 (.room[data-zone=p1])" },
-    "dots-paper-stock":    { file: "assets/dots-paper-stock.jpg",    fallback: null,                             where: "종이 재료: 회계 이면화(.dip), 입구 명판(.plaque). 대체 없음 = 지금의 단색 bone" },
-    "dots-threads-list":   { file: "assets/dots-threads-list.jpg",   fallback: "assets/gen-drawing-threads.jpg", where: "목록 보기 배경 (dialog.index)" },
-    "muse-drawing-floor":  { file: "assets/muse-drawing-floor.jpg",  fallback: "assets/gen-drawing-threads.jpg", where: "2부 바닥 질감 (.zone-p2 .zone-tex)" },
-    "muse-room-drawing":   { file: "assets/muse-room-drawing.jpg",   fallback: "assets/gen-drawing-threads.jpg", where: "2부 방 배경 (.room[data-zone=p2])" },
-    "muse-corridor-ember": { file: "assets/muse-corridor-ember.jpg", fallback: "assets/gen-paper-ember.jpg",     where: "다리 복도 벽 (.zone-br .zone-tex)" },
-    "muse-room-bridge":    { file: "assets/muse-room-bridge.jpg",    fallback: "assets/gen-paper-ember.jpg",     where: "다리 방 배경 (.room[data-zone=br])" },
-    /* v4: second batch (archive/asset-prompts-v2.md), mostly Part 2. Each sits behind an explainer drawn in SVG and only gives it
+    "art-field-scatter":  { file: "assets/art-field-scatter.jpg",  fallback: "assets/gen-field-fragments.jpg", where: "1부 바닥 질감 (.zone-p1 .zone-tex)" },
+    "art-room-field":     { file: "assets/art-room-field.jpg",     fallback: "assets/gen-field-fragments.jpg", where: "1부 방 배경 (.room[data-zone=p1])" },
+    "art-paper-stock":    { file: "assets/art-paper-stock.jpg",    fallback: null,                             where: "종이 재료: 회계 이면화(.dip), 입구 명판(.plaque). 대체 없음 = 지금의 단색 bone" },
+    "art-threads-list":   { file: "assets/art-threads-list.jpg",   fallback: "assets/gen-drawing-threads.jpg", where: "목록 보기 배경 (dialog.index)" },
+    "art-drawing-floor":  { file: "assets/art-drawing-floor.jpg",  fallback: "assets/gen-drawing-threads.jpg", where: "2부 바닥 질감 (.zone-p2 .zone-tex)" },
+    "art-room-drawing":   { file: "assets/art-room-drawing.jpg",   fallback: "assets/gen-drawing-threads.jpg", where: "2부 방 배경 (.room[data-zone=p2])" },
+    "art-corridor-ember": { file: "assets/art-corridor-ember.jpg", fallback: "assets/gen-paper-ember.jpg",     where: "다리 복도 벽 (.zone-br .zone-tex)" },
+    "art-room-bridge":    { file: "assets/art-room-bridge.jpg",    fallback: "assets/gen-paper-ember.jpg",     where: "다리 방 배경 (.room[data-zone=br])" },
+    /* v4: second batch, mostly Part 2. Each sits behind an explainer drawn in SVG and only gives it
        light and depth. gen2-* images stand in until the file arrives; a slot without a fallback shows nothing. */
-    "muse2-field-manifold":        { file: "assets/muse2-field-manifold.jpg",        fallback: null,                              where: "2부 바닥 바탕층 (.zone-p2 .zone-tex.is-base)" },
-    "muse2-horizon-rings":         { file: "assets/muse2-horizon-rings.jpg",         fallback: null,                              where: "2부 제목 띠 (.zone-p2 .zone-band)" },
-    "muse2-core-seed":             { file: "assets/muse2-core-seed.jpg",             fallback: "assets/gen2-nested-shells.jpg",   where: "다섯 단계 포함 도식 뒤 (paradigm)" },
-    "muse2-context-aperture":      { file: "assets/muse2-context-aperture.jpg",      fallback: null,                              where: "컨텍스트 창 도식 뒤 (context)" },
-    "muse2-loop-orbit":            { file: "assets/muse2-loop-orbit.jpg",            fallback: "assets/gen2-agent-loop.jpg",      where: "에이전트 루프 도식 뒤 (loop)" },
-    "muse2-swarm-streams":         { file: "assets/muse2-swarm-streams.jpg",         fallback: "assets/gen-drawing-threads.jpg",  where: "그래프 방 배경, 스웜 영상 둘레 (graph)" },
-    "dots2-harness-frame":         { file: "assets/dots2-harness-frame.jpg",         fallback: "assets/gen2-harness-scaffold.jpg", where: "하네스 조립 도식 뒤 (harness)" },
-    "dots2-gap-arches":            { file: "assets/dots2-gap-arches.jpg",            fallback: null,                              where: "명명 간격 점 그림 뒤 (paradigm 방)" },
-    "dots2-verify-prism":          { file: "assets/dots2-verify-prism.jpg",          fallback: null,                              where: "검증 조각 (selfverify, review)" },
-    "dots2-approval-threshold":    { file: "assets/dots2-approval-threshold.jpg",    fallback: null,                              where: "허락 조각 (approval)" },
-    "dots2-graph-constellation":   { file: "assets/dots2-graph-constellation.jpg",   fallback: null,                              where: "그래프 도식 뒤, 노드와 엣지를 맞춤 (graph)" },
-    "dots2-seam-ember-to-lattice": { file: "assets/dots2-seam-ember-to-lattice.jpg", fallback: null,                              where: "다리와 2부의 경계 (.seam), 전환선을 x 5600에 맞춤" },
+    "art-field-manifold":        { file: "assets/art-field-manifold.jpg",        fallback: null,                              where: "2부 바닥 바탕층 (.zone-p2 .zone-tex.is-base)" },
+    "art-horizon-rings":         { file: "assets/art-horizon-rings.jpg",         fallback: null,                              where: "2부 제목 띠 (.zone-p2 .zone-band)" },
+    "art-core-seed":             { file: "assets/art-core-seed.jpg",             fallback: "assets/gen2-nested-shells.jpg",   where: "다섯 단계 포함 도식 뒤 (paradigm)" },
+    "art-context-aperture":      { file: "assets/art-context-aperture.jpg",      fallback: null,                              where: "컨텍스트 창 도식 뒤 (context)" },
+    "art-loop-orbit":            { file: "assets/art-loop-orbit.jpg",            fallback: "assets/gen2-agent-loop.jpg",      where: "에이전트 루프 도식 뒤 (loop)" },
+    "art-swarm-streams":         { file: "assets/art-swarm-streams.jpg",         fallback: "assets/gen-drawing-threads.jpg",  where: "그래프 방 배경, 스웜 영상 둘레 (graph)" },
+    "art-harness-frame":         { file: "assets/art-harness-frame.jpg",         fallback: "assets/gen2-harness-scaffold.jpg", where: "하네스 조립 도식 뒤 (harness)" },
+    "art-gap-arches":            { file: "assets/art-gap-arches.jpg",            fallback: null,                              where: "명명 간격 점 그림 뒤 (paradigm 방)" },
+    "art-verify-prism":          { file: "assets/art-verify-prism.jpg",          fallback: null,                              where: "검증 조각 (selfverify, review)" },
+    "art-approval-threshold":    { file: "assets/art-approval-threshold.jpg",    fallback: null,                              where: "허락 조각 (approval)" },
+    "art-graph-constellation":   { file: "assets/art-graph-constellation.jpg",   fallback: null,                              where: "그래프 도식 뒤, 노드와 엣지를 맞춤 (graph)" },
+    "art-seam-ember-to-lattice": { file: "assets/art-seam-ember-to-lattice.jpg", fallback: null,                              where: "다리와 2부의 경계 (.seam), 전환선을 x 5600에 맞춤" },
   };
   /* READY:start (generated by tools/assets.py) */
-  AR.assetsReady = ["muse2-field-manifold", "muse2-horizon-rings", "muse2-core-seed", "muse2-context-aperture", "muse2-loop-orbit", "muse2-swarm-streams", "dots2-harness-frame", "dots2-gap-arches", "dots2-verify-prism", "dots2-approval-threshold", "dots2-graph-constellation", "dots2-seam-ember-to-lattice"];
+  AR.assetsReady = ["art-field-manifold", "art-horizon-rings", "art-core-seed", "art-context-aperture", "art-loop-orbit", "art-swarm-streams", "art-harness-frame", "art-gap-arches", "art-verify-prism", "art-approval-threshold", "art-graph-constellation", "art-seam-ember-to-lattice"];
   /* READY:end */
   AR.asset = (slot) => {
     const s = AR.assetSlots[slot];
@@ -58,13 +58,13 @@
     const set = (name, slot) => { const src = AR.asset(slot); root.style.setProperty(name, src ? `url("${new URL(src, document.baseURI).href}")` : "none"); };
     /* v4 room backgrounds: set only when there is a file, so the Part 2 room background stays as the fallback */
     const opt = (name, slot) => { const src = AR.asset(slot); if (src) root.style.setProperty(name, `url("${new URL(src, document.baseURI).href}")`); };
-    opt("--asset-room-graph", "muse2-swarm-streams");  /* asset-prompts-v2 M-5: the graph room; D-5 sits under the graph explainer */
-    opt("--asset-room-verify", "dots2-verify-prism");
-    opt("--asset-room-approval", "dots2-approval-threshold");
-    set("--asset-room-p1", "dots-room-field");
-    set("--asset-room-p2", "muse-room-drawing");
-    set("--asset-room-br", "muse-room-bridge");
-    set("--asset-list", "dots-threads-list");
-    set("--asset-paper", "dots-paper-stock");
+    opt("--asset-room-graph", "art-swarm-streams");  /* the graph room; D-5 sits under the graph explainer */
+    opt("--asset-room-verify", "art-verify-prism");
+    opt("--asset-room-approval", "art-approval-threshold");
+    set("--asset-room-p1", "art-room-field");
+    set("--asset-room-p2", "art-room-drawing");
+    set("--asset-room-br", "art-room-bridge");
+    set("--asset-list", "art-threads-list");
+    set("--asset-paper", "art-paper-stock");
   };
 })();

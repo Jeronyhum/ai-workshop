@@ -6,7 +6,7 @@
      data-x="k"   takes the accent from step k   data-dim="k" recedes from step k
    CSS does the motion: strokes draw themselves (ShowCreation), shapes fade and travel. Reduced motion
    removes every transition, so a step becomes a cut and the floor shows each figure's last frame.
-   Dots that travel along a path (state, orbit) run on requestAnimationFrame, only while their figure is
+   Points that travel along a path (state, orbit) run on requestAnimationFrame, only while their figure is
    playing: on screen, large enough, motion allowed, no dialog over it. */
 (function () {
   const A = window.AR, R = window.ARR;
@@ -70,13 +70,13 @@
       <image class="xs-img ${cls}" href="${A.lodImg(A.assetSlots[slot].file).src}"${A.lodImg(A.assetSlots[slot].file).attrs} x="${r1(T[0] - ax * s)}" y="${r1(T[1] - ay * s)}" width="${r1(W * s)}" height="${r1(H * s)}" preserveAspectRatio="none" mask="url(#${id})" data-slot="${slot}" onerror="this.remove()"/>`;
   }
 
-  /* the graph explainer follows the constellation Dots drew: its eight nodes, its ten edges, its one acid edge.
+  /* the graph explainer follows the constellation in the background image: its eight nodes, its ten edges, its one acid edge.
      These defaults are that image's measurement on 2026-11-04; a re-delivery re-measures and the drawing follows. */
   const GDEF = { pts: { n1: [.392, .207], n2: [.845, .199], n3: [.639, .313], n4: [.309, .473], n5: [.539, .549], n6: [.739, .549], n7: [.870, .738], n8: [.506, .791] },
     edges: { "n1-n2": [.618, .042], "n1-n4": [.317, .29], "n2-n7": [.971, .438], "n4-n5": [.393, .585], "n4-n8": [.34, .73], "n5-n3": [.537, .407], "n3-n6": [.716, .348], "n6-n5": [.649, .647], "n6-n7": [.831, .585], "n8-n7": [.675, .864] },
     acid: "n6-n5", r: .016 };
   function graphGeo() {
-    const g = ready("dots2-graph-constellation") ? AN["dots2-graph-constellation"] : null, vb = (f) => [r1(f[0] * 1600), r1(f[1] * 900)];
+    const g = ready("art-graph-constellation") ? AN["art-graph-constellation"] : null, vb = (f) => [r1(f[0] * 1600), r1(f[1] * 900)];
     const P = {}, C = {};
     Object.keys(GDEF.pts).forEach((k) => (P[k] = vb(g && g.pts[k] ? g.pts[k] : GDEF.pts[k])));
     Object.keys(GDEF.edges).forEach((k) => (C[k] = vb(g && g.edges && g.edges[k] ? g.edges[k].c : GDEF.edges[k])));
@@ -84,11 +84,11 @@
     return { P, C, acid, r: Math.max(24, (g ? g.ring_r : GDEF.r) * 1600 + 3), live: !!g };
   }
   const REG = {
-    nest: () => ready("muse2-core-seed") ? reg("muse2-core-seed", "c", [500, 420], ["c", "r4"], [[500, 420], [850, 420]], "is-nest") : "",
-    loop: () => ready("muse2-loop-orbit") ? reg("muse2-loop-orbit", "c", [550, 500], ["c", "e"], [[550, 500], [830, 500]], "is-loop") : "",
-    context: () => ready("muse2-context-aperture") ? reg("muse2-context-aperture", "c", [1272, 496], ["c", "e"], [[1272, 496], [1498, 496]], "is-context") : "",
-    harness: () => ready("dots2-harness-frame") ? reg("dots2-harness-frame", "c", [800, 540], ["c", "e"], [[800, 540], [898, 540]], "is-harness") : "",  /* the sphere on the Model, its rim on the outer halo */
-    graph: () => { const G = graphGeo(); return G.live ? reg("dots2-graph-constellation", "n1", G.P.n1, ["n1", "n7"], [G.P.n1, G.P.n7], "is-graph") : ""; },
+    nest: () => ready("art-core-seed") ? reg("art-core-seed", "c", [500, 420], ["c", "r4"], [[500, 420], [850, 420]], "is-nest") : "",
+    loop: () => ready("art-loop-orbit") ? reg("art-loop-orbit", "c", [550, 500], ["c", "e"], [[550, 500], [830, 500]], "is-loop") : "",
+    context: () => ready("art-context-aperture") ? reg("art-context-aperture", "c", [1272, 496], ["c", "e"], [[1272, 496], [1498, 496]], "is-context") : "",
+    harness: () => ready("art-harness-frame") ? reg("art-harness-frame", "c", [800, 540], ["c", "e"], [[800, 540], [898, 540]], "is-harness") : "",  /* the sphere on the Model, its rim on the outer halo */
+    graph: () => { const G = graphGeo(); return G.live ? reg("art-graph-constellation", "n1", G.P.n1, ["n1", "n7"], [G.P.n1, G.P.n7], "is-graph") : ""; },
   };
   const pick = (ex, k) => ex.steps.find((s) => s.k === k);
 
@@ -311,7 +311,7 @@
     const t = `<h3 class="w-title" id="t-${p.id}">${esc(p.title)}</h3>`;
     const fig = figure(p, { label: false });
     if (p.id === "paradigm") return `<div class="w w-x w-x-nest">${t}${fig}${lede(p)}</div>`;  /* v5: the naming-gap towers live in the room (명명 간격); the floor keeps the picture */
-    if (p.id === "graph") return `<div class="w w-x w-x-graph">${fig}<div class="w-x-row"><div class="xs-scr">${A.asset("muse2-swarm-streams") ? A.assetImg("muse2-swarm-streams", "xs-scr-bg") : ""}${R.screen(p.media[0], { ambient: true })}</div><div class="w-text">${t}${lede(p)}</div></div></div>`;
+    if (p.id === "graph") return `<div class="w w-x w-x-graph">${fig}<div class="w-x-row"><div class="xs-scr">${A.asset("art-swarm-streams") ? A.assetImg("art-swarm-streams", "xs-scr-bg") : ""}${R.screen(p.media[0], { ambient: true })}</div><div class="w-text">${t}${lede(p)}</div></div></div>`;
     return `<div class="w w-x w-x-${A.explain[p.id].scene}">${fig}<div class="w-text">${t}${lede(p)}</div></div>`;
   };
   R.xThumb = (p) => `<span class="th-x">${figure(p, { cap: false, label: false })}</span>`;
@@ -322,7 +322,7 @@
       <path class="a" d="${rr(244, 136, 112, 28, 14)}"/>${[[258, 278], [286, 306], [314, 328], [336, 344]].map(([a, b]) => `<path class="a" d="M${a} 150 H${b}"/>`).join("")}</svg>`;
 
   /* ── rooms: the figure stays, the steps scroll past it ── */
-  const ref = () => "";  /* v6 (t1195u): no research-file credits in public view; each room lists its public sources */
+  const ref = () => "";  /* v6: no research-file credits in public view; each room lists its public sources */
   const quote = (st) => {
     const qs = st.q ? [].concat(st.q) : [st.line];
     return `<details class="xr-q"><summary>원문</summary><blockquote>${qs.map((q) => `<p>${esc(q)}</p>`).join("")}</blockquote>${ref(st.s)}</details>`;
@@ -431,7 +431,7 @@
     const ex = A.explain[p.id], out = [];
     const sec = (cls, h, body, foot) => `<section class="xr-x ${cls}"><h3>${h}</h3>${body}${foot ? `<div class="xr-foot">${foot}</div>` : ""}</section>`;
     if (p.id === "paradigm") {
-      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("dots2-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p>`));
+      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("art-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p>`));
       out.push(sec("xr-tl", "날짜가 있는 사건만", timeline(ex), `<p class="legend">줄은 표의 ‘단계’ 칸에 있는 낱말로 나눴습니다. 날짜가 월까지만 있으면 그달 15일에, 기간이면 첫날에 표시했습니다. 아래는 2025년 5월~2026년 9월을 확대한 것입니다.</p><details class="xr-q"><summary>사건 목록</summary><ol class="xr-tl-list">${ex.timeline.rows.map((r) => `<li><time>${esc(r[0])}</time> ${esc(r[1])} <span>${esc(r[2])}</span></li>`).join("")}</ol>${ref(ex.timeline.s)}</details>`));
     }
     if (p.id === "loop") out.push(sec("xr-kinds xm-wrap", esc(ex.kinds.label), loopKinds(ex), `<details class="xr-q"><summary>원문</summary><blockquote>${ex.kinds.rows.map((r) => `<p>${esc(r.t)}</p>`).join("")}</blockquote>${ref(ex.kinds.s)}</details>`));

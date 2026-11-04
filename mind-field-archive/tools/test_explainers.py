@@ -11,7 +11,7 @@ with serve() as url, browser() as b:
         want = {k: v["floor"] for k, v in ev("AR.explain").items()}
         if mode == "reduce": R.ok(f"{tag} every floor figure rests on its last frame", steps == want, str(steps))
         R.ok(f"{tag} five explainers on the floor", sorted(steps) == sorted(X))
-        R.ok(f"{tag} delivered images registered inside the SVGs", ev("[...document.querySelectorAll('.pc image.xs-img')].map(i=>i.dataset.slot).sort().join()") == "dots2-graph-constellation,dots2-harness-frame,muse2-context-aperture,muse2-core-seed,muse2-loop-orbit")
+        R.ok(f"{tag} delivered images registered inside the SVGs", ev("[...document.querySelectorAll('.pc image.xs-img')].map(i=>i.dataset.slot).sort().join()") == "art-context-aperture,art-core-seed,art-graph-constellation,art-harness-frame,art-loop-orbit")
         pg.keyboard.press("Digit2"); pg.wait_for_timeout(600)
         s0 = ev("+document.querySelector('#pc-paradigm figure.xs').dataset.step")
         if mode == "no-preference":

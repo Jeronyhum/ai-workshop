@@ -7,7 +7,7 @@
 (function () {
   const AR = (window.AR = window.AR || {});
   const RM = "ai-workshop/README.md", IN = "ai-workshop/build/payload/install.sh", AG = "ai-workshop/build/payload/AGENTS.md";
-  const BL = "archive/materials/transcript/보완_전사본_근본내용_블록.md";  /* v6 (전사본): 민성's narration */
+  const BL = "talk/blocks.md";  /* the opening talk */
   AR.exit = {
     question: "오늘 뭘 만들고 싶은가?",
     lead: "다 둘러봤다면 이제 하나를 고를 차례입니다. 고른 길마다 알아야 할 낱말과 설치 순서를 이어 두었습니다.",
@@ -72,7 +72,7 @@
       { id: "f6", k: "검증", tool: "실행 결과", t: "실행 결과로 확인한다", plain: "'됐어요'라는 말 대신, 실제로 돌려 본 결과로 확인해요.", s: { f: AG, l: 13 } },
     ],
     flowName: { t: "전체 흐름 (한 바퀴)", s: { f: AG, l: 6 } },
-    /* why the loop starts at 의도: the thesis 민성 ends his story on (C-20), and where it stands on the floor */
+    /* why the loop starts at 의도: the thesis the talk ends on, and where it stands on the floor */
     why: { t: "그래서 이 의도를 챙겨주는 것이 코딩, 바이브 코딩 안에서 굉장히 중요할 수 있다.", s: { f: BL, l: 346 }, piece: "s-intent" },
     links: [
       { label: "설치 파일", file: "ssu-opencode-setup.cmd", rel: "../build/ssu-opencode-setup.cmd" },

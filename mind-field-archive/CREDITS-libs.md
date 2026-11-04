@@ -22,7 +22,7 @@
 
 ## 글꼴 (모두 SIL Open Font License 1.1)
 
-`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. v6 글꼴 정리(민성 t1193u)로 세리프와 명조(Noto Serif KR, Instrument Serif)와 쓰이지 않던 Gothic A1을 지웠습니다. 합계 4가족 6파일, 388KB입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
+`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. v6 글꼴 정리로 세리프와 명조(Noto Serif KR, Instrument Serif)와 쓰이지 않던 Gothic A1을 지웠습니다. 합계 4가족 6파일, 388KB입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
 
 | 글꼴 | 저작권 | 파일 | 크기 |
 |---|---|---|---|

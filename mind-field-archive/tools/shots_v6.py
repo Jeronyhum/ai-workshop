@@ -10,7 +10,7 @@ def shot(pg, name):
 def entrance(pg): pass                                              # the first screen: whole floor, entry card with the exit hint
 def floor(pg): pg.keyboard.press("Digit1"); settle(pg); pg.keyboard.press("Digit0")
 def part1(pg): pg.keyboard.press("Digit1"); settle(pg); pg.evaluate("ARchive.fit({x: AR.zones.p1.open, y: 0, w: AR.zones.p1.w - AR.zones.p1.open, h: 2250}, false, 1, 0.02)")  # the evidence after the story
-def intro(pg): pg.keyboard.press("Digit1")                         # v6 (전사본): Part 1 opens on 민성's story
+def intro(pg): pg.keyboard.press("Digit1")                         # v6: Part 1 opens on the talk
 def metaphor(pid): return lambda pg: pg.evaluate(f"ARchive.setCurrent('{pid}', {{glide: false}})")
 def part2_step(pg):
     pg.evaluate("ARchive.setCurrent('harness',{glide:false})"); settle(pg)

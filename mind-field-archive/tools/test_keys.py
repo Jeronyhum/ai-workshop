@@ -10,7 +10,7 @@ with serve() as url, browser() as b:
     while n < 24:
         pg.keyboard.press("Tab"); n += 1
         if "pc" in (act()["cls"] or "").split(): break
-    start = pg.evaluate("AR.zones.p1.anchor")  # v6 (전사본): the floor starts on the first piece of 민성's story
+    start = pg.evaluate("AR.zones.p1.anchor")  # v6: the floor starts on the first piece of the talk
     R.ok("Tab from page start reaches the floor at the story's first piece", act()["pid"] == start == "s-vibe", f"{n} presses, on {act()['pid']}")
     near = pg.evaluate(f"ARchive.near('{start}').map(n=>n.id)")
     pg.keyboard.press("Tab"); pg.wait_for_timeout(400); first = act()["pid"]

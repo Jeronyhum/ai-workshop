@@ -163,11 +163,11 @@ with serve() as url, browser() as b:
     R.ok(f"first load under 3 MB (was 6.25 MB): {total / 1e6:.2f} MB in {len(sizes)} requests", total < 3e6)
     R.ok("no unsubset TTF fonts on load", not ttf, str(ttf))
     full = [u for u, _ in sizes if "/lod/" not in u and ("/assets/" in u or "/media/" in u) and u.endswith(".jpg") and "/usecases/" not in u]
-    R.ok("the overview loads small copies, not full images (muse2-context-aperture full file not loaded)", not any(u.endswith("/assets/muse2-context-aperture.jpg") for u in full) and len(full) <= 3, str(full[:5]))
+    R.ok("the overview loads small copies, not full images (art-context-aperture full file not loaded)", not any(u.endswith("/assets/art-context-aperture.jpg") for u in full) and len(full) <= 3, str(full[:5]))
     R.ok("no console errors or warnings, no failed requests (session 2)", not pg.errs, "; ".join(pg.errs[:4]))
     pg.context.close()
 
-    # ── Dots browser review (627a0744): calmer entrance, quieter floor, gallery groups of one; perf of rooms ──
+    # ── browser review: calmer entrance, quieter floor, gallery groups of one; perf of rooms ──
     pg = page(b, url); ev = pg.evaluate
     st = ev("""(() => { const f = document.getElementById('floor'), h = document.querySelector('.pc[data-hero]'), o = document.querySelector('.pc:not([data-hero])');
       return { first: f.classList.contains('is-first'), hero: h && h.dataset.id, ho: +getComputedStyle(h).opacity, oo: +getComputedStyle(o).opacity,
@@ -201,13 +201,13 @@ with serve() as url, browser() as b:
     R.ok("no console errors or warnings, no failed requests (session 3)", not pg.errs, "; ".join(pg.errs[:4]))
     pg.context.close()
 
-# ── transcript addendum (민성 t1191u): his story opens Part 1, in block order, under the fact gate ──
+# ── transcript addendum: his story opens Part 1, in block order, under the fact gate ──
 BANNED = [r"Mythos|미토스|GLM[\s-]*5\.3", r"API\s*환산|1,?100\s*달러|등가\s*추산", r"GPT[\s-]?5[^.\n]{0,60}(IMO|금메달)|(IMO|금메달)[^.\n]{0,60}GPT[\s-]?5",
           r"IBK|7개\s*은행", r"(회계|CPA)[^\n]{0,40}\b33\s*%", r"(HLE|Humanity's Last Exam)[^\n]{0,80}\b(60|70)\s*(%|~)"]
 with serve() as url, browser() as b:
     pg = page(b, url); ev = pg.evaluate
     order = ev("ARchive.pieces.filter(p => p.kind === 'story').map(p => +(p.src[0].s.match(/C-(\\d+)/) || [0, 0])[1])")
-    R.ok("story: 15 pieces open Part 1 in 민성's block order (역사 → 에이전트의 등장 → 활용)", len(order) == 15 and order == sorted(order), str(order))
+    R.ok("story: 15 pieces open Part 1 in the talk's order (역사 → 에이전트의 등장 → 활용)", len(order) == 15 and order == sorted(order), str(order))
     acts = ev("[...document.querySelectorAll('.act b')].map(e => e.textContent)")
     R.ok("story: the three acts head the band in his order", acts == ["역사", "에이전트의 등장", "활용"], str(acts))
     xs = ev("ARchive.pieces.filter(p => p.kind === 'story').map(p => p.x)") ; ox = ev("Math.min(...ARchive.pieces.filter(p => p.kind !== 'story' && p.zone === 'p1').map(p => p.x - p.w / 2))")
@@ -221,9 +221,12 @@ with serve() as url, browser() as b:
     pg.keyboard.press("Escape"); settle(pg)
     # verbatim: what the floor shows of his definition, harness and thesis is the source line (speech-recognition LMM read as LLM)
     import pathlib as _p
-    src = (ARC / "materials/transcript/보완_전사본_근본내용_블록.md").read_text(encoding="utf-8").replace("LMM", "LLM")
-    shown = ev("[document.querySelector('#pc-s-define .st-def').textContent, document.querySelector('#pc-s-harness .st-voice p').textContent, document.querySelector('#pc-s-intent .st-thesis').textContent]")
-    R.ok("verbatim: C-09 definition, C-10 harness and C-20 thesis on the floor are his words exactly", all(t.strip("“”") in src for t in shown), str([t[:30] for t in shown]))
+    talk = ARC.parent / "refs/drive/talk/blocks.md"
+    if talk.exists():
+        src = talk.read_text(encoding="utf-8").replace("LMM", "LLM")
+        shown = ev("[document.querySelector('#pc-s-define .st-def').textContent, document.querySelector('#pc-s-harness .st-voice p').textContent, document.querySelector('#pc-s-intent .st-thesis').textContent]")
+        R.ok("verbatim: the definition, harness and thesis on the floor are the talk's words exactly", all(t.strip("“”") in src for t in shown), str([t[:30] for t in shown]))
+    else: print("NOT_RUN verbatim talk quotes: the private talk text (refs/) is not in this checkout")
     # the fact gate in what a visitor can read (each text node on its own)
     texts = ev("(() => { const out = []; for (const root of [document.getElementById('world'), document.getElementById('index-list'), document.getElementById('entry')]) { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); for (let t = w.nextNode(); t; t = w.nextNode()) if (t.textContent.trim()) out.push(t.textContent); } return out; })()")
     import re as _re
@@ -247,7 +250,7 @@ with serve() as url, browser() as b:
     R.ok("no console errors or warnings, no failed requests (session 4)", not pg.errs, "; ".join(pg.errs[:4]))
     pg.context.close()
 
-# ── public text (민성 t1195u): no internal wording anywhere a visitor can reach, rendered ──
+# ── public text: no internal wording anywhere a visitor can reach, rendered ──
 INTERNAL = r"민성|나레이션|전사본|소유자|transcript|사실\s?검증|fact[\s-]?gate|감수|감독관|감사\s?(?:[A-Z(]|범위|판정|이후)|(?<![\w-])[ABCEOU]-\d{1,2}(?![\w-])|\bMuse\b|\bDots\b|muse2?-|dots2?-|package_1105|refs/|archive/|materials/|\.md :|[12]부 조사|워크숍 조사 자료|이 아카이브의 기록|기획자의 원문|\bTODO\b"
 GRAB = """(root) => { const out = []; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let t = w.nextNode(); t; t = w.nextNode()) { const p = t.parentElement; if (p && !p.closest('script,style') && t.textContent.trim()) out.push(t.textContent.trim()); }
@@ -289,9 +292,9 @@ r2 = subprocess.run([sys.executable, "tools/check.py"], cwd=bad, capture_output=
 R.ok("fact gate: putting \"GPT-5 IMO 금메달\" back makes check.py fail", r2.returncode == 1 and "fact gate: 'GPT-5 IMO gold'" in r2.stdout, r2.stdout[-200:])
 pub = tmp / "repo3/mind-field-archive"
 shutil.copytree(ARC, pub, ignore=shutil.ignore_patterns("media", "shots", "fonts-src", "lod", "assets"))
-(pub / "js/story.js").write_text((pub / "js/story.js").read_text(encoding="utf-8").replace("<footer>워크숍 발표에서</footer>", "<footer>민성의 나레이션</footer>"), encoding="utf-8")
+(pub / "js/story.js").write_text((pub / "js/story.js").read_text(encoding="utf-8").replace("<footer>워크숍 발표에서</footer>", "<footer>transcript of the owner</footer>"), encoding="utf-8")
 r3 = subprocess.run([sys.executable, "tools/check.py"], cwd=pub, capture_output=True, text=True)
-R.ok("public text: putting '민성의 나레이션' back makes check.py fail", r3.returncode == 1 and "public text: internal wording in js/story.js" in r3.stdout, r3.stdout[-200:])
+R.ok("public text: putting internal wording back makes check.py fail", r3.returncode == 1 and "public text: internal wording in js/story.js" in r3.stdout, r3.stdout[-200:])
 shutil.rmtree(tmp, ignore_errors=True)
 sys.exit(0 if R.report() else 1)
 

@@ -56,7 +56,7 @@
     world.style.width = W + "px"; world.style.height = H + "px";
     const z = A.zones;
     /* the well of the field manifold sits on the centre of the rings */
-    const placeTex = (a, k) => a.slot === "muse2-field-manifold" ? coverAt(a.slot, "c", A.rings.cx - z[k].x, A.rings.cy, z[k].w, H) : "";
+    const placeTex = (a, k) => a.slot === "art-field-manifold" ? coverAt(a.slot, "c", A.rings.cx - z[k].x, A.rings.cy, z[k].w, H) : "";
     const zoneHTML = Object.entries(z).map(([k, d]) => `
       <div class="zone zone-${k}" style="left:${d.x}px;width:${d.w}px" aria-hidden="true">
         ${A.assets.filter((a) => a.zone === k && !a.seam).map((a) => withStyle(A.assetImg(a.slot, "zone-tex" + (a.cls ? " " + a.cls : "")), placeTex(a, k))).join("")}
@@ -64,17 +64,17 @@
         <span class="zone-title"><b>${d.name}</b><span>${d.title}</span></span>
       </div>`).join("");
     /* the seam: paper turns into lattice exactly on the line between the bridge and Part 2 */
-    const sm = measured("dots2-seam-ember-to-lattice"), sw = 600;
-    const seam = sm ? `<div class="seam" style="left:${z.p2.x - sw / 2}px;width:${sw}px;height:${H}px" aria-hidden="true">${withStyle(A.assetImg("dots2-seam-ember-to-lattice", "seam-img"),
+    const sm = measured("art-seam-ember-to-lattice"), sw = 600;
+    const seam = sm ? `<div class="seam" style="left:${z.p2.x - sw / 2}px;width:${sw}px;height:${H}px" aria-hidden="true">${withStyle(A.assetImg("art-seam-ember-to-lattice", "seam-img"),
       `height:${H}px;width:${((sm.size[0] / sm.size[1]) * H).toFixed(0)}px;left:${(sw / 2 - sm.pts.t[0] * (sm.size[0] / sm.size[1]) * H).toFixed(0)}px`)}</div>` : "";
     const spark = `<span class="spark" style="left:${A.plaque.x}px;top:${A.plaque.y - 90}px" aria-hidden="true"></span>`;
     /* one caption per zone, listing the files actually shown there (a slot with no file and no fallback shows nothing) */
     const assetCaps = Object.keys(z).map((k) => {
       const shown = A.assets.filter((a) => a.zone === k && A.asset(a.slot));
-      return shown.length ? `<span class="asset-cap" style="left:${z[k].x + 28}px;top:${H - 80}px">${shown[0].cap}</span>` : "";  /* v6 (t1195u): no file names in public view */
+      return shown.length ? `<span class="asset-cap" style="left:${z[k].x + 28}px;top:${H - 80}px">${shown[0].cap}</span>` : "";  /* v6: no file names in public view */
     }).join("");
     const clusters = A.clusters.map((c) => `<span class="cluster" style="left:${c.x}px;top:${c.y}px" aria-hidden="true">${c.name}</span>`).join("")
-      /* v6 (전사본): the three acts of 민성's story head their columns, numbered in his order */
+      /* v6: the three acts of the talk head their columns, numbered in order */
       + (A.acts || []).map((a, i) => `<span class="act" style="left:${a.x}px;top:900px" aria-hidden="true"><i>${i + 1}</i><b>${a.name}</b><em>${a.sub}</em></span>`).join("")
       + (z.p1.open ? `<span class="act-rule" style="left:${z.p1.open - 40}px;height:${H}px" aria-hidden="true"></span>` : "");
     const ringSvg = `<svg class="floor-rings" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
@@ -89,7 +89,7 @@
     const ringLabels = A.rings.bands.map((b, i) => {
       return `<span class="fr-label" style="left:${A.rings.cx + 22}px;top:${A.rings.cy - b.r + 14}px" aria-hidden="true"><b>${b.name}</b> <i>${b.axis}</i></span>`;
     }).join("");
-    /* v6 (민성 t1195u): the planner's original brief no longer hangs on the bridge; the site is public and the brief was
+    /* v6: the planner's original brief no longer hangs on the bridge; the site is public and the brief was
        an instruction to the people and tools that built it. The spark of the first screen keeps its spot. */
     const plaque = "";
     const threadSvg = `<svg class="threads" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"></svg>`;
@@ -600,7 +600,7 @@
       setTimeout(() => { world.classList.remove("intro", "twist", "lock"); updateVideos(); }, 4200);
     } else updateVideos();
     $("#pc-" + A.zones.p1.anchor).tabIndex = 0;
-    /* v6 (Dots browser review 1): the first screen lights one piece, the one "1부부터 보기" opens, and dims the rest
+    /* v6: the first screen lights one piece, the one "1부부터 보기" opens, and dims the rest
        until the visitor moves (any zoom, jump or chosen piece ends it) */
     const hero = $("#pc-" + A.zones.p1.anchor), hr = hero.getBoundingClientRect(), wr = world.getBoundingClientRect();
     hero.dataset.hero = "";

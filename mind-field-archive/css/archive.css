@@ -1,9 +1,9 @@
 /* MIND FIELD archive, v2: hierarchy and imagery.
-   Aesthetics lead (archive/v2-direction.md). The site tokens stay underneath; this layer breaks them where it is
+   Aesthetics lead. The site tokens stay underneath; this layer breaks them where it is
    more beautiful: big statements (v6: in Pretendard and Inter, no serif), richer textures, ambient video, threads hidden at rest, quiet provenance.
    Three levels on the floor: works (tier 1), plates (tier 2), notes (tier 3). Size is the hierarchy. */
 
-/* v6 (민성 t1193u): no serif, myeongjo, 궁서 or brush face anywhere. Korean display text is Pretendard (the dale-ui face,
+/* v6: no serif, myeongjo, 궁서 or brush face anywhere. Korean display text is Pretendard (the dale-ui face,
    below with the v5 rules); Latin display text is Inter, a Helvetica-style grotesk (OFL, one variable file, upright). */
 @font-face { font-family: "Inter MF"; src: url("../fonts/Inter-subset.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
 
@@ -916,7 +916,7 @@ body:has(.pc[aria-current="true"]) .hud { display: grid; }
   .xr-card { min-height: 58vh; }
 }
 
-/* v4: delivered images registered inside the SVG (js/explain.js reg(), anchors from tools/anchors.py), opacities from asset-prompts-v2 */
+/* v4: delivered images registered inside the SVG (js/explain.js reg(), anchors from tools/anchors.py) */
 .xs-img { pointer-events: none; mix-blend-mode: screen; opacity: .55; }
 .xs-img.is-loop { opacity: .6; } .xs-img.is-context { opacity: .7; } .xs-img.is-graph { opacity: .5; } .xs-img.is-nest { opacity: .5; }
 .xs-img { transition: opacity 600ms var(--ease-out); }
@@ -941,7 +941,7 @@ body:has(.pc[aria-current="true"]) .hud { display: grid; }
 @font-face { font-family: "Pretendard MF"; src: url("../fonts/Pretendard-Bold-subset.woff2") format("woff2"); font-weight: 600 700; font-display: swap; }
 :root {
   --f-text: "Pretendard MF", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-  /* v6 (t1193u): display stacks. --f-head: Korean headings and quotes (Pretendard, then free Korean sans: Nanum Gothic).
+  /* v6: display stacks. --f-head: Korean headings and quotes (Pretendard, then free Korean sans: Nanum Gothic).
      --f-latin: English titles, labels and equations (Inter, then Helvetica-style system faces). Neither ends in a serif. */
   --f-head: "Pretendard MF", "Pretendard Variable", Pretendard, "NanumGothic", "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --f-latin: "Inter MF", Inter, "Helvetica Neue", Helvetica, Arial, "Pretendard MF", sans-serif;
@@ -999,7 +999,7 @@ h1, h2, h3, h4, h5, h6 { line-height: var(--lh-tight); }
 .keys dl div { padding: 7px 0; } .keys dd { line-height: var(--lh-balanced); } .keys { max-height: calc(100dvh - 32px); overflow: auto; }
 .hud .ref { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0; word-break: normal; }
 
-/* ── v6: fix phase (reviews: Muse, Dots, blind, personas). Aesthetics first, desktop only ─────────────
+/* ── v6: fix phase (design reviews). Aesthetics first, desktop only ─────────────
    The floor sits on a live contour field (js/field.js); chrome is solid and never lands on a framed piece (js/app.js box());
    detail text waits for zoom, the current piece or the docent; every technical word explains itself (js/terms.js). */
 [data-zone="exit"] { --accent: var(--acid); --accent-text: var(--acid); }
@@ -1231,7 +1231,7 @@ button.term:focus-visible { outline: 2px solid var(--accent-text, var(--acid)); 
 body.floor-off .floor { content-visibility: hidden; }  /* skips the floor's rendering entirely, keeps its box (camera maths stay valid) */
 body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off .zoom { visibility: hidden; }
 
-/* v6 (Dots browser review 4): a lone gallery tile spans the row, picture beside its text; merged one-example tiles carry a kicker */
+/* v6: a lone gallery tile spans the row, picture beside its text; merged one-example tiles carry a kicker */
 .gl-grid.is-solo { grid-template-columns: 1fr; }
 .gl-grid.is-solo .gl-item { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 14px clamp(24px, 3vw, 48px); align-items: start; }
 .gl-grid.is-solo .gl-media { aspect-ratio: 16 / 9; }
@@ -1242,7 +1242,7 @@ body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off 
 .gl-sub h5 i { font-style: normal; font-weight: 400; color: var(--fog); margin-left: 4px; }
 .gl-sub h5 i span { margin-left: .3em; }
 
-/* v6 (Dots browser review 1): the first screen is calmer. One piece is lit and tagged (js/app.js start); the rest wait
+/* v6: the first screen is calmer. One piece is lit and tagged (js/app.js start); the rest wait
    at low light until the visitor zooms, jumps or picks a piece */
 .floor .floor-rings, .floor .cluster { transition: opacity 700ms var(--ease-out); }  /* .pc already eases its opacity */
 .floor.is-first .pc:not([data-hero]), .floor.is-first .floor-rings, .floor.is-first .cluster { opacity: .34; }
@@ -1251,7 +1251,7 @@ body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off 
   transform: scale(calc(1 / var(--z, 1))) translateY(10px); opacity: 0; transition: opacity 400ms var(--ease-out); }
 .floor.is-first .hero-tag { opacity: 1; }
 
-/* v6 (Dots browser review 2): the floor textures sit back so the diagrams lead. The paper scraps in Part 1 and the
+/* v6: the floor textures sit back so the diagrams lead. The paper scraps in Part 1 and the
    scaffold texture, dot grid and dashed rings in Part 2 were as loud as the pieces in front of them */
 .zone-p1 .zone-tex { opacity: .1; }
 .zone-p2 .zone-tex { opacity: .04; }
@@ -1278,7 +1278,7 @@ body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off 
 .gl-seg:focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
 .gl-fam, .gl-famblock, .gl-sub { scroll-margin-top: 96px; }  /* a jump lands the heading below the sticky bar */
 
-/* ── v6 (전사본): 1부 여는 이야기, 민성의 이야기 (js/story.js) ──────────────────
+/* ── v6: 1부 여는 이야기 (js/story.js) ──────────────────
    One voice, one picture per piece. His words are set in the heading face (Pretendard), quoted, signed; the pictures are line drawings in
    bone with one accent (signal red for history, acid for agents and use), so the band reads as a single hand. */
 .act { position: absolute; display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 26px; pointer-events: none; width: 1120px; }
@@ -1465,11 +1465,11 @@ body.floor-off .entry, body.floor-off .hud, body.floor-off .map, body.floor-off 
 .ex-why p { margin: 0; font-family: var(--f-head); font-weight: 700; font-size: clamp(1.3rem, 2.2vw, 2rem); line-height: 1.35; color: var(--ink-field); text-wrap: balance; }
 .ex-why footer { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: .9rem; color: var(--fog); }
 
-/* v6 (전사본) legibility: the story's small picture labels and signatures wait for a near view (as Part 2's do) */
+/* v6  legibility: the story's small picture labels and signatures wait for a near view (as Part 2's do) */
 :root:not([data-level="piece"]) .floor:not([data-scale="near"]) .pc[data-kind="story"] :is(.st-svg text:not(.st-big):not(.st-num):not(.st-blank), .st-ko span, .st-by, .st-pre, .st-post, .st-voice footer, .st-layer, .q),
 .floor:not([data-scale="near"]) .pc[data-kind="story"]:not([aria-current]) :is(.st-svg text:not(.st-big):not(.st-num):not(.st-blank), .st-ko span, .st-by, .st-pre, .st-post, .st-voice footer, .st-layer, .q) { visibility: hidden; }
 
-/* ── v6 (민성 t1193u/t1194u): type without the serif ──────────────────
+/* ── v6: type without the serif ──────────────────
    Korean display: Pretendard, dale-ui rules (keep-all, -0.01em only on large titles, 0 elsewhere, tight leading on
    headings, 400/500/700). Latin display: Inter, a Helvetica-style grotesk; at display size it tightens and gains weight,
    since the serif's contrast and italic no longer carry the emphasis. Weight and colour carry it instead. */

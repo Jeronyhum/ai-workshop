@@ -21,7 +21,7 @@
     const s = A.status[st];
     return `<span class="st${small ? " st-s" : ""}" data-st="${st}" title="${raw(s.note)}"><span class="sr-only">${s.mark} </span>${s.word}</span>`;
   };
-  /* v6 (민성 t1195u): the site is public. Visitors see the status of each statement and its public sources (the links in
+  /* v6: the site is public. Visitors see the status of each statement and its public sources (the links in
      each room); research files, line numbers, audit codes and who drafted what stay in the data and the README only. */
   /* the one legend for the status marks, in plain words */
   R.legend = (cls = "") => `<dl class="legend-st ${cls}">${["verified", "conditional", "unverified", "corrected", "excluded"].map((k) => `<div><dt>${R.st(k, true)}</dt><dd>${esc(A.status[k].note)}</dd></div>`).join("")}</dl>`;
@@ -154,7 +154,7 @@
 
   /* ── tier 1: works ─────────────────────────────── */
   function work(p, room) {
-    if (p.kind === "story" && R.storyWork) return R.storyWork(p, room);  /* v6: 민성's story, js/story.js */
+    if (p.kind === "story" && R.storyWork) return R.storyWork(p, room);  /* v6: the opening talk, js/story.js */
     if (!room && R.xFloor && A.explain && A.explain[p.id]) return R.xFloor(p);  /* v4: Part 2 explainers (js/explain.js) */
     const t = `<h3 class="w-title"${room ? "" : ` id="t-${p.id}"`}>${esc(p.title)}</h3>`;
     const lede = p.lede ? `<p class="w-lede">${esc(p.lede)}</p>` : "";

@@ -1,5 +1,5 @@
 {
- "_note": "민성's curation: keep only the standouts on visual quality and how impressive the output is, judged by looking at frames of every post (2026-11-04). Keys: d-<user>-<id> = refs/drive/usecases, x-<n> = refs/x-frontier-cases/cases.json, w-<rank> = refs/web-office-cases/cases.json (all six pass by instruction). Anything not listed under keep is dropped and its copied media are deleted by tools/build_gallery.py.",
+ "_note": "Curation: keep only the standouts on visual quality and how impressive the output is, judged by looking at frames of every post (2026-11-04). Keys: d-<user>-<id> = refs/drive/usecases, x-<n> = refs/x-frontier-cases/cases.json, w-<rank> = refs/web-office-cases/cases.json (all six pass by instruction). Anything not listed under keep is dropped and its copied media are deleted by tools/build_gallery.py.",
  "computer_use_cases": {
   "x-40": "글이 'Grok 4.7 vs GPT-6 Astra at computer-use'라고 밝히고, 화면은 데스크톱에서 테트리스를 하는 에이전트다",
   "x-41": "글이 'at computer-use'라고 밝히고, 화면은 2048 게임 점수 경쟁이다",

@@ -1,4 +1,4 @@
-/* v6 (전사본): the pictures of Part 1's opening, 민성's story in block order (js/data.js, kind "story").
+/* v6: the pictures of Part 1's opening, the talk in its order (js/data.js, kind "story").
    Every label with a date or number comes from the piece's data (vis), each with its source line, which tools/check.py
    checks; this file only draws. The four metaphors (썰물, 하네스, 머리+손발, 가드레일) get exactly one picture each,
    marked data-metaphor (tests/test_v6.py counts them). Motion is CSS only and stops under reduced motion and the M toggle. */
@@ -6,7 +6,7 @@
   const A = window.AR, R = window.ARR;
   if (!A || !R) return;
   const esc = R.esc;
-  /* the transcript is read with the fact check's speech-recognition table (보완_전사본_사실검증.md (e)): LMM is LLM.
+  /* speech-recognition slips are read as meant: LMM is LLM.
      " · " joins verbatim fragments of one line; on screen the gap is an ellipsis. */
   const said = (t) => t.replace(/LMM/g, "LLM").replace(/컨테스트/g, "컨텍스트").split(" · ").join(" … ");
   const voice = (v, cls = "") => `<blockquote class="st-voice ${cls}"><p>${esc(said(v.t))}</p><footer>워크숍 발표에서</footer></blockquote>`;

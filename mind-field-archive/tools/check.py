@@ -3,7 +3,7 @@
 1. Links: every URL is in urls-ok.txt or x-from-drive.txt; "X 원본" only for x-from-drive.txt.
 2. Sources: every cited file exists and has the cited line.
 3. Numbers: every number shown on a piece appears within ±4 lines of the line it cites.
-4. Gates: a status that cites 감독관_감사.md agrees with the audit section of that line
+4. Gates: a status that cites the audit file agrees with the audit section of that line
    (B-0 :101-111 정정, B-1 :113-136 확정, B-2 :138-167 단서, B-3 :169-180 제외).
 5. Media: every media file and poster exists.
 v6: the research packages (refs/) and the installer repo are private fixtures. On a clean checkout without them, every
@@ -41,7 +41,7 @@ def lines(f):
         cache[f] = p.read_text(encoding="utf-8").splitlines() if p.exists() and p.suffix in (".md", ".txt", ".csv") else None
     return cache[f]
 
-AUDIT = "package_1105/감독관_감사.md"
+AUDIT = "pkg/audit.md"
 def section(line):
     for lo, hi, st in ((101, 111, "corrected"), (113, 136, "verified"), (138, 167, "conditional"), (169, 180, "excluded")):
         if lo <= line <= hi: return st
@@ -139,14 +139,14 @@ for a in data["assets"]:
 for k, sl in slots.items():
     if sl.get("fallback") and not (ARC / sl["fallback"]).exists(): fails.append(f"slot {k}: missing fallback {sl['fallback']}")
     if k in data.get("assetsReadyList", []) and not (ARC / sl["file"]).exists(): fails.append(f"slot {k}: marked ready but {sl['file']} is missing")
-    if not re.match(r"assets/(dots|muse)2?-[a-z-]+\.jpg$", sl["file"]): fails.append(f"slot {k}: file name must be assets/dots-*.jpg, muse-*.jpg, dots2-*.jpg or muse2-*.jpg")
+    if not re.match(r"assets/art-[a-z-]+\.jpg$", sl["file"]): fails.append(f"slot {k}: file name must be assets/art-*.jpg")
     if sl.get("fallback") and not re.match(r"assets/gen2?-[a-z-]+\.jpg$", sl["fallback"]): fails.append(f"slot {k}: a fallback must be a generated image (assets/gen-*.jpg or gen2-*.jpg)")
 
 # v4: every delivered second-batch image has been measured (js/anchors.js), and measured as it is now
 import hashlib
 anch = data.get("assetAnchors") or {}
 for k in data.get("assetsReadyList", []):
-    if not re.match(r"(muse2|dots2)-", k): continue
+    if not re.match(r"art-", k): continue
     m = anch.get(k)
     if not m: fails.append(f"slot {k}: ready but not measured; run python3 tools/anchors.py"); continue
     f = ARC / slots[k]["file"]
@@ -275,9 +275,9 @@ for f in sorted([*ARC.glob("js/*.js"), ARC / "index.html", *ARC.glob("*.md")]):
     for i, ln in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
         if KEYLIKE.search(ln): fails.append(f"{f.relative_to(ARC)}:{i}: something that looks like a key or token")
 
-# v6 (전사본): Part 1 opens with 민성's story. His lines are verbatim from the one line they cite (span 0); every date,
+# v6: Part 1 opens with the talk. Its lines are verbatim from the one line they cite (span 0); every date,
 # number and label on the pictures is within ±4 lines of its source; the four metaphors have exactly one picture each;
-# the story runs in his block order (C-01 … C-20).
+# the story runs in its order.
 DIG = re.compile(r"\d{2,}")
 def check_digits(t, s, where, span=4):
     L = check_src(s, where)
@@ -322,8 +322,8 @@ for k in ("vibe", "agent", "harness", "hook", "metaprompt", "intent"):
     if g and g.get("voice"): check_text(g["voice"]["t"], g["voice"]["s"], f"glossary {k} voice", span=0)
 if ex and ex.get("why"): check_text(ex["why"]["t"], ex["why"]["s"], "exit why", span=0)
 
-# v6 (전사본) fact gate: what the transcript fact check (보완_전사본_사실검증.md) bans or replaces can never come back.
-# Site files are strict; README lines that state a ban ("금지") or quote the narration ("나레이션") are allowed.
+# v6 fact gate: claims the fact check bans or replaces can never come back.
+# Site files are strict; README lines that state a ban ("금지") are allowed.
 GATE = [
     ("plan-equivalence estimate (U-3)", r"API\s*환산|1,?100\s*달러|\$\s?1,?100(?![\d,])|등가\s*추산|요금제\s*등가", None),
     ("GLM 5.3 ≈ Mythos 5 / Mythos cluster (U-5, B-3)", r"Mythos|미토스|GLM[\s-]*5\.3", None),
@@ -343,12 +343,12 @@ site = sorted(f for f in ARC.glob("js/*.js") if f.name not in ("lod.js", "anchor
 docs = [ARC / "README.md", ARC / "CREDITS-libs.md"]
 for f in site + docs:
     for i, ln in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
-        if f in docs and ("금지" in ln or "나레이션" in ln): continue
+        if f in docs and "금지" in ln: continue
         for name, rx, unless in GATE:
             if re.search(rx, ln) and not (unless and re.search(unless, ln)): fails.append(f"fact gate: {name} at {f.relative_to(ARC)}:{i}")
 print(f"story: {len(story)} pieces in block order, metaphors {', '.join(f'{m} 1' for m in METAPHORS)}; fact gate: {len(GATE)} rules over {len(site + docs)} files")
 
-# v6 (민성 t1193u): no serif, myeongjo, 궁서 or brush face. Every font-family stack and every shipped font file is sans or mono.
+# v6: no serif, myeongjo, 궁서 or brush face. Every font-family stack and every shipped font file is sans or mono.
 SERIFISH = re.compile(r"(?<!sans-)\bserif\b|Myeongjo|명조|Batang|바탕|Gungsuh|궁서|Brush|Nanum Pen|cursive|Instrument Serif|Noto Serif", re.I)
 for f in sorted(ARC.glob("css/*.css")):
     for i, ln in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
@@ -358,8 +358,8 @@ for f in sorted(ARC.glob("css/*.css")):
 for f in sorted((ARC / "fonts").glob("*.woff2")):
     if SERIFISH.search(f.stem): fails.append(f"font: serif or brush file shipped: fonts/{f.name}")
 
-# v6 (민성 t1195u): the site is public. No internal or behind-the-scenes wording reaches a visitor: who drafted what
-# (narration, transcript, owner, the agents that built it), audit and fact-check process words and codes, block ids,
+# v6: the site is public. No internal or behind-the-scenes wording reaches a visitor: who drafted what
+# (who drafted what, the tools that built it), audit and fact-check process words and codes, block ids,
 # decision ids, research-file credits, internal paths, dev notes. Two scans: (1) every visitor-facing data field
 # (source objects, ids, paths and slugs are skipped); (2) the UI code with comments stripped, every human string literal
 # (one with a space or Hangul). tools/test_v6.py also scans the rendered pages.

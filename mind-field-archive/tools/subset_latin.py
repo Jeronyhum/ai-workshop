@@ -17,7 +17,7 @@ unicodes = sorted(ord(c) for c in chars if ord(c) >= 0x20)
 jobs = [("Archivo-Variable.ttf", "Archivo-subset.woff2", {"wdth": (62, 100), "wght": (400, 900)}),
         ("JetBrainsMono-Variable.ttf", "JetBrainsMono-subset.woff2", None),
         ("Inter-VariableFont_opsz,wght.ttf", "Inter-subset.woff2", None)]  # JetBrains and Inter: the instancer breaks their glyph names, so both keep their full axes
-# v6 (t1193u): Inter 4.001 (OFL) replaces Instrument Serif: the Latin display face, a Helvetica-style grotesk. Upright only;
+# v6: Inter 4.001 (OFL) replaces Instrument Serif: the Latin display face, a Helvetica-style grotesk. Upright only;
 # it keeps its optical-size axis (14–32), so large titles get the tighter display cut automatically.
 for src, dst, axes in jobs:
     s = SRC / src

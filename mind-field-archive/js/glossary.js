@@ -5,13 +5,13 @@
    match  the words in the site's text that open this entry (longest first wins, so "API 키" beats "API").
    zones  where the word means this; e.g. "그래프" is a chart in Part 1, so it only opens the agent-graph entry in Part 2.
    core   shown as a card in the exit zone, in this order.
-   voice  v6 (전사본): 민성's own line on this word, verbatim from his narration blocks (archive/materials/transcript/);
+   voice  the talk's own line on this word, verbatim;
           shown under the plain definition, checked by tools/check.py like q. */
 (function () {
   const AR = (window.AR = window.AR || {});
-  const P = "package_1105/", T1 = P + "P2_엔지니어링패러다임.md", T3 = P + "P2_용어와필수개념.md", S1 = P + "P1_사무직벤치마크.md";
+  const P = "pkg/", T1 = P + "P2_엔지니어링패러다임.md", T3 = P + "P2_용어와필수개념.md", S1 = P + "P1_사무직벤치마크.md";
   const AW = "ai-workshop/build/payload/AGENTS.md", RM = "ai-workshop/README.md";
-  const TR = "archive/materials/transcript/", BL = TR + "보완_전사본_근본내용_블록.md", FC = TR + "보완_전사본_사실검증.md";
+  const TR = "talk/", BL = TR + "blocks.md", FC = TR + "facts.md";
   AR.glossary = [
     { id: "vibe", term: "바이브코딩", match: ["바이브코딩", "바이브 코딩"], core: 1,
       plain: "코드를 한 줄씩 직접 짜기보다, 만들고 싶은 것을 말로 설명하고 AI가 만든 결과를 보며 고쳐 가는 방식이에요. 말을 처음 쓴 사람은 안드레 카파시예요(2025년 2월 2일).", q: "창시 게시물의 날짜는 2025년 2월 2일", s: { f: FC, l: 31 },

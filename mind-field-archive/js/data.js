@@ -1,6 +1,6 @@
 /* MIND FIELD archive: every piece on the floor.
    Text is copied from refs/drive/ (paths below are relative to refs/drive/ unless they start with refs/).
-   Status follows the fact gate, package_1105/감독관_감사.md:
+   Status follows the audit, pkg/audit.md:
      verified    확정 ●  감사 B-1
      conditional 단서 ◐  감사 B-2, or a source that states its own limit (the condition is always shown)
      unverified  미확인 ○  social posts, images, copy outside the audit
@@ -9,14 +9,14 @@
    Links come only from archive/urls-ok.txt or archive/x-from-drive.txt (checked by tools/check.py). */
 (function () {
   const AR = (window.AR = window.AR || {});
-  const P = "package_1105/";
+  const P = "pkg/";
   const S1 = P + "P1_사무직벤치마크.md", S2 = P + "P1_과학난제와지표.md", S3 = P + "P1_시장산업.md",
         S4 = P + "P1_해킹보안.md", T1 = P + "P2_엔지니어링패러다임.md", T2 = P + "P2_에이전트진화와실전.md",
-        T3 = P + "P2_용어와필수개념.md", AU = P + "감독관_감사.md", ME = P + "학생의미_메타.md",
+        T3 = P + "P2_용어와필수개념.md", AU = P + "audit.md", ME = P + "학생의미_메타.md",
         PD = P + "보완_PD수첩_통계검증.md", XP = "refs/x-opus-motion-prompts.md";
   const x = (h, id) => ({ kind: "X 원본", label: "@" + h, url: `https://x.com/${h}/status/${id}` });
-  /* v6 (전사본): 민성의 나레이션 블록, 그 사실 검증, 메타 분석 (이 아카이브 안의 사본) */
-  const TR = "archive/materials/transcript/", BL = TR + "보완_전사본_근본내용_블록.md", FC = TR + "보완_전사본_사실검증.md", MT = TR + "보완_전사본_메타와꼬리질문.md";
+  /* the opening talk: its text, its fact check, its notes */
+  const TR = "talk/", BL = TR + "blocks.md", FC = TR + "facts.md", MT = TR + "notes.md";
 
   AR.world = { w: 15500, h: 5600 };
 
@@ -64,21 +64,20 @@
   /* Generated images: design assets only, never evidence. */
   /* Floor textures by slot (js/assets.js decides between the delivered file and its generated fallback). */
   AR.assets = [
-    { slot: "dots-field-scatter", zone: "p1", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
-    { slot: "muse-corridor-ember", zone: "br", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
-    { slot: "muse2-field-manifold", zone: "p2", cls: "is-base", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
-    { slot: "muse-drawing-floor", zone: "p2", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
-    { slot: "muse2-horizon-rings", zone: "p2", cls: "zone-band", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
-    { slot: "dots2-seam-ember-to-lattice", zone: "p2", seam: true, cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-field-scatter", zone: "p1", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-corridor-ember", zone: "br", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-field-manifold", zone: "p2", cls: "is-base", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-drawing-floor", zone: "p2", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-horizon-rings", zone: "p2", cls: "zone-band", cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
+    { slot: "art-seam-ember-to-lattice", zone: "p2", seam: true, cap: "AI로 만든 배경 그림 · 근거 자료 아님" },
   ];
 
   /* Pieces. Part 1 sits on a scattered 5×6 field (col,row); the bridge stacks in the corridor;
      Part 2 sits in its paradigm ring (ring, angle in degrees, 0 = east, clockwise) or at a corner (x,y). */
   AR.pieces = [
-    /* ───────── v6 (전사본): 1부 여는 이야기 ─────────
-       민성의 나레이션 블록 C-01–C-20 (archive/materials/transcript/보완_전사본_근본내용_블록.md) 순서대로: 역사 → 에이전트의 등장 → 활용.
-       voice = 그의 말 그대로 (전사 오인식 LMM→LLM만 사실검증 (e)표대로 읽음, tools/check.py가 원문과 대조).
-       날짜·수치·귀속은 보완_전사본_사실검증.md가 정본 (빌드브리프 :52). metaphor = 비유 넷, 각각 그림 하나. */
+    /* ───────── 1부 여는 이야기 ─────────
+       발표 순서대로: 역사 → 에이전트의 등장 → 활용. voice = 발표의 말 그대로 (tools/check.py가 원문과 대조).
+       날짜·수치·귀속은 사실 확인 자료가 정본. metaphor = 비유 넷, 각각 그림 하나. */
     {
       id: "s-vibe", zone: "p1", cluster: "역사", w: 560, kind: "story",
       title: "바이브 코딩, 2025년 2월 2일",
@@ -1209,8 +1208,8 @@
     self:        { tier: 3, at: [9680, 3380], w: 320 },
   };
 
-  /* v6 (전사본): Part 1 now opens with 민성's story (x 0 to OPEN), in the order of his narration blocks: 역사 → 에이전트의
-     등장 → 활용 (보완_전사본_근본내용_블록.md :3, :46, :131, :257). Everything that used to start at x 0 moves right by OPEN,
+  /* Part 1 opens with the talk (x 0 to OPEN), in its order: 역사 → 에이전트의
+     등장 → 활용. Everything that used to start at x 0 moves right by OPEN,
      here, once; the rest of the code reads these numbers and never assumes where a zone starts. */
   const OPEN = 3800;
   AR.world.w += OPEN;
@@ -1259,7 +1258,7 @@
      The drawings add no quantity: the number of tokens, laps and nodes in a figure is illustrative and the figure says so. */
   AR.explain = {
     paradigm: {
-      scene: "nest", slot: "muse2-core-seed", floor: 6,
+      scene: "nest", slot: "art-core-seed", floor: 6,
       chain: { t: "프롬프트 ⊂ 컨텍스트 ⊂ 하네스 ⊂ 루프 ⊂ 그래프", s: { f: T1, s: "§10", l: 227 } },
       steps: [
         { k: "prompt",  label: "프롬프트", sub: "2020~", line: "지시문 한 개", q: ["모델에게 주는 지시문 한 개", "\"어떻게 말해야 잘 듣는가\""], s: { f: T1, s: "§0", l: 12 } },
@@ -1288,7 +1287,7 @@
       ] },
     },
     context: {
-      scene: "context", slot: "muse2-context-aperture", floor: 3,
+      scene: "context", slot: "art-context-aperture", floor: 3,
       steps: [
         { k: "sources", label: "토큰의 전체 생애주기", line: "추론의 매 순간 모델이 보는", s: { f: T1, s: "§2", l: 53 },
           kinds: ["시스템 프롬프트", "도구 정의", "도구 출력", "검색 문서(RAG)", "메시지 히스토리", "메모리", "상태"] },
@@ -1299,7 +1298,7 @@
       moves: { label: "분류 체계", rows: ["write", "select", "compress", "isolate"], who: "Lance Martin, Context Engineering for Agents (2025-06-23, LangChain 블로그)", s: { f: T1, s: "§2", l: 55 } },
     },
     harness: {
-      scene: "harness", slot: "dots2-harness-frame", floor: 7,
+      scene: "harness", slot: "art-harness-frame", floor: 7,
       eq: { t: "Agent = Model + Harness", s: { f: T1, s: "§3", l: 74 } },
       steps: [
         { k: "model",   label: "Model", line: "모델을 블랙박스로 두고", s: { f: T1, s: "§3", l: 77 } },
@@ -1316,7 +1315,7 @@
       openai: { t: ["3~7명의 엔지니어가 5개월간", "수동으로 작성한 코드 0줄", "약 100만 줄·약 1,500개 PR", "Humans steer. Agents execute."], who: "OpenAI, Ryan Lopopolo · 2026-02-11", s: { f: T1, s: "§3", l: 85 } },
     },
     loop: {
-      scene: "loop", slot: "muse2-loop-orbit", floor: 5,
+      scene: "loop", slot: "art-loop-orbit", floor: 5,
       cycle: { t: "Goal → Action → Observation → Adjustment", s: { f: T1, s: "§4", l: 98 } },
       steps: [
         { k: "you",    label: "당신", line: "에이전트에게 프롬프트를 주는 사람인 당신", s: { f: T1, s: "§4", l: 96 } },
@@ -1331,7 +1330,7 @@
       ], s: { f: T1, s: "§4", l: 103 } },
     },
     graph: {
-      scene: "graph", slot: "dots2-graph-constellation", floor: 6,
+      scene: "graph", slot: "art-graph-constellation", floor: 6,
       steps: [
         { k: "nodes", label: "Nodes", line: "Nodes가 일을 하고", s: { f: T1, s: "§5", l: 124 } },
         { k: "edges", label: "Edges", line: "Edges가 전이를 정의하고", s: { f: T1, s: "§5", l: 124 } },
@@ -1347,7 +1346,7 @@
 
   /* Threads: [a, b, why]. Colour comes from the zones they join (red inside 1부, acid inside 2부, ember across). */
   AR.threads = [
-    /* v6 (전사본): his story in block order, then where it meets the evidence already on the floor */
+    /* the talk in its order, then where it meets the evidence already on the floor */
     ["s-vibe", "s-model", "말이 생기기 전: 모델과 대화 환경"],
     ["s-model", "s-tide", "GPT-4에서 한국어가 따라왔다: 고르지 않은 물결"],
     ["s-tide", "s-deeper", "다음 물결: 크기 대신 추론"],
@@ -1426,7 +1425,7 @@
   AR.threadSrc = { paradigmGaps: { f: T1, s: "§9", l: 221 } };
 
   AR.status = {
-    /* v6 (t1195u): words a public visitor reads at a glance; the audit sections stay in the comments above */
+    /* words a public visitor reads at a glance; the audit sections stay in the comments above */
     verified:    { word: "확인됨",   mark: "●", note: "공식 발표나 1차 자료로 확인한 내용이에요" },
     conditional: { word: "조건부",   mark: "◐", note: "조건이 붙은 내용이에요. 조건을 함께 읽어 주세요" },
     unverified:  { word: "미확인",   mark: "○", note: "게시물과 이미지 속 주장이에요. 분위기를 보여 줄 뿐 증거는 아니에요" },

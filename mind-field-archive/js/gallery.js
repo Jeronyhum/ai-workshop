@@ -101,14 +101,14 @@
       </div></li>`;
   }
   /* a lone tile gets the whole row (picture beside its text), so a one-example group never leaves an empty grid */
-  /* v6 (민성 t1193u/t1194u): the section headings are loanwords (쇼케이스, 오피스); in display type they read better in
+  /* v6: the section headings are loanwords (쇼케이스, 오피스); in display type they read better in
      English, set in Inter. The Korean subtitle under each keeps what the section is. */
   const EN = { showcase: "Showcase", office: "Office", blender: "Blender" };
   const secName = (s) => EN[s.key] || s.name;
   const grid = (list, leadFirst, kicker) => `<ol class="gl-grid${list.length === 1 ? " is-solo" : ""}">${list.map((it, i) => tile(it, leadFirst && i === 0 && list.length > 2, kicker && kicker(it))).join("")}</ol>`;
-  /* v6 (Dots browser review 4): groups with one example share one grid inside their family, each tile labelled with its
+  /* v6: groups with one example share one grid inside their family, each tile labelled with its
      group; families with one example share a last block. Groups of two or more keep their own heading. */
-  /* v6 (Dots browser review 4): no group or family of one gets a row of its own. A one-example group joins its family's
+  /* v6: no group or family of one gets a row of its own. A one-example group joins its family's
      larger group (its name on the tile); one-example families share one block at the end, each tile naming its family. */
   function showcase(s) {
     const fams = G.families.map((f) => ({ f, list: s.items.filter((i) => i.family === f.key) })).filter((x) => x.list.length);

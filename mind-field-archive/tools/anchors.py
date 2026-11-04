@@ -1,5 +1,5 @@
-"""Measure the delivered design assets against their anchors in archive/asset-prompts-v2.md. Run from archive/:  python3 tools/anchors.py
-Reads assets/muse2-*.jpg and assets/dots2-*.jpg (never writes there), finds the geometry each prompt fixed (a centre,
+"""Measure the delivered design assets against their anchors in the asset spec. Run from archive/:  python3 tools/anchors.py
+Reads assets/art-*.jpg and assets/art-*.jpg (never writes there), finds the geometry each prompt fixed (a centre,
 a radius, a vanishing point, posts, nodes ...) and writes js/anchors.js. The explainers in js/explain.js register their SVG
 to these measured points, so a re-delivered image lines up after one run of this tool (tools/assets.py runs it too).
 Prints spec vs measured for every anchor and flags anything further off than the tolerance. Flags are reported, not fixed:
@@ -26,7 +26,7 @@ def chans(a):
     sat = (mx - mn) / (mx + 1e-6)
     return R, G, B, lum, sat, mn
 
-def green(a):  # the acid accent (Dots' mask)
+def green(a):  # the acid accent mask
     R, G, B, *_ = chans(a)
     return (G > 150) & (G > 1.15 * R) & (G > 1.5 * B)
 
@@ -310,25 +310,25 @@ def m_seam(d):
     return {"pts": {"t": [f2(np.median(xs)), 0.5]}, "edge_min": f2(xs.min()), "edge_max": f2(xs.max()), "edge_sd": f2(xs.std())}
 
 MEASURE = {
-    "muse2-core-seed": m_core_seed, "muse2-loop-orbit": m_loop_orbit, "muse2-context-aperture": m_context, "muse2-swarm-streams": m_swarm,
-    "muse2-field-manifold": m_manifold, "muse2-horizon-rings": m_horizon, "dots2-harness-frame": m_harness, "dots2-gap-arches": m_arches,
-    "dots2-verify-prism": m_prism, "dots2-approval-threshold": m_gate, "dots2-graph-constellation": m_graph, "dots2-seam-ember-to-lattice": m_seam,
+    "art-core-seed": m_core_seed, "art-loop-orbit": m_loop_orbit, "art-context-aperture": m_context, "art-swarm-streams": m_swarm,
+    "art-field-manifold": m_manifold, "art-horizon-rings": m_horizon, "art-harness-frame": m_harness, "art-gap-arches": m_arches,
+    "art-verify-prism": m_prism, "art-approval-threshold": m_gate, "art-graph-constellation": m_graph, "art-seam-ember-to-lattice": m_seam,
 }
 
-# what asset-prompts-v2.md asked for: [label, path into the measurement, spec value]
+# what the asset spec asked for: [label, path into the measurement, spec value]
 SPEC = {
-    "muse2-core-seed": [["acid point at the centre", "pts.c", [0.5, 0.5]], ["4th circle radius", "rings.3", 0.4]],
-    "muse2-loop-orbit": [["orbit centre", "pts.c", [0.5, 0.5]], ["outer orbit radius", "r_outer", 0.36]],
-    "muse2-context-aperture": [["window centre", "pts.c", [0.58, 0.5]], ["empty left band", "empty_left", 0.3]],
-    "muse2-swarm-streams": [["acid gathering point", "pts.g", [0.55, 0.62]], ["chalk gathering point 1", "pts.w1", [0.28, 0.40]], ["chalk gathering point 2", "pts.w2", [0.78, 0.35]], ["empty bottom band", "empty_bottom", 0.22]],
-    "muse2-field-manifold": [["well centre", "pts.c", [0.5, 0.52]], ["empty centre radius", "r_disk", 0.12], ["empty top band", "empty_top", 0.10]],
-    "muse2-horizon-rings": [["ellipse centre", "pts.c", [0.62, 0.70]]],
-    "dots2-harness-frame": [["sphere centre", "pts.c", [0.64, 0.52]], ["sphere radius", "r_sphere", 0.07], ["cube face edge (one face's top edge)", "front_w", 0.34], ["empty left band", "empty_left", 0.38]],
-    "dots2-gap-arches": [["vanishing point (farthest acid arch)", "pts.v", [0.5, 0.34]]],
-    "dots2-verify-prism": [["prism centre", "centroid", [0.52, 0.5]], ["prism side / height", "side", 0.30], ["beam enters at", "pts.beam", [0.0, 0.5]]],
-    "dots2-approval-threshold": [["posts centre x", "pts.sig", [0.5, None]], ["posts centre y", "post_mid_y", 0.54], ["post spacing", "spacing", 0.14]],
-    "dots2-graph-constellation": [["cycle centre", "cycle_c", [0.60, 0.46]], ["nodes", "rings_found", 7]],
-    "dots2-seam-ember-to-lattice": [["paper-to-lattice edge", "pts.t", [0.5, None]]],
+    "art-core-seed": [["acid point at the centre", "pts.c", [0.5, 0.5]], ["4th circle radius", "rings.3", 0.4]],
+    "art-loop-orbit": [["orbit centre", "pts.c", [0.5, 0.5]], ["outer orbit radius", "r_outer", 0.36]],
+    "art-context-aperture": [["window centre", "pts.c", [0.58, 0.5]], ["empty left band", "empty_left", 0.3]],
+    "art-swarm-streams": [["acid gathering point", "pts.g", [0.55, 0.62]], ["chalk gathering point 1", "pts.w1", [0.28, 0.40]], ["chalk gathering point 2", "pts.w2", [0.78, 0.35]], ["empty bottom band", "empty_bottom", 0.22]],
+    "art-field-manifold": [["well centre", "pts.c", [0.5, 0.52]], ["empty centre radius", "r_disk", 0.12], ["empty top band", "empty_top", 0.10]],
+    "art-horizon-rings": [["ellipse centre", "pts.c", [0.62, 0.70]]],
+    "art-harness-frame": [["sphere centre", "pts.c", [0.64, 0.52]], ["sphere radius", "r_sphere", 0.07], ["cube face edge (one face's top edge)", "front_w", 0.34], ["empty left band", "empty_left", 0.38]],
+    "art-gap-arches": [["vanishing point (farthest acid arch)", "pts.v", [0.5, 0.34]]],
+    "art-verify-prism": [["prism centre", "centroid", [0.52, 0.5]], ["prism side / height", "side", 0.30], ["beam enters at", "pts.beam", [0.0, 0.5]]],
+    "art-approval-threshold": [["posts centre x", "pts.sig", [0.5, None]], ["posts centre y", "post_mid_y", 0.54], ["post spacing", "spacing", 0.14]],
+    "art-graph-constellation": [["cycle centre", "cycle_c", [0.60, 0.46]], ["nodes", "rings_found", 7]],
+    "art-seam-ember-to-lattice": [["paper-to-lattice edge", "pts.t", [0.5, None]]],
 }
 
 def get(m, path):

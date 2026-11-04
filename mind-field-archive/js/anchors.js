@@ -4,7 +4,7 @@
 (function () {
   const AR = (window.AR = window.AR || {});
   AR.assetAnchors = {
- "muse2-core-seed": {
+ "art-core-seed": {
   "pts": {
    "c": [
     0.5005,
@@ -21,7 +21,7 @@
    0.25,
    0.3325
   ],
-  "file": "assets/muse2-core-seed.jpg",
+  "file": "assets/art-core-seed.jpg",
   "size": [
    1600,
    1600
@@ -53,7 +53,7 @@
    ]
   ]
  },
- "muse2-loop-orbit": {
+ "art-loop-orbit": {
   "pts": {
    "c": [
     0.5007,
@@ -72,7 +72,7 @@
    ],
    "r": 0.0985
   },
-  "file": "assets/muse2-loop-orbit.jpg",
+  "file": "assets/art-loop-orbit.jpg",
   "size": [
    1600,
    1600
@@ -104,7 +104,7 @@
    ]
   ]
  },
- "muse2-context-aperture": {
+ "art-context-aperture": {
   "pts": {
    "c": [
     0.6557,
@@ -117,7 +117,7 @@
   },
   "empty_left": 0.3,
   "note": "no drawn window: c is the centre of the densest particles, the width is the prompt's 34%",
-  "file": "assets/muse2-context-aperture.jpg",
+  "file": "assets/art-context-aperture.jpg",
   "size": [
    1920,
    1200
@@ -149,7 +149,7 @@
    ]
   ]
  },
- "muse2-swarm-streams": {
+ "art-swarm-streams": {
   "pts": {
    "g": [
     0.4888,
@@ -165,7 +165,7 @@
    ]
   },
   "empty_bottom": 0.2457,
-  "file": "assets/muse2-swarm-streams.jpg",
+  "file": "assets/art-swarm-streams.jpg",
   "size": [
    2048,
    1152
@@ -229,7 +229,7 @@
    ]
   ]
  },
- "muse2-field-manifold": {
+ "art-field-manifold": {
   "pts": {
    "c": [
     0.4975,
@@ -246,7 +246,7 @@
    9.7,
    28.4
   ],
-  "file": "assets/muse2-field-manifold.jpg",
+  "file": "assets/art-field-manifold.jpg",
   "size": [
    1408,
    1760
@@ -285,7 +285,7 @@
    ]
   ]
  },
- "muse2-horizon-rings": {
+ "art-horizon-rings": {
   "pts": {
    "c": [
     0.7343,
@@ -293,7 +293,7 @@
    ]
   },
   "upper_left_max": 50.7,
-  "file": "assets/muse2-horizon-rings.jpg",
+  "file": "assets/art-horizon-rings.jpg",
   "size": [
    2736,
    912
@@ -318,7 +318,7 @@
    ]
   ]
  },
- "dots2-harness-frame": {
+ "art-harness-frame": {
   "pts": {
    "c": [
     0.6685,
@@ -341,7 +341,7 @@
   "front_w": 0.2325,
   "front_h": 0.0,
   "empty_left": 0.4667,
-  "file": "assets/dots2-harness-frame.jpg",
+  "file": "assets/art-harness-frame.jpg",
   "size": [
    2400,
    1800
@@ -387,7 +387,7 @@
    ]
   ]
  },
- "dots2-gap-arches": {
+ "art-gap-arches": {
   "pts": {
    "v": [
     0.499,
@@ -395,7 +395,7 @@
    ]
   },
   "bottom40_max": 42.4,
-  "file": "assets/dots2-gap-arches.jpg",
+  "file": "assets/art-gap-arches.jpg",
   "size": [
    1800,
    2400
@@ -420,7 +420,7 @@
    ]
   ]
  },
- "dots2-verify-prism": {
+ "art-verify-prism": {
   "pts": {
    "apex": [
     0.5283,
@@ -456,7 +456,7 @@
    0.5273,
    0.5354
   ],
-  "file": "assets/dots2-verify-prism.jpg",
+  "file": "assets/art-verify-prism.jpg",
   "size": [
    2560,
    1600
@@ -504,7 +504,7 @@
    ]
   ]
  },
- "dots2-approval-threshold": {
+ "art-approval-threshold": {
   "pts": {
    "l": [
     0.4367,
@@ -745,7 +745,7 @@
   ],
   "spacing": 0.1258,
   "post_mid_y": 0.5787,
-  "file": "assets/dots2-approval-threshold.jpg",
+  "file": "assets/art-approval-threshold.jpg",
   "size": [
    2560,
    1600
@@ -784,7 +784,7 @@
    ]
   ]
  },
- "dots2-graph-constellation": {
+ "art-graph-constellation": {
   "pts": {
    "n1": [
     0.3918,
@@ -907,7 +907,7 @@
    0.6391,
    0.4706
   ],
-  "file": "assets/dots2-graph-constellation.jpg",
+  "file": "assets/art-graph-constellation.jpg",
   "size": [
    2560,
    1440
@@ -939,7 +939,7 @@
    ]
   ]
  },
- "dots2-seam-ember-to-lattice": {
+ "art-seam-ember-to-lattice": {
   "pts": {
    "t": [
     0.4675,
@@ -949,7 +949,7 @@
   "edge_min": 0.4294,
   "edge_max": 0.5251,
   "edge_sd": 0.0157,
-  "file": "assets/dots2-seam-ember-to-lattice.jpg",
+  "file": "assets/art-seam-ember-to-lattice.jpg",
   "size": [
    724,
    2172

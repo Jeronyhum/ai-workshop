@@ -1,5 +1,5 @@
 """Mark delivered design assets as ready. Run from archive/ after dropping files into assets/:  python3 tools/assets.py
-Scans assets/ for the slot files named in js/assets.js (dots-*.jpg, muse-*.jpg, and v4's dots2-*.jpg, muse2-*.jpg) and rewrites the READY list there.
+Scans assets/ for the slot files named in js/assets.js (art-*.jpg) and rewrites the READY list there.
 Slots without a file keep using their generated fallback. Prints what is ready and what still falls back."""
 import pathlib, re
 ARC = pathlib.Path(__file__).resolve().parent.parent

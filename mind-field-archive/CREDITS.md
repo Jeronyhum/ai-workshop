@@ -4,8 +4,7 @@
 | Font | Licence |
 |---|---|
 | Pretendard 1.3.9 (orioncactus) | SIL OFL 1.1 |
-| Gothic A1, Noto Serif KR (Google Fonts) | SIL OFL 1.1 |
-| Instrument Serif, Archivo, JetBrains Mono | SIL OFL 1.1 |
+| Inter, Archivo, JetBrains Mono | SIL OFL 1.1 |
 
 The licence text is in fonts/OFL.txt.
 
@@ -13,12 +12,12 @@ The licence text is in fonts/OFL.txt.
 - dale-ui (DaleStudy), https://github.com/DaleStudy/daleui. MIT, Copyright (c) 2025 DaleStudy. Typography rules were ported to CSS (see README v5).
 
 ## Sources
-- Workshop materials come from 민성's Google Drive packages. Every external link is listed per piece in js/data.js and checked by tools/check.py.
+- Workshop materials come from the workshop's own research packages. Every external link is listed per piece in js/data.js and checked by tools/check.py.
 - Gallery cases are X posts and official vendor pages, each linked from its card. Unverified model claims and computer-use demos are labelled as such on the card. Videos have been re-encoded (compressed) for size.
 - Statistics: 국가데이터처 (Statistics Korea) and 한국은행 이슈노트, as cited in the pieces. The DCinside posts were used as pointers to these sources.
 
 ## Images
-Generated images in assets/ (Muse, Dots, Grok) are design assets only and aren't evidence. Their provenance is in assets/provenance/.
+Generated images in assets/ (files named art-*, and the other AI-made backgrounds) were made with AI image tools for this archive. They are design assets only, aren't evidence, and are released with the site.
 
 ## Libraries and fonts (v6)
 
@@ -46,7 +45,7 @@ Generated images in assets/ (Muse, Dots, Grok) are design assets only and aren't
 
 ## 글꼴 (모두 SIL Open Font License 1.1)
 
-`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. v6 글꼴 정리(민성 t1193u)로 세리프와 명조(Noto Serif KR, Instrument Serif)와 쓰이지 않던 Gothic A1을 지웠습니다. 합계 4가족 6파일, 388KB입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
+`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. v6 글꼴 정리로 세리프와 명조(Noto Serif KR, Instrument Serif)와 쓰이지 않던 Gothic A1을 지웠습니다. 합계 4가족 6파일, 388KB입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
 
 | 글꼴 | 저작권 | 파일 | 크기 |
 |---|---|---|---|
