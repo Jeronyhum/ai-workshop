@@ -25,6 +25,6 @@
       상태표 갱신안, 잔여 게이트 목록 확정.
 - [ ] T009 dots 피드백 수렴 (Workroom) — 계약·G-1·OD 설치 방식에 대한
       의견을 받아 반영 여부를 감독관이 판정.
-- [ ] T010 통합본 push (GitHub API 경유, non-force)
+- [x] T010 통합본 push (GitHub API 경유, non-force)
 - [ ] T011 (잔여, 소유자) 실모델 호출 스모크 재확인, Windows 피시방 실측
       (G-2), macOS 실기계 (G-3)
