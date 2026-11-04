@@ -57,17 +57,20 @@ node_major() {
 }
 
 install_node_tarball() {
-  # Official Node.js 22 LTS tarball into ~/.local — no sudo, works on any distro.
-  local ver tarch url dest
+  # Official Node.js 22 LTS tarball into ~/.local — no sudo. OS-aware: the
+  # tarball name differs (linux/darwin) and darwin ships .tar.gz, not .tar.xz.
+  local ver tarch osname ext xflag url dest
   ver="$(curl -fsSL https://nodejs.org/dist/index.json 2>/dev/null | grep -o '"version":"v22\.[0-9.]*"' | head -1 | cut -d'"' -f4)"
   [ -n "$ver" ] || return 1
   case "$ARCH" in
     x86_64) tarch="x64" ;; aarch64|arm64) tarch="arm64" ;; *) return 1 ;;
   esac
-  url="https://nodejs.org/dist/${ver}/node-${ver}-linux-${tarch}.tar.xz"
+  if [ "$OS" = "Darwin" ]; then osname="darwin"; ext="tar.gz"; xflag="z"
+  else osname="linux"; ext="tar.xz"; xflag="J"; fi
+  url="https://nodejs.org/dist/${ver}/node-${ver}-${osname}-${tarch}.${ext}"
   dest="$HOME/.local/opt/node-${ver}"
   mkdir -p "$HOME/.local/opt" "$HOME/.local/bin"
-  curl -fsSL "$url" | tar -xJ -C "$HOME/.local/opt" 2>/dev/null || return 1
+  curl -fsSL "$url" | tar -x${xflag} -C "$HOME/.local/opt" 2>/dev/null || return 1
   ln -sf "$dest/bin/node" "$HOME/.local/bin/node"
   ln -sf "$dest/bin/npm" "$HOME/.local/bin/npm"
   ln -sf "$dest/bin/npx" "$HOME/.local/bin/npx"
