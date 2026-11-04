@@ -131,11 +131,19 @@ function Install-DesktopDirect {
 }
 
 function Install-CliDirect {
-    if (Have npm) {
+    # npm on Windows is a .cmd shim; Start-Process "npm" can resolve the
+    # extensionless Unix shim instead and die with "%1 is not a valid Win32
+    # application" (seen on a real machine, 2026-11-04). Call npm.cmd by its
+    # full path, and never let a failure here abort the installer — the ZIP
+    # route is the fallback, and even total CLI failure is non-fatal.
+    $npmCmd = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
+    if ($npmCmd) {
         Step "OpenCode CLI 설치 중 (npm)"
-        $p = Start-Process npm -ArgumentList @("install", "-g", "opencode-ai") -Wait -PassThru -NoNewWindow
-        if ($p.ExitCode -eq 0) { Ok "OpenCode CLI 설치 (npm)"; return }
-        Warn "npm 설치 실패 — ZIP으로 재시도합니다"
+        try {
+            & $npmCmd install -g opencode-ai 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) { Ok "OpenCode CLI 설치 (npm)"; return }
+            Warn "npm 설치 실패 (code $LASTEXITCODE) — ZIP으로 재시도합니다"
+        } catch { Warn "npm 실행 실패 — ZIP으로 재시도합니다" }
     }
     $url = Get-GithubLatestAsset "anomalyco/opencode" "^opencode-windows-x64\.zip$"
     if (-not $url) { Warn "OpenCode CLI 다운로드 주소를 찾지 못했습니다"; return }

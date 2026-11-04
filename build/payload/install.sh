@@ -40,7 +40,9 @@ install_pkg() {
   # uniform — Debian's `node` package is NOT Node.js, so node never goes through here
   # as a first choice.
   if [ "$OS" = "Darwin" ]; then
-    have brew || { err "Homebrew가 없습니다. https://brew.sh 를 먼저 설치하세요."; return 1; }
+    # No brew is not an error here: callers fall back to direct installs
+    # (node tarball, CLT git, dmg desktop) automatically.
+    have brew || return 1
     brew install "$1" >/dev/null 2>&1 || brew install --cask "$1" >/dev/null 2>&1
   elif have apt-get; then
     sudo apt-get update -qq && sudo apt-get install -y "$1" >/dev/null 2>&1
@@ -78,6 +80,79 @@ install_node_tarball() {
   have node
 }
 
+install_git_mac() {
+  # macOS ships git inside the Xcode Command Line Tools. Triggering the
+  # install shows one system dialog; after that click everything is
+  # automatic — poll until git lands (up to ~5 minutes).
+  have git && return 0
+  xcode-select --install >/dev/null 2>&1 || true
+  say "  화면에 뜨는 시스템 창에서 '설치'를 눌러주세요 (Git이 포함된 도구 세트입니다)"
+  local i
+  for i in $(seq 1 60); do
+    have git && return 0
+    sleep 5
+  done
+  have git
+}
+
+install_desktop_mac() {
+  # Direct .dmg install (no Homebrew): download, mount, copy the app.
+  local dmgname url mnt app base
+  case "$ARCH" in
+    arm64) dmgname="opencode-desktop-mac-arm64.dmg" ;;
+    x86_64) dmgname="opencode-desktop-mac-x64.dmg" ;;
+    *) return 1 ;;
+  esac
+  url="https://github.com/anomalyco/opencode/releases/latest/download/$dmgname"
+  curl -fsSL "$url" -o "/tmp/$dmgname" 2>/dev/null || return 1
+  mnt="$(mktemp -d)"
+  if ! hdiutil attach -nobrowse -quiet -mountpoint "$mnt" "/tmp/$dmgname" 2>/dev/null; then
+    rm -f "/tmp/$dmgname"; return 1
+  fi
+  app="$(ls -d "$mnt"/*.app 2>/dev/null | head -1)"
+  base=""
+  if [ -n "$app" ]; then
+    if cp -R "$app" /Applications/ 2>/dev/null; then base="/Applications"
+    else
+      mkdir -p "$HOME/Applications"
+      if cp -R "$app" "$HOME/Applications/" 2>/dev/null; then base="$HOME/Applications"; fi
+    fi
+    [ -n "$base" ] && xattr -dr com.apple.quarantine "$base/OpenCode.app" 2>/dev/null
+  fi
+  hdiutil detach -quiet "$mnt" 2>/dev/null || true
+  rm -f "/tmp/$dmgname"
+  [ -n "$base" ] && [ -d "$base/OpenCode.app" ]
+}
+
+install_cli_fallback() {
+  # Official script failed: try npm, then the release ZIP into ~/.local/bin.
+  if have npm; then
+    npm install -g opencode-ai >/dev/null 2>&1 && { ok "OpenCode CLI 설치 (npm)"; return 0; }
+  fi
+  [ "$OS" = "Darwin" ] || return 1
+  local zipname
+  case "$ARCH" in
+    arm64) zipname="opencode-darwin-arm64.zip" ;;
+    x86_64) zipname="opencode-darwin-x64.zip" ;;
+    *) return 1 ;;
+  esac
+  local tmp
+  tmp="$(mktemp -d)"
+  if curl -fsSL "https://github.com/anomalyco/opencode/releases/latest/download/$zipname" -o "$tmp/oc.zip" 2>/dev/null \
+     && unzip -o -q "$tmp/oc.zip" -d "$tmp/oc" 2>/dev/null; then
+    local bin
+    bin="$(find "$tmp/oc" -name opencode -type f 2>/dev/null | head -1)"
+    if [ -n "$bin" ]; then
+      mkdir -p "$HOME/.local/bin"
+      cp "$bin" "$HOME/.local/bin/opencode" && chmod +x "$HOME/.local/bin/opencode"
+      xattr -dr com.apple.quarantine "$HOME/.local/bin/opencode" 2>/dev/null || true
+      export PATH="$HOME/.local/bin:$PATH"
+      have opencode && { ok "OpenCode CLI 설치 (ZIP)"; return 0; }
+    fi
+  fi
+  return 1
+}
+
 if [ "$DRY" = "1" ]; then
   have node && ok "Node $(node --version)" || warn "(연습 모드) Node 없음 — 실제 설치에서는 자동으로 설치합니다"
   have git && ok "$(git --version)" || warn "(연습 모드) Git 없음 — 실제 설치에서는 설치를 시도합니다"
@@ -86,7 +161,7 @@ if [ "$DRY" = "1" ]; then
 else
   if [ "$(node_major)" -ge 22 ]; then ok "Node $(node --version)"; else
     say "  Node.js 22 설치 중"
-    if [ "$OS" = "Darwin" ]; then
+    if [ "$OS" = "Darwin" ] && have brew; then
       install_pkg node@22 >/dev/null 2>&1 || install_pkg node >/dev/null 2>&1 || true
       export PATH="/opt/homebrew/opt/node@22/bin:/usr/local/opt/node@22/bin:$PATH"
     fi
@@ -98,7 +173,12 @@ else
     [ "$(node_major)" -ge 22 ] || warn "Node 22 미만이라 HUD의 컨텍스트 그래프가 동작하지 않을 수 있습니다"
   fi
   if have git; then ok "$(git --version)"; else
-    say "  Git 설치 중"; install_pkg git || warn "Git 설치 실패 (스킬 팩을 건너뜁니다)"
+    say "  Git 설치 중"
+    if [ "$OS" = "Darwin" ]; then
+      install_pkg git || install_git_mac || warn "Git 설치 실패 (스킬 팩을 건너뜁니다)"
+    else
+      install_pkg git || warn "Git 설치 실패 (스킬 팩을 건너뜁니다)"
+    fi
   fi
   if have uv; then ok "$(uv --version)"; else
     say "  uv 설치 중"
@@ -110,16 +190,22 @@ else
   if have opencode; then ok "OpenCode CLI 이미 설치됨"
   else
     say "  OpenCode CLI 설치 중"
-    curl -fsSL https://opencode.ai/v2/install | bash >/dev/null 2>&1 && ok "OpenCode CLI 설치" || warn "CLI 설치 실패: https://opencode.ai/download"
+    if curl -fsSL https://opencode.ai/v2/install | bash >/dev/null 2>&1; then ok "OpenCode CLI 설치"
+    else install_cli_fallback || warn "CLI 설치 실패: https://opencode.ai/download"; fi
   fi
   export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$PATH"
 
   if [ "$OS" = "Darwin" ]; then
-    if [ -d "/Applications/OpenCode.app" ]; then ok "OpenCode Desktop 이미 설치됨"
-    elif have brew; then
+    if [ -d "/Applications/OpenCode.app" ] || [ -d "$HOME/Applications/OpenCode.app" ]; then ok "OpenCode Desktop 이미 설치됨"
+    else
       say "  OpenCode Desktop 설치 중"
-      brew install --cask opencode-desktop >/dev/null 2>&1 && ok "OpenCode Desktop 설치" || warn "자동 설치 실패: https://opencode.ai/download"
-    else warn "Homebrew 없음: https://opencode.ai/download 에서 받으세요"
+      desktop_ok=0
+      if have brew; then
+        brew install --cask opencode-desktop >/dev/null 2>&1 && desktop_ok=1
+      fi
+      if [ "$desktop_ok" = "0" ]; then install_desktop_mac && desktop_ok=1; fi
+      if [ "$desktop_ok" = "1" ]; then ok "OpenCode Desktop 설치"
+      else warn "OpenCode Desktop 자동 설치 실패: https://opencode.ai/download"; fi
     fi
   else
     install_desktop_linux() {
