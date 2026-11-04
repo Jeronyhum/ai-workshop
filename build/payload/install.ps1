@@ -61,6 +61,124 @@ function Ensure-WingetPackage($id, $label) {
     Warn "$label 설치 실패 (code $($p.ExitCode)). 직접 실행: winget install --id $id -e"
 }
 
+# ---- Direct-download installs (no winget) --------------------------------
+# winget needs Windows 10 1809+ and the Store App Installer; older or
+# locked-down machines have neither. Every base app also ships an official
+# standalone installer, so the fallback downloads and runs those silently
+# instead of asking the student to fetch files by hand.
+
+function Get-GithubLatestAsset($repo, $pattern) {
+    try {
+        $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -TimeoutSec 60 -Headers @{ "User-Agent" = "ssu-installer" }
+        $asset = $rel.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
+        if ($asset) { return $asset.browser_download_url }
+    } catch {}
+    return $null
+}
+
+function Save-Url($url, $name) {
+    $dst = Join-Path $env:TEMP $name
+    Invoke-WebRequest -Uri $url -OutFile $dst -UseBasicParsing -TimeoutSec 1200
+    return $dst
+}
+
+function Install-NodeDirect {
+    Step "Node.js 직접 다운로드 설치 중"
+    $ver = $null
+    try {
+        $idx = Invoke-RestMethod -Uri "https://nodejs.org/dist/index.json" -TimeoutSec 60
+        $hit = $idx | Where-Object { $_.version -like "v22.*" -and $_.lts } | Select-Object -First 1
+        if ($hit) { $ver = $hit.version }
+    } catch {}
+    if (-not $ver) { $ver = "v22.11.0" }
+    try {
+        $msi = Save-Url "https://nodejs.org/dist/$ver/node-$ver-x64.msi" "node-$ver-x64.msi"
+        $p = Start-Process msiexec.exe -ArgumentList @("/i", $msi, "/quiet", "/norestart") -Verb RunAs -Wait -PassThru
+        if ($p.ExitCode -eq 0 -or $p.ExitCode -eq 3010) { Ok "Node.js $ver 설치" }
+        else { Warn "Node.js 설치 실패 (code $($p.ExitCode))" }
+    } catch { Warn "Node.js 직접 설치 실패: $($_.Exception.Message)" }
+}
+
+function Install-GitDirect {
+    $url = Get-GithubLatestAsset "git-for-windows/git" "^Git-.*-64-bit\.exe$"
+    if (-not $url) { Warn "Git 다운로드 주소를 찾지 못했습니다"; return }
+    Step "Git 직접 다운로드 설치 중"
+    try {
+        $exe = Save-Url $url "git-installer.exe"
+        $p = Start-Process $exe -ArgumentList @("/VERYSILENT", "/NORESTART") -Verb RunAs -Wait -PassThru
+        if ($p.ExitCode -eq 0) { Ok "Git 설치" } else { Warn "Git 설치 실패 (code $($p.ExitCode))" }
+    } catch { Warn "Git 직접 설치 실패: $($_.Exception.Message)" }
+}
+
+function Install-UvDirect {
+    Step "uv 직접 설치 중 (공식 설치 스크립트)"
+    try {
+        Invoke-Expression (Invoke-RestMethod -Uri "https://astral.sh/uv/install.ps1" -TimeoutSec 60)
+        $uvbin = Join-Path $env:USERPROFILE ".local\bin"
+        if (Test-Path $uvbin) { $env:Path = "$uvbin;$env:Path" }
+    } catch { Warn "uv 직접 설치 실패: $($_.Exception.Message)" }
+}
+
+function Install-DesktopDirect {
+    $url = Get-GithubLatestAsset "anomalyco/opencode" "^opencode-desktop-win-x64\.exe$"
+    if (-not $url) { Warn "OpenCode Desktop 다운로드 주소를 찾지 못했습니다"; return }
+    Step "OpenCode Desktop 직접 다운로드 설치 중"
+    try {
+        $exe = Save-Url $url "opencode-desktop-win-x64.exe"
+        $p = Start-Process $exe -ArgumentList @("/S") -Verb RunAs -Wait -PassThru
+        if ($p.ExitCode -eq 0) { Ok "OpenCode Desktop 설치" } else { Warn "OpenCode Desktop 설치 실패 (code $($p.ExitCode))" }
+    } catch { Warn "OpenCode Desktop 직접 설치 실패: $($_.Exception.Message)" }
+}
+
+function Install-CliDirect {
+    if (Have npm) {
+        Step "OpenCode CLI 설치 중 (npm)"
+        $p = Start-Process npm -ArgumentList @("install", "-g", "opencode-ai") -Wait -PassThru -NoNewWindow
+        if ($p.ExitCode -eq 0) { Ok "OpenCode CLI 설치 (npm)"; return }
+        Warn "npm 설치 실패 — ZIP으로 재시도합니다"
+    }
+    $url = Get-GithubLatestAsset "anomalyco/opencode" "^opencode-windows-x64\.zip$"
+    if (-not $url) { Warn "OpenCode CLI 다운로드 주소를 찾지 못했습니다"; return }
+    Step "OpenCode CLI 직접 다운로드 설치 중"
+    try {
+        $zip = Save-Url $url "opencode-windows-x64.zip"
+        $dest = Join-Path $env:LOCALAPPDATA "Programs\OpenCodeCLI"
+        New-Item -ItemType Directory -Path $dest -Force | Out-Null
+        Expand-Archive -Path $zip -DestinationPath $dest -Force
+        $exeDir = $null
+        if (Test-Path (Join-Path $dest "opencode.exe")) { $exeDir = $dest }
+        else {
+            $found = Get-ChildItem $dest -Recurse -Filter "opencode.exe" | Select-Object -First 1
+            if ($found) { $exeDir = $found.DirectoryName }
+        }
+        if ($exeDir) {
+            $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+            if ($userPath -notlike "*$exeDir*") { [Environment]::SetEnvironmentVariable("Path", "$userPath;$exeDir", "User") }
+            $env:Path = "$exeDir;$env:Path"
+            Ok "OpenCode CLI 설치 (ZIP)"
+        }
+        else { Warn "OpenCode CLI 압축 해제 후 실행 파일을 찾지 못했습니다" }
+    } catch { Warn "OpenCode CLI 직접 설치 실패: $($_.Exception.Message)" }
+}
+
+function Ensure-NodeInstall {
+    if ($DryRun) { Step "(dry-run) Node.js LTS 설치"; return }
+    if (Have winget) { Ensure-WingetPackage "OpenJS.NodeJS.LTS" "Node.js LTS"; Refresh-Path }
+    if (-not (Have node)) { Install-NodeDirect; Refresh-Path }
+}
+
+function Ensure-GitInstall {
+    if ($DryRun) { Step "(dry-run) Git 설치"; return }
+    if (Have winget) { Ensure-WingetPackage "Git.Git" "Git"; Refresh-Path }
+    if (-not (Have git)) { Install-GitDirect; Refresh-Path }
+}
+
+function Ensure-UvInstall {
+    if ($DryRun) { Step "(dry-run) uv 설치"; return }
+    if (Have winget) { Ensure-WingetPackage "astral-sh.uv" "uv"; Refresh-Path }
+    if (-not (Have uv)) { Install-UvDirect; Refresh-Path }
+}
+
 function Read-KeyInteractive($prompt) {
     $sec = Read-Host $prompt -AsSecureString
     $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
@@ -134,12 +252,8 @@ if ($SkipApps) {
     Warn "앱 설치를 건너뜁니다 (-SkipApps)"
 }
 else {
-    if (-not (Have winget)) {
-        Fail "winget이 없습니다. Microsoft Store에서 'App Installer'를 설치한 뒤 다시 실행하세요."
-        Fail "Windows 10 1809 미만이면 https://opencode.ai/download 에서 설치 파일을 직접 받으세요."
-        exit 1
-    }
-    Ok "winget 준비됨"
+    if (Have winget) { Ok "winget 준비됨" }
+    else { Warn "winget이 없어 공식 설치 파일로 직접 설치합니다 (자동 진행)" }
 
     if (Have node) {
         $nv = (node --version) -replace "^v", ""
@@ -148,19 +262,19 @@ else {
         $minor = [int]($nv.Split(".")[1])
         if ($major -lt 22 -or ($major -eq 22 -and $minor -lt 5)) {
             Warn "Node 22.5 이상이 필요합니다 (HUD가 SQLite를 읽습니다). LTS로 업그레이드합니다."
-            Ensure-WingetPackage "OpenJS.NodeJS.LTS" "Node.js LTS"
+            Ensure-NodeInstall
         }
     }
     else {
         Step "Node.js 설치 중 (1~3분)"
-        Ensure-WingetPackage "OpenJS.NodeJS.LTS" "Node.js LTS"
+        Ensure-NodeInstall
     }
 
     if (Have git) { Ok ((git --version) -replace "git version ", "Git ") }
-    else { Step "Git 설치 중"; Ensure-WingetPackage "Git.Git" "Git" }
+    else { Step "Git 설치 중"; Ensure-GitInstall }
 
     if (Have uv) { Ok ((uv --version) -replace "uv ", "uv ") }
-    else { Step "uv 설치 중"; Ensure-WingetPackage "astral-sh.uv" "uv" }
+    else { Step "uv 설치 중"; Ensure-UvInstall }
 
     # Journey rule: if the app is already there, skip the install entirely.
     $ocDesktop = @(
@@ -170,12 +284,24 @@ else {
     if ($ocDesktop) { Ok "OpenCode Desktop 이미 설치됨" }
     else {
         Step "OpenCode Desktop 설치 중"
-        Ensure-WingetPackage "SST.OpenCodeDesktop" "OpenCode Desktop"
+        if ($DryRun) { Step "(dry-run) OpenCode Desktop 설치" }
+        else {
+            if (Have winget) { Ensure-WingetPackage "SST.OpenCodeDesktop" "OpenCode Desktop" }
+            $ocDesktop = @(
+                (Join-Path $env:LOCALAPPDATA "Programs\OpenCode\OpenCode.exe"),
+                (Join-Path $env:LOCALAPPDATA "OpenCode\OpenCode.exe")
+            ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if (-not $ocDesktop) { Install-DesktopDirect }
+        }
     }
     if (Have opencode) { Ok "OpenCode CLI 이미 설치됨" }
     else {
         Step "OpenCode CLI 설치 중"
-        Ensure-WingetPackage "SST.opencode" "OpenCode CLI"
+        if ($DryRun) { Step "(dry-run) OpenCode CLI 설치" }
+        else {
+            if (Have winget) { Ensure-WingetPackage "SST.opencode" "OpenCode CLI"; Refresh-Path }
+            if (-not (Have opencode)) { Install-CliDirect; Refresh-Path }
+        }
     }
 
     Refresh-Path
