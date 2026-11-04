@@ -2,7 +2,9 @@
 # SSU x OpenCode workshop — one-line installer bootstrap (macOS / Linux)
 # Students run:  curl -fsSL jeronyhum.github.io/ai-workshop/i.sh | bash
 set -e
-url='https://raw.githubusercontent.com/Jeronyhum/ai-workshop/main/build/ssu-opencode-setup.cmd'
+# Cache-bust the download: raw branch-tip files sit in a CDN cache for
+# minutes, and a stale copy once re-delivered an already-fixed installer.
+url="https://raw.githubusercontent.com/Jeronyhum/ai-workshop/main/build/ssu-opencode-setup.cmd?r=$(date +%s)"
 tmp="$(mktemp -d)"
 echo ''
 echo '  SSU x OpenCode workshop installer'
