@@ -124,11 +124,27 @@ function entry(id, lane) {
     m.cost = cost;
   }
 
+  // Reasoning-effort ladders measured live on the gateway (2026-11-04,
+  // reasoning_effort on the chat lane, 2026+ models):
+  // - xhigh+max accepted: deepseek v4 flash/pro, qwen3.8-max, glm-5.2, all claude
+  // - xhigh only (max = HTTP 400): the gpt-5.4/5.5/5.6/6/6.1 chat models below
+  // - max only (xhigh = HTTP 400): glm-5.3, glm-5.3-flash
+  // - xhigh/max rejected, low/medium/high fine: gemini family (default ladder)
+  // Untested models keep the conservative default ladder for their lane.
+  const EFFORT_FULL = new Set(["deepseek-v4.1-flash", "deepseek-v4-pro", "qwen3.8-max", "glm-5.2"]);
+  const EFFORT_XHIGH = new Set(["gpt-6.1-sol", "gpt-6.1-terra", "gpt-6-sol", "gpt-6-luna", "gpt-6-astra", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.5", "gpt-5.4"]);
+  const EFFORT_MAX_ONLY = new Set(["glm-5.3", "glm-5.3-flash"]);
   const efforts = NO_THINKING.has(id)
     ? null
-    : lane === "claude"
-      ? ["low", "medium", "high", "xhigh", "max"]
-      : ["low", "medium", "high"];
+    : EFFORT_MAX_ONLY.has(id)
+      ? ["low", "medium", "high", "max"]
+      : EFFORT_FULL.has(id) || EFFORT_XHIGH.has(id)
+        ? EFFORT_FULL.has(id)
+          ? ["low", "medium", "high", "xhigh", "max"]
+          : ["low", "medium", "high", "xhigh"]
+        : lane === "claude"
+          ? ["low", "medium", "high", "xhigh", "max"]
+          : ["low", "medium", "high"];
   // opencode model fields are `modalities` / `reasoning` / `attachment` — there is no
   // `capabilities` block (it is stripped silently) and no model-level `reasoningField`.
   if (isVision(id)) {
