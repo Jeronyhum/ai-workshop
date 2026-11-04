@@ -324,7 +324,7 @@ try {
 
 servers["ssu-bridge"] = {
   type: "local",
-  command: ["node", path.join(dir, "mcp", "ssu-bridge.mjs")],
+  command: [process.execPath, path.join(dir, "mcp", "ssu-bridge.mjs")],
   timeout: 120000,
 };
 

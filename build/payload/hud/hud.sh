@@ -5,9 +5,23 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT="${SSU_HUD_PORT:-8788}"
+# Node may live in ~/.local/bin (installer tarball); a fresh terminal does not
+# have it on PATH yet, so resolve it ourselves instead of failing.
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"
 
 if [ "${1:-}" = "--print" ]; then
   node --no-warnings "$HERE/status.mjs"
+  exit 0
+fi
+
+URL="http://127.0.0.1:${PORT}/"
+# Already running (autostart + a manual run is the common double): just open
+# the tab and succeed, instead of dying on EADDRINUSE with a scary message.
+if (command -v curl >/dev/null 2>&1 && curl -fsS -m 1 "$URL" >/dev/null 2>&1) || \
+   (command -v wget >/dev/null 2>&1 && wget -q -T 1 -O /dev/null "$URL"); then
+  echo "HUD가 이미 실행 중입니다: $URL"
+  if command -v open >/dev/null 2>&1; then open "$URL"
+  elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1; fi
   exit 0
 fi
 

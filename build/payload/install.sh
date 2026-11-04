@@ -25,6 +25,11 @@ have() { command -v "$1" >/dev/null 2>&1; }
 
 OS="$(uname -s)"
 ARCH="$(uname -m)"
+# A terminal running under Rosetta reports x86_64 on Apple Silicon; downloads
+# must match the real machine or everything lands in the Intel builds.
+if [ "$OS" = "Darwin" ] && [ "$ARCH" = "x86_64" ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
+  ARCH="arm64"
+fi
 say "SSU x OpenCode 설치"
 say "  OS: $OS $ARCH"
 say "  대상 폴더: $ROOT"
@@ -81,13 +86,16 @@ install_node_tarball() {
 install_git_mac() {
   # macOS ships git inside the Xcode Command Line Tools. Triggering the
   # install shows one system dialog; after that click everything is
-  # automatic — poll until git lands (up to ~5 minutes).
+  # automatic — poll until git lands (up to ~10 minutes: the CLT download
+  # is large and workshop Wi-Fi is slow; giving up at 5 minutes on a real
+  # machine silently dropped the whole skill pack).
   have git && return 0
   xcode-select --install >/dev/null 2>&1 || true
   say "  화면에 뜨는 시스템 창에서 '설치'를 눌러주세요 (Git이 포함된 도구 세트입니다)"
   local i
-  for i in $(seq 1 60); do
+  for i in $(seq 1 120); do
     have git && return 0
+    if [ $((i % 24)) -eq 0 ]; then say "  아직 설치 중입니다. 시스템 창에서 설치가 끝날 때까지 기다려주세요 ($((i * 5))초 경과)"; fi
     sleep 5
   done
   have git
@@ -250,6 +258,20 @@ EOF
   fi
 fi
 
+# Binaries installed into ~/.local/bin (node tarball, CLI zip) must stay
+# findable in FUTURE terminals too — this session's PATH export dies with
+# it, and the next terminal would report "command not found" for tools
+# that installed fine (the macOS cousin of the Windows npm-shim failure).
+ensure_rc_path() {
+  local rc="$1" line='export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"'
+  [ -e "$rc" ] || : > "$rc" 2>/dev/null || return 0
+  grep -Fq '.local/bin' "$rc" 2>/dev/null || printf '\n# SSU workshop tools\n%s\n' "$line" >> "$rc"
+}
+if [ "$DRY" != "1" ]; then
+  if [ "$OS" = "Darwin" ]; then ensure_rc_path "$HOME/.zshrc"; ensure_rc_path "$HOME/.bashrc"
+  else ensure_rc_path "$HOME/.bashrc"; fi
+fi
+
 export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$PATH"
 
 # ---------------- 2. key ----------------
@@ -408,20 +430,28 @@ open_design_present() {
     || [ -d "$HOME/Applications/OpenDesign.app" ] || [ -d "$HOME/Applications/Open Design.app" ]
 }
 
+find_od_cli() {
+  # PATH first — but never /usr/bin/od, which is the macOS octal-dump tool,
+  # not Open Design. Then search inside every installed app bundle: the
+  # CLI's exact spot in the bundle differs between builds (fixed-path
+  # guesses missed it on a real machine), so search instead of guessing.
+  local cand app
+  cand="$(command -v od || true)"
+  if [ -n "$cand" ] && [ "$cand" != "/usr/bin/od" ]; then printf '%s' "$cand"; return 0; fi
+  for app in "/Applications/OpenDesign.app" "/Applications/Open Design.app" \
+             "$HOME/Applications/OpenDesign.app" "$HOME/Applications/Open Design.app"; do
+    [ -d "$app" ] || continue
+    cand="$(find "$app" -name od -type f 2>/dev/null | head -1)"
+    if [ -n "$cand" ] && [ -x "$cand" ]; then printf '%s' "$cand"; return 0; fi
+  done
+  if [ -x "$HOME/.local/bin/od" ]; then printf '%s' "$HOME/.local/bin/od"; return 0; fi
+  return 1
+}
+
 wire_open_design_mcp() {
   # OpenCode에 Open Design MCP 연결 (best-effort).
-  # macOS의 /usr/bin/od는 시스템 유틸리티(octal dump)라 Open Design CLI로 취급하지 않는다.
-  local od="" cand
-  cand="$(command -v od || true)"
-  if [ -n "$cand" ] && [ "$cand" != "/usr/bin/od" ]; then od="$cand"; fi
-  if [ -z "$od" ]; then
-    for cand in \
-      "/Applications/OpenDesign.app/Contents/Resources/od" \
-      "/Applications/Open Design.app/Contents/Resources/od" \
-      "$HOME/.local/bin/od"; do
-      if [ -x "$cand" ]; then od="$cand"; break; fi
-    done
-  fi
+  local od=""
+  od="$(find_od_cli || true)"
   if [ -n "$od" ]; then
     if "$od" mcp install opencode >/dev/null 2>&1; then ok "Open Design MCP를 OpenCode에 연결"
     else warn "Open Design MCP 연결 실패 — 직접 실행: od mcp install opencode"; fi
@@ -465,6 +495,11 @@ install_open_design_darwin() {
   base="$(basename "$app")"
   if cp -R "$app" /Applications/ 2>/dev/null || sudo cp -R "$app" /Applications/ 2>/dev/null; then
     ok "Open Design 설치 ($base)"
+    # A dmg-copied app keeps its quarantine flag; without stripping it,
+    # Gatekeeper can block the first launch (the OpenCode dmg path strips
+    # it for the same reason).
+    xattr -dr com.apple.quarantine "/Applications/$base" 2>/dev/null \
+      || sudo xattr -dr com.apple.quarantine "/Applications/$base" 2>/dev/null || true
     hdiutil detach "$mnt" >/dev/null 2>&1 || true
     rm -f "$dmg"
     return 0
@@ -477,7 +512,10 @@ install_open_design_darwin() {
 if [ "$DRY" = "1" ]; then
   say "  (연습 모드) Open Design 설치 계획만 표시합니다 — macOS: brew cask 또는 최신 dmg, Linux: 프리빌드가 없어 안내만"
 elif [ "$OS" = "Darwin" ]; then
-  if install_open_design_darwin; then wire_open_design_mcp; fi
+  # Wire whenever the app is present, even if this run's install step had
+  # trouble — a previous (partial) install still deserves its MCP wiring.
+  install_open_design_darwin || true
+  if open_design_present; then wire_open_design_mcp; fi
 else
   warn "Open Design은 Linux 공식 프리빌드가 없어 건너뜁니다"
   say "    소스 실행: Node 24 + pnpm 필요 — https://github.com/nexu-io/open-design"
