@@ -1,0 +1,227 @@
+{
+ "rus-table.jpg": {
+  "src": "refs/drive/usecases/Rus_Khairullin_2102690067856708083_0.jpg",
+  "w": 1200,
+  "h": 951,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "rus-terminal-cost.jpg": {
+  "src": "refs/drive/usecases/Rus_Khairullin_2102690067856708083_1.jpg",
+  "w": 1200,
+  "h": 979,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "tesla-cpas.jpg": {
+  "src": "refs/drive/usecases/Tesla_Optimus_K_2106153801745092901_0.jpg",
+  "w": 1024,
+  "h": 1024,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "cbdoge-gdpval.jpg": {
+  "src": "refs/drive/usecases/cb_doge_2102083469405000036_0.jpg",
+  "w": 1200,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "openai-ale.jpg": {
+  "src": "refs/drive/usecases/OpenAI_2114780717188272382_0.jpg",
+  "w": 1200,
+  "h": 1096,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "openai-automationbench.jpg": {
+  "src": "refs/drive/usecases/OpenAI_2095595744300503356_0.jpg",
+  "w": 1200,
+  "h": 1025,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "supermannx-radar.jpg": {
+  "src": "refs/drive/jobs_chart/jobs_chart/thesupermannx_2094623256737411268_0.jpg",
+  "w": 1200,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "bennie-postings.jpg": {
+  "src": "refs/drive/jobs_chart/jobs_chart/bennie_chen_2086740865221845057_0.jpg",
+  "w": 1200,
+  "h": 533,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "anthropic-scale.jpg": {
+  "src": "refs/drive/jobs_chart_anthropic_primary/jobs_chart_primary/db62de82e8396bec6edf60ee2134b36957cc7700-1200x630.jpg",
+  "w": 1200,
+  "h": 630,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "anthropic-monitor.jpg": {
+  "src": "refs/drive/labs/labs/AnthropicAI_2116349211549843666_0.jpg",
+  "w": 1200,
+  "h": 830,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "harness2.jpg": {
+  "src": "refs/drive/harness_rag/akshay_pachaar_2111753928031531232_0.jpg",
+  "w": 1051,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "oo-harness.jpg": {
+  "src": "refs/drive/harness_rag/omarsar0_2112911038098317422_0.jpg",
+  "w": 967,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "skill-library.jpg": {
+  "src": "refs/drive/harness_rag/0xShoopy_2117282738143166592_0.jpg",
+  "w": 848,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "memory-tax.jpg": {
+  "src": "refs/drive/harness_rag/Xudong07452910_2116008943126552615_0.jpg",
+  "w": 1154,
+  "h": 1140,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "naive-rag.jpg": {
+  "src": "refs/drive/harness_rag/akshay_pachaar_2114659720602534014_0.jpg",
+  "w": 944,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "delm-central.jpg": {
+  "src": "refs/drive/harness_rag/rohanpaul_ai_2108087162092818694_1.jpg",
+  "w": 725,
+  "h": 433,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "agentbaton.jpg": {
+  "src": "refs/drive/harness_rag/dair_ai_2115888920860958961_0.jpg",
+  "w": 975,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "code-review.jpg": {
+  "src": "refs/drive/harness_rag/undefinedKi_2116634779583979805_0.jpg",
+  "w": 848,
+  "h": 1199,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "self-verify.jpg": {
+  "src": "refs/drive/loop_graph/hanakoxbt_2117365616579666418_0.jpg",
+  "w": 960,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "claude-md.jpg": {
+  "src": "refs/drive/loop_graph/Voxyz_ai_2116968517157212271_0.jpg",
+  "w": 1200,
+  "h": 675,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "super-agent.jpg": {
+  "src": "refs/drive/loop_graph/Hesamation_2116920980002230772_0.jpg",
+  "w": 900,
+  "h": 1200,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "graph-eng-post.jpg": {
+  "src": "refs/drive/_frames/loop_graph_AnnatarXBT_2116256966381301780_0_0.35.jpg",
+  "w": 640,
+  "h": 853,
+  "note": "resized to ≤1400px, JPEG q82"
+ },
+ "claudia-zealcaiden.mp4": {
+  "src": "refs/drive/usecases/zealcaiden_2117359490257629331_0.mp4",
+  "excerpt": "0s–45s",
+  "audio": true,
+  "w": 960,
+  "h": 540,
+  "dur": 45.0,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "dimentorio-blender.mp4": {
+  "src": "refs/drive/usecases/Dimentorio_2113350351499739203_0.mp4",
+  "excerpt": "0s–17s",
+  "audio": true,
+  "w": 960,
+  "h": 512,
+  "dur": 17.0,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "motion-so-launch.mp4": {
+  "src": "refs/drive/usecases/motion_so_2107136416342061418_0.mp4",
+  "excerpt": "0s–27s",
+  "audio": true,
+  "w": 960,
+  "h": 540,
+  "dur": 26.1,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "eliakuratli-approval.mp4": {
+  "src": "refs/drive/frontend_UI_library/eliakuratli_2114800098534387734_0.mp4",
+  "excerpt": "0s–11s",
+  "audio": false,
+  "w": 960,
+  "h": 960,
+  "dur": 10.9,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "flohoeller-needs-you.mp4": {
+  "src": "refs/drive/frontend_UI_library/flohoeller_2116105105762328633_0.mp4",
+  "excerpt": "0s–17s",
+  "audio": false,
+  "w": 960,
+  "h": 774,
+  "dur": 16.7,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "enesozturk-spec.mp4": {
+  "src": "refs/drive/frontend_UI_library/enesozturkdev_2114035471953326126_0.mp4",
+  "excerpt": "0s–11s",
+  "audio": false,
+  "w": 960,
+  "h": 540,
+  "dur": 11.0,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "jakubantalik-motion.mp4": {
+  "src": "refs/drive/frontend_UI_library/Jakubantalik_2113656694303551906_0.mp4",
+  "excerpt": "0s–15s",
+  "audio": false,
+  "w": 960,
+  "h": 648,
+  "dur": 14.6,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "primeintellect-swarm.mp4": {
+  "src": "refs/drive/usecases/PrimeIntellect_2108672479007047952_0.mp4",
+  "excerpt": "0s–15s",
+  "audio": false,
+  "w": 960,
+  "h": 736,
+  "dur": 15.0,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "zoustack-radar.mp4": {
+  "src": "refs/drive/jobs_chart/jobs_chart/ZouStack_2106657886868742276_0.mp4",
+  "excerpt": "0s–30s",
+  "audio": false,
+  "w": 960,
+  "h": 696,
+  "dur": 6.0,
+  "note": "re-encoded H.264 CRF 30, 960px wide"
+ },
+ "anthropic-lab.jpg": {
+  "src": "refs/drive/jobs_chart_anthropic_primary/jobs_chart_primary/55c24ba57e702cf993cd96674ae030ba4c00842d-1280x1280.jpg",
+  "w": 1280,
+  "h": 1280,
+  "note": "re-saved JPEG q82 (1280px)"
+ },
+ "anthropic-columns.jpg": {
+  "src": "refs/drive/jobs_chart_anthropic_primary/jobs_chart_primary/ef0faa4dc389400ab9c9019ecdec7f1257cc6843-2000x1125.jpg",
+  "w": 1400,
+  "h": 788,
+  "note": "resized to ≤1400px, JPEG q82"
+ }
+}

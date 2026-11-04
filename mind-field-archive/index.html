@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIND FIELD 아카이브: 바이브코딩 워크숍 자료</title>
+<meta name="description" content="바이브코딩 워크숍 자료를 관람 순서 없는 전시장처럼 걷는 아카이브. 1부 AI 시대의 변화, 2부 에이전트와 만드는 법.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/archive.css">
+<script src="js/data.js" defer></script>
+<script src="js/assets.js" defer></script>
+<script src="js/anchors.js" defer></script>
+<script src="js/gallery-data.js" defer></script>
+<script src="js/render.js" defer></script>
+<script src="js/explain.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/gallery.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#index-open">목록 보기로 건너뛰기</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar">
+  <a class="bar-mark" href="#" data-jump="all" aria-label="MIND FIELD 아카이브, 전시장 전체 보기">MIND FIELD<i aria-hidden="true"></i><span>아카이브</span></a>
+  <nav class="bar-zones" aria-label="구역으로 이동">
+    <button type="button" data-jump="all"><kbd>0</kbd><span>전체</span></button>
+    <button type="button" data-jump="p1" data-zone="p1"><kbd>1</kbd><span>1부</span></button>
+    <button type="button" data-jump="br" data-zone="br"><kbd>3</kbd><span>다리</span></button>
+    <button type="button" data-jump="p2" data-zone="p2"><kbd>2</kbd><span>2부</span></button>
+    <button type="button" data-jump="gal" data-zone="gal"><kbd>4</kbd><span>사례관</span></button>
+  </nav>
+  <div class="bar-tools">
+    <button type="button" class="tool" id="docent-btn" aria-pressed="false"><kbd>D</kbd><span>도슨트</span></button>
+    <button type="button" class="tool" id="index-open"><kbd>L</kbd><span>목록</span></button>
+    <button type="button" class="tool" id="motion-btn" aria-pressed="false"><kbd>M</kbd><span>모션 <b>기본</b></span></button>
+    <button type="button" class="tool" id="keys-btn" aria-haspopup="dialog"><kbd>?</kbd><span>단축키</span></button>
+  </div>
+</header>
+
+<main>
+  <section class="floor" id="floor" aria-roledescription="전시장 바닥" aria-label="전시장 바닥: 관람 순서 없음" aria-describedby="floor-help">
+    <p class="sr-only" id="floor-help">방향키로 가까운 조각에, Tab으로 실로 이어진 이웃 조각에 갑니다. Enter로 열고 Esc로 한 단계씩 돌아갑니다. D는 도슨트 조명, 숫자 0~4는 구역 이동, G는 사례관입니다. 2부 도식은 마침표(.)와 쉼표(,)로 한 단계씩 넘깁니다.</p>
+    <div class="world" id="world"></div>
+  </section>
+
+  <aside class="hud" id="hud" aria-label="지금 선 자리">
+    <div class="hud-now" id="hud-now"></div>
+    <div class="hud-x" id="hud-x"></div>
+    <ol class="hud-next" id="hud-next" aria-label="실로 이어진 이웃"></ol>
+    <p class="hud-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> 가까운 조각 <kbd>Tab</kbd> 이웃 <kbd>Enter</kbd> 열기 <kbd>Esc</kbd> 뒤로</p>
+  </aside>
+
+  <nav class="map" id="map" aria-label="전시장 지도"></nav>
+  <div class="zoom" role="group" aria-label="확대">
+    <button type="button" class="tool" id="zoom-in" aria-label="확대"><kbd>+</kbd></button>
+    <button type="button" class="tool" id="zoom-out" aria-label="축소"><kbd>−</kbd></button>
+  </div>
+  <p class="sr-only" role="status" aria-live="polite" id="live"></p>
+</main>
+
+<dialog class="room" id="room" aria-labelledby="room-title">
+  <div class="room-progress" aria-hidden="true"></div>
+  <div class="room-in" id="room-in"></div>
+</dialog>
+
+<dialog class="index" id="index" aria-labelledby="index-title">
+  <div class="index-in">
+    <header class="index-head">
+      <h2 id="index-title">목록으로 보기</h2>
+      <p>바닥에 있는 조각을 구역과 축별로 묶었습니다. 이 순서는 관람 순서가 아닙니다.</p>
+      <button type="button" class="btn btn-quiet index-x" data-close>닫기 <kbd>Esc</kbd></button>
+    </header>
+    <div id="index-list"></div>
+  </div>
+</dialog>
+
+<dialog class="gallery" id="gallery" aria-labelledby="gallery-title">
+  <div class="gallery-in" id="gallery-in"></div>
+</dialog>
+
+<dialog class="keys" id="keys" aria-labelledby="keys-title">
+  <h2 id="keys-title">단축키</h2>
+  <dl>
+    <div><dt><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></dt><dd>그 방향에서 가장 가까운 조각으로 이동</dd></div>
+    <div><dt><kbd>Tab</kbd></dt><dd>실로 이어진 다음 이웃 조각으로 이동</dd></div>
+    <div><dt><kbd>Shift</kbd> <kbd>Tab</kbd></dt><dd>방금 지나온 조각으로 돌아가기</dd></div>
+    <div><dt><kbd>Enter</kbd></dt><dd>조각 열기. 방 안에서는 <kbd>←</kbd><kbd>→</kbd>로 이웃 방에 갑니다</dd></div>
+    <div><dt><kbd>Esc</kbd></dt><dd>한 단계씩 뒤로: 방 → 조각 → 구역 → 전체 → 위쪽 메뉴</dd></div>
+    <div><dt><kbd>D</kbd></dt><dd>도슨트 조명: 지금 조각과 이어진 실만 밝히고 나머지는 어둡게, 글자는 크게</dd></div>
+    <div><dt><kbd>.</kbd> <kbd>,</kbd></dt><dd>2부 도식을 한 단계씩 앞뒤로 넘기기 (바닥과 방 모두)</dd></div>
+    <div><dt><kbd>0</kbd> <kbd>1</kbd> <kbd>3</kbd> <kbd>2</kbd> <kbd>4</kbd></dt><dd>전체, 1부, 다리, 2부, 사례관</dd></div>
+    <div><dt><kbd>G</kbd></dt><dd>사례관 열기: 프런티어 모델 활용 사례 (모델 표기는 모두 확인되지 않음)</dd></div>
+    <div><dt><kbd>+</kbd> <kbd>−</kbd></dt><dd>확대·축소. 끌어서 둘러보고, Ctrl을 누른 채 휠로도 확대</dd></div>
+    <div><dt><kbd>L</kbd></dt><dd>목록으로 보기</dd></div>
+    <div><dt><kbd>M</kbd></dt><dd>움직임을 기본과 줄임 사이에서 바꾸기</dd></div>
+  </dl>
+  <p class="keys-note">한글 입력 상태에서도 글자 키가 그대로 작동합니다.</p>
+  <button type="button" class="btn" data-close>닫기 <kbd>Esc</kbd></button>
+</dialog>
+</body>
+</html>

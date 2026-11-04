@@ -1,0 +1,969 @@
+{
+ "bytes_total": 127525142,
+ "files": {
+  "media/usecases/OpenAI_2097374640582668336_0.jpg": {
+   "src": "refs/drive/usecases/OpenAI_2097374640582668336_0.jpg",
+   "out": "media/usecases/OpenAI_2097374640582668336_0.jpg",
+   "w": 1200,
+   "h": 1200,
+   "bytes": 198201
+  },
+  "media/usecases/PrimeIntellect_2108672479007047952_0.mp4": {
+   "src": "refs/drive/usecases/PrimeIntellect_2108672479007047952_0.mp4",
+   "out": "media/usecases/PrimeIntellect_2108672479007047952_0.mp4",
+   "poster": "media/usecases/PrimeIntellect_2108672479007047952_0.jpg",
+   "w": 1280,
+   "h": 982,
+   "dur": 15.0,
+   "srcDur": 15.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1405196
+  },
+  "media/usecases/claudeai_2111177834127601902_0.mp4": {
+   "src": "refs/drive/usecases/claudeai_2111177834127601902_0.mp4",
+   "out": "media/usecases/claudeai_2111177834127601902_0.mp4",
+   "poster": "media/usecases/claudeai_2111177834127601902_0.jpg",
+   "w": 1250,
+   "h": 720,
+   "dur": 115.0,
+   "srcDur": 115.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 17399484
+  },
+  "media/usecases/jasonzhou1993_2116122945605222637_0.mp4": {
+   "src": "refs/drive/usecases/jasonzhou1993_2116122945605222637_0.mp4",
+   "out": "media/usecases/jasonzhou1993_2116122945605222637_0.mp4",
+   "poster": "media/usecases/jasonzhou1993_2116122945605222637_0.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 60.7,
+   "srcDur": 60.7,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 3532152
+  },
+  "media/usecases/motion_so_2107136416342061418_0.mp4": {
+   "src": "refs/drive/usecases/motion_so_2107136416342061418_0.mp4",
+   "out": "media/usecases/motion_so_2107136416342061418_0.mp4",
+   "poster": "media/usecases/motion_so_2107136416342061418_0.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 25.9,
+   "srcDur": 26.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1115249
+  },
+  "media/usecases/u7niversal_2099160360896831804_0.mp4": {
+   "src": "refs/drive/usecases/u7niversal_2099160360896831804_0.mp4",
+   "out": "media/usecases/u7niversal_2099160360896831804_0.mp4",
+   "poster": "media/usecases/u7niversal_2099160360896831804_0.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 120.0,
+   "srcDur": 452.7,
+   "excerpt": true,
+   "audio": false,
+   "bytes": 10640014
+  },
+  "media/usecases/zealcaiden_2117359490257629331_0.mp4": {
+   "src": "refs/drive/usecases/zealcaiden_2117359490257629331_0.mp4",
+   "out": "media/usecases/zealcaiden_2117359490257629331_0.mp4",
+   "poster": "media/usecases/zealcaiden_2117359490257629331_0.jpg",
+   "w": 960,
+   "h": 540,
+   "dur": 120.0,
+   "srcDur": 144.6,
+   "excerpt": true,
+   "audio": true,
+   "bytes": 16764531
+  },
+  "media/usecases/x02_LexnLin_1.mp4": {
+   "src": "refs/x-frontier-cases/media/02_LexnLin_1.mp4",
+   "out": "media/usecases/x02_LexnLin_1.mp4",
+   "poster": "media/usecases/x02_LexnLin_1.jpg",
+   "w": 1280,
+   "h": 796,
+   "dur": 37.4,
+   "srcDur": 37.5,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1807964
+  },
+  "media/usecases/x03_notjazii_1.mp4": {
+   "src": "refs/x-frontier-cases/media/03_notjazii_1.mp4",
+   "out": "media/usecases/x03_notjazii_1.mp4",
+   "poster": "media/usecases/x03_notjazii_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 28.4,
+   "srcDur": 28.5,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 4754315
+  },
+  "media/usecases/x04_Vladic_ETH_1.mp4": {
+   "src": "refs/x-frontier-cases/media/04_Vladic_ETH_1.mp4",
+   "out": "media/usecases/x04_Vladic_ETH_1.mp4",
+   "poster": "media/usecases/x04_Vladic_ETH_1.jpg",
+   "w": 1280,
+   "h": 964,
+   "dur": 87.5,
+   "srcDur": 87.6,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 9708675
+  },
+  "media/usecases/x10_EXM7777_1.mp4": {
+   "src": "refs/x-frontier-cases/media/10_EXM7777_1.mp4",
+   "out": "media/usecases/x10_EXM7777_1.mp4",
+   "poster": "media/usecases/x10_EXM7777_1.jpg",
+   "w": 1080,
+   "h": 1210,
+   "dur": 30.1,
+   "srcDur": 30.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 4614891
+  },
+  "media/usecases/x11_ZentrixHQ_1.mp4": {
+   "src": "refs/x-frontier-cases/media/11_ZentrixHQ_1.mp4",
+   "out": "media/usecases/x11_ZentrixHQ_1.mp4",
+   "poster": "media/usecases/x11_ZentrixHQ_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 15.1,
+   "srcDur": 15.2,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 2194906
+  },
+  "media/usecases/x12_himanshubuildss_1.mp4": {
+   "src": "refs/x-frontier-cases/media/12_himanshubuildss_1.mp4",
+   "out": "media/usecases/x12_himanshubuildss_1.mp4",
+   "poster": "media/usecases/x12_himanshubuildss_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 7.4,
+   "srcDur": 7.5,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 448573
+  },
+  "media/usecases/x15_thebuggeddev_1.mp4": {
+   "src": "refs/x-frontier-cases/media/15_thebuggeddev_1.mp4",
+   "out": "media/usecases/x15_thebuggeddev_1.mp4",
+   "poster": "media/usecases/x15_thebuggeddev_1.jpg",
+   "w": 1280,
+   "h": 804,
+   "dur": 32.1,
+   "srcDur": 32.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 6390470
+  },
+  "media/usecases/x16_pipeline_os_1.mp4": {
+   "src": "refs/x-frontier-cases/media/16_pipeline_os_1.mp4",
+   "out": "media/usecases/x16_pipeline_os_1.mp4",
+   "poster": "media/usecases/x16_pipeline_os_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 10.0,
+   "srcDur": 10.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1948918
+  },
+  "media/usecases/x21_RafaCrackYT_1.mp4": {
+   "src": "refs/x-frontier-cases/media/21_RafaCrackYT_1.mp4",
+   "out": "media/usecases/x21_RafaCrackYT_1.mp4",
+   "poster": "media/usecases/x21_RafaCrackYT_1.jpg",
+   "w": 960,
+   "h": 540,
+   "dur": 30.0,
+   "srcDur": 30.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 3658607
+  },
+  "media/usecases/x25_thehypedotnews_1.mp4": {
+   "src": "refs/x-frontier-cases/media/25_thehypedotnews_1.mp4",
+   "out": "media/usecases/x25_thehypedotnews_1.mp4",
+   "poster": "media/usecases/x25_thehypedotnews_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 56.0,
+   "srcDur": 56.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 9167232
+  },
+  "media/usecases/x27_Soso_fun_yt_1-poster.jpg": {
+   "poster": "media/usecases/x27_Soso_fun_yt_1-poster.jpg",
+   "remote": "https://video.twimg.com/amplify_video/2106442931070464000/vid/avc1/1920x1080/IIHmmS9KdSwqUKRd.mp4",
+   "bytes": 69809,
+   "pulled": true
+  },
+  "media/usecases/x27_Soso_fun_yt_2.jpg": {
+   "src": "refs/x-frontier-cases/media/27_Soso_fun_yt_2.png",
+   "out": "media/usecases/x27_Soso_fun_yt_2.jpg",
+   "w": 696,
+   "h": 635,
+   "bytes": 47230
+  },
+  "media/usecases/x30_MartiansOfMars_1.mp4": {
+   "src": "refs/x-frontier-cases/media/30_MartiansOfMars_1.mp4",
+   "out": "media/usecases/x30_MartiansOfMars_1.mp4",
+   "poster": "media/usecases/x30_MartiansOfMars_1.jpg",
+   "w": 672,
+   "h": 448,
+   "dur": 15.0,
+   "srcDur": 15.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 2173157
+  },
+  "media/usecases/x35_PiskunVladislav_1.mp4": {
+   "src": "refs/x-frontier-cases/media/35_PiskunVladislav_1.mp4",
+   "out": "media/usecases/x35_PiskunVladislav_1.mp4",
+   "poster": "media/usecases/x35_PiskunVladislav_1.jpg",
+   "w": 720,
+   "h": 900,
+   "dur": 15.0,
+   "srcDur": 15.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1458303
+  },
+  "media/usecases/x36_Ed_Forson_1.mp4": {
+   "src": "refs/x-frontier-cases/media/36_Ed_Forson_1.mp4",
+   "out": "media/usecases/x36_Ed_Forson_1.mp4",
+   "poster": "media/usecases/x36_Ed_Forson_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 120.0,
+   "srcDur": 318.0,
+   "excerpt": true,
+   "audio": false,
+   "bytes": 1854512
+  },
+  "media/usecases/x37_tetsuoai_1.jpg": {
+   "src": "refs/x-frontier-cases/media/37_tetsuoai_1.jpg",
+   "out": "media/usecases/x37_tetsuoai_1.jpg",
+   "w": 927,
+   "h": 1200,
+   "bytes": 178251
+  },
+  "media/usecases/x37_tetsuoai_2.jpg": {
+   "src": "refs/x-frontier-cases/media/37_tetsuoai_2.jpg",
+   "out": "media/usecases/x37_tetsuoai_2.jpg",
+   "w": 927,
+   "h": 1200,
+   "bytes": 193436
+  },
+  "media/usecases/x45_KdubSoSolid_1.mp4": {
+   "src": "refs/x-frontier-cases/media/45_KdubSoSolid_1.mp4",
+   "out": "media/usecases/x45_KdubSoSolid_1.mp4",
+   "poster": "media/usecases/x45_KdubSoSolid_1.jpg",
+   "w": 1280,
+   "h": 1148,
+   "dur": 120.0,
+   "srcDur": 148.8,
+   "excerpt": true,
+   "audio": false,
+   "bytes": 5144110
+  },
+  "media/usecases/x47_patch_gg_1.mp4": {
+   "src": "refs/x-frontier-cases/media/47_patch_gg_1.mp4",
+   "out": "media/usecases/x47_patch_gg_1.mp4",
+   "poster": "media/usecases/x47_patch_gg_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 18.3,
+   "srcDur": 18.4,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 946842
+  },
+  "media/usecases/x48_maxt3chno_1.mp4": {
+   "src": "refs/x-frontier-cases/media/48_maxt3chno_1.mp4",
+   "out": "media/usecases/x48_maxt3chno_1.mp4",
+   "poster": "media/usecases/x48_maxt3chno_1.jpg",
+   "w": 1280,
+   "h": 682,
+   "dur": 16.8,
+   "srcDur": 16.9,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1974016
+  },
+  "media/usecases/x50_MrTacticalX_1.mp4": {
+   "src": "refs/x-frontier-cases/media/50_MrTacticalX_1.mp4",
+   "out": "media/usecases/x50_MrTacticalX_1.mp4",
+   "poster": "media/usecases/x50_MrTacticalX_1.jpg",
+   "w": 1024,
+   "h": 1280,
+   "dur": 49.1,
+   "srcDur": 49.1,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 8649913
+  },
+  "media/usecases/x52_rewind02_1.mp4": {
+   "src": "refs/x-frontier-cases/media/52_rewind02_1.mp4",
+   "out": "media/usecases/x52_rewind02_1.mp4",
+   "poster": "media/usecases/x52_rewind02_1.jpg",
+   "w": 1080,
+   "h": 1080,
+   "dur": 13.5,
+   "srcDur": 13.5,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 1497212
+  },
+  "media/usecases/x53_MrTacticalX_1.mp4": {
+   "src": "refs/x-frontier-cases/media/53_MrTacticalX_1.mp4",
+   "out": "media/usecases/x53_MrTacticalX_1.mp4",
+   "poster": "media/usecases/x53_MrTacticalX_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 26.0,
+   "srcDur": 26.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 2477736
+  },
+  "media/usecases/x54_MrTacticalX_1.mp4": {
+   "src": "refs/x-frontier-cases/media/54_MrTacticalX_1.mp4",
+   "out": "media/usecases/x54_MrTacticalX_1.mp4",
+   "poster": "media/usecases/x54_MrTacticalX_1.jpg",
+   "w": 1280,
+   "h": 720,
+   "dur": 25.0,
+   "srcDur": 25.0,
+   "excerpt": false,
+   "audio": false,
+   "bytes": 4562034
+  },
+  "media/usecases/web/anthropic_opus55_og.jpg": {
+   "src": "refs/web-office-cases/media/anthropic_opus55_og.jpg",
+   "out": "media/usecases/web/anthropic_opus55_og.jpg",
+   "w": 1200,
+   "h": 630,
+   "bytes": 91046
+  },
+  "media/usecases/web/yt_kuGjypoJKwk.jpg": {
+   "src": "refs/web-office-cases/media/yt_kuGjypoJKwk.jpg",
+   "out": "media/usecases/web/yt_kuGjypoJKwk.jpg",
+   "w": 480,
+   "h": 360,
+   "bytes": 17998
+  },
+  "media/usecases/web/yt_OKC1qUJA4Fc.jpg": {
+   "src": "refs/web-office-cases/media/yt_OKC1qUJA4Fc.jpg",
+   "out": "media/usecases/web/yt_OKC1qUJA4Fc.jpg",
+   "w": 1280,
+   "h": 720,
+   "bytes": 115274
+  },
+  "media/usecases/web/yt_nJut4s0DTx8.jpg": {
+   "src": "refs/web-office-cases/media/yt_nJut4s0DTx8.jpg",
+   "out": "media/usecases/web/yt_nJut4s0DTx8.jpg",
+   "w": 480,
+   "h": 360,
+   "bytes": 27953
+  }
+ },
+ "removed": [
+  [
+   "media/usecases/AlexFinn_2115596225793921048_0.jpg",
+   38671
+  ],
+  [
+   "media/usecases/AlexFinn_2115596225793921048_0.mp4",
+   4196872
+  ],
+  [
+   "media/usecases/Ben_escrito_2112559004941472230_0.jpg",
+   21093
+  ],
+  [
+   "media/usecases/Ben_escrito_2112559004941472230_0.mp4",
+   2953737
+  ],
+  [
+   "media/usecases/Dimentorio_2113350351499739203_0.jpg",
+   53862
+  ],
+  [
+   "media/usecases/Dimentorio_2113350351499739203_0.mp4",
+   1900533
+  ],
+  [
+   "media/usecases/GoogleCloudTech_2116277717096186261_0.jpg",
+   159476
+  ],
+  [
+   "media/usecases/OpenAI_2095595744300503356_0.jpg",
+   39680
+  ],
+  [
+   "media/usecases/OpenAI_2105373267171438779_0.jpg",
+   36692
+  ],
+  [
+   "media/usecases/OpenAI_2114780717188272382_0.jpg",
+   40375
+  ],
+  [
+   "media/usecases/Rus_Khairullin_2102690067856708083_0.jpg",
+   108238
+  ],
+  [
+   "media/usecases/Rus_Khairullin_2102690067856708083_1.jpg",
+   91880
+  ],
+  [
+   "media/usecases/Rus_Khairullin_2102690067856708083_2.jpg",
+   69416
+  ],
+  [
+   "media/usecases/Rus_Khairullin_2102690067856708083_3.jpg",
+   54219
+  ],
+  [
+   "media/usecases/SakanaAILabs_2113435148792598986_0.jpg",
+   58288
+  ],
+  [
+   "media/usecases/SakanaAILabs_2113435148792598986_0.mp4",
+   351073
+  ],
+  [
+   "media/usecases/Tesla_Optimus_K_2106153801745092901_0.jpg",
+   119089
+  ],
+  [
+   "media/usecases/cb_doge_2102083469405000036_0.jpg",
+   72849
+  ],
+  [
+   "media/usecases/claudeai_2107574195978641911_0.jpg",
+   47236
+  ],
+  [
+   "media/usecases/claudeai_2107574195978641911_0.mp4",
+   4622624
+  ],
+  [
+   "media/usecases/ctatedev_2116323148706771302_0.jpg",
+   66974
+  ],
+  [
+   "media/usecases/ctatedev_2116323148706771302_0.mp4",
+   516464
+  ],
+  [
+   "media/usecases/noclipepe_2116109757865930787_0.jpg",
+   77494
+  ],
+  [
+   "media/usecases/noclipepe_2116109757865930787_0.mp4",
+   1423123
+  ],
+  [
+   "media/usecases/thumbs/AlexFinn_2115596225793921048_0.jpg",
+   8333
+  ],
+  [
+   "media/usecases/thumbs/Ben_escrito_2112559004941472230_0.jpg",
+   6089
+  ],
+  [
+   "media/usecases/thumbs/Dimentorio_2113350351499739203_0.jpg",
+   10426
+  ],
+  [
+   "media/usecases/thumbs/GoogleCloudTech_2116277717096186261_0.jpg",
+   12258
+  ],
+  [
+   "media/usecases/thumbs/OpenAI_2095595744300503356_0.jpg",
+   5232
+  ],
+  [
+   "media/usecases/thumbs/OpenAI_2105373267171438779_0.jpg",
+   4532
+  ],
+  [
+   "media/usecases/thumbs/OpenAI_2114780717188272382_0.jpg",
+   5737
+  ],
+  [
+   "media/usecases/thumbs/Rus_Khairullin_2102690067856708083_0.jpg",
+   11685
+  ],
+  [
+   "media/usecases/thumbs/SakanaAILabs_2113435148792598986_0.jpg",
+   11378
+  ],
+  [
+   "media/usecases/thumbs/Tesla_Optimus_K_2106153801745092901_0.jpg",
+   13957
+  ],
+  [
+   "media/usecases/thumbs/cb_doge_2102083469405000036_0.jpg",
+   9475
+  ],
+  [
+   "media/usecases/thumbs/claudeai_2107574195978641911_0.jpg",
+   10184
+  ],
+  [
+   "media/usecases/thumbs/ctatedev_2116323148706771302_0.jpg",
+   12829
+  ],
+  [
+   "media/usecases/thumbs/noclipepe_2116109757865930787_0.jpg",
+   9869
+  ],
+  [
+   "media/usecases/thumbs/x01_MrTacticalX_1.jpg",
+   14712
+  ],
+  [
+   "media/usecases/thumbs/x05_nityeshaga_1.jpg",
+   10635
+  ],
+  [
+   "media/usecases/thumbs/x06_minicut_ai_1.jpg",
+   7232
+  ],
+  [
+   "media/usecases/thumbs/x07_kopert0x_1.jpg",
+   3344
+  ],
+  [
+   "media/usecases/thumbs/x08_leohuanfang_1.jpg",
+   6768
+  ],
+  [
+   "media/usecases/thumbs/x09_SamgreyAi_1.jpg",
+   5329
+  ],
+  [
+   "media/usecases/thumbs/x13_AIMind_Ai_1.jpg",
+   16438
+  ],
+  [
+   "media/usecases/thumbs/x14_isofunds_1-poster.jpg",
+   5985
+  ],
+  [
+   "media/usecases/thumbs/x17_hunnidventures_1.jpg",
+   5589
+  ],
+  [
+   "media/usecases/thumbs/x18_noclipepe_1.jpg",
+   8861
+  ],
+  [
+   "media/usecases/thumbs/x19_shownotover_1.jpg",
+   11692
+  ],
+  [
+   "media/usecases/thumbs/x20_thehypedotnews_1.jpg",
+   8579
+  ],
+  [
+   "media/usecases/thumbs/x22_0xGull_1.jpg",
+   8922
+  ],
+  [
+   "media/usecases/thumbs/x23_ottollm_1.jpg",
+   14285
+  ],
+  [
+   "media/usecases/thumbs/x24_Haleeeemahh_1.jpg",
+   10338
+  ],
+  [
+   "media/usecases/thumbs/x26_KanikaBK_1.jpg",
+   3288
+  ],
+  [
+   "media/usecases/thumbs/x28_kepochnik_1.jpg",
+   16822
+  ],
+  [
+   "media/usecases/thumbs/x29_noclipepe_1.jpg",
+   9462
+  ],
+  [
+   "media/usecases/thumbs/x31_ericzakariasson_1.jpg",
+   4936
+  ],
+  [
+   "media/usecases/thumbs/x32_bowie_HQ_1.jpg",
+   7932
+  ],
+  [
+   "media/usecases/thumbs/x33_vutruongart_1-poster.jpg",
+   7668
+  ],
+  [
+   "media/usecases/thumbs/x34_FuckingSlaveMan_1.jpg",
+   4736
+  ],
+  [
+   "media/usecases/thumbs/x38_starmexxx_1.jpg",
+   8516
+  ],
+  [
+   "media/usecases/thumbs/x39_pricedin_mkts_1.jpg",
+   7179
+  ],
+  [
+   "media/usecases/thumbs/x40_coastyai_1.jpg",
+   6112
+  ],
+  [
+   "media/usecases/thumbs/x41_coastyai_1.jpg",
+   4717
+  ],
+  [
+   "media/usecases/thumbs/x42_coastyai_1.jpg",
+   5485
+  ],
+  [
+   "media/usecases/thumbs/x43_EvoLinkAi_1.jpg",
+   9425
+  ],
+  [
+   "media/usecases/thumbs/x44_qi9098_1.jpg",
+   5487
+  ],
+  [
+   "media/usecases/thumbs/x46_necrophosalpha_1.jpg",
+   8181
+  ],
+  [
+   "media/usecases/thumbs/x49_iamMalk_1.jpg",
+   9379
+  ],
+  [
+   "media/usecases/thumbs/x51_Ferhan_XRB_1.jpg",
+   5450
+  ],
+  [
+   "media/usecases/thumbs/x55_aisavvy1_1.jpg",
+   6047
+  ],
+  [
+   "media/usecases/thumbs/x56_RafaCrackYT_1.jpg",
+   9462
+  ],
+  [
+   "media/usecases/thumbs/x57_EvoLinkAi_1.jpg",
+   11942
+  ],
+  [
+   "media/usecases/thumbs/x58_XtraAi_1.jpg",
+   9552
+  ],
+  [
+   "media/usecases/thumbs/x59_RobertBeckebans_1.jpg",
+   8998
+  ],
+  [
+   "media/usecases/x01_MrTacticalX_1.jpg",
+   93726
+  ],
+  [
+   "media/usecases/x01_MrTacticalX_1.mp4",
+   4584713
+  ],
+  [
+   "media/usecases/x05_nityeshaga_1.jpg",
+   135153
+  ],
+  [
+   "media/usecases/x05_nityeshaga_2.jpg",
+   62786
+  ],
+  [
+   "media/usecases/x05_nityeshaga_3.jpg",
+   98757
+  ],
+  [
+   "media/usecases/x06_minicut_ai_1.jpg",
+   35317
+  ],
+  [
+   "media/usecases/x06_minicut_ai_1.mp4",
+   2243153
+  ],
+  [
+   "media/usecases/x07_kopert0x_1.jpg",
+   14550
+  ],
+  [
+   "media/usecases/x07_kopert0x_1.mp4",
+   2818904
+  ],
+  [
+   "media/usecases/x08_leohuanfang_1.jpg",
+   52920
+  ],
+  [
+   "media/usecases/x08_leohuanfang_1.mp4",
+   740804
+  ],
+  [
+   "media/usecases/x09_SamgreyAi_1.jpg",
+   32748
+  ],
+  [
+   "media/usecases/x09_SamgreyAi_1.mp4",
+   1328183
+  ],
+  [
+   "media/usecases/x13_AIMind_Ai_1.jpg",
+   68626
+  ],
+  [
+   "media/usecases/x13_AIMind_Ai_1.mp4",
+   632438
+  ],
+  [
+   "media/usecases/x14_isofunds_1-poster.jpg",
+   33575
+  ],
+  [
+   "media/usecases/x17_hunnidventures_1.jpg",
+   18864
+  ],
+  [
+   "media/usecases/x17_hunnidventures_1.mp4",
+   3659269
+  ],
+  [
+   "media/usecases/x18_noclipepe_1.jpg",
+   76443
+  ],
+  [
+   "media/usecases/x18_noclipepe_1.mp4",
+   2155006
+  ],
+  [
+   "media/usecases/x19_shownotover_1.jpg",
+   76215
+  ],
+  [
+   "media/usecases/x19_shownotover_1.mp4",
+   1624516
+  ],
+  [
+   "media/usecases/x20_thehypedotnews_1.jpg",
+   44993
+  ],
+  [
+   "media/usecases/x20_thehypedotnews_1.mp4",
+   6527460
+  ],
+  [
+   "media/usecases/x22_0xGull_1.jpg",
+   55549
+  ],
+  [
+   "media/usecases/x22_0xGull_1.mp4",
+   2090400
+  ],
+  [
+   "media/usecases/x23_ottollm_1.jpg",
+   91895
+  ],
+  [
+   "media/usecases/x23_ottollm_1.mp4",
+   1795851
+  ],
+  [
+   "media/usecases/x24_Haleeeemahh_1.jpg",
+   78546
+  ],
+  [
+   "media/usecases/x24_Haleeeemahh_1.mp4",
+   4765606
+  ],
+  [
+   "media/usecases/x26_KanikaBK_1.jpg",
+   14307
+  ],
+  [
+   "media/usecases/x26_KanikaBK_1.mp4",
+   4506362
+  ],
+  [
+   "media/usecases/x28_kepochnik_1.jpg",
+   94913
+  ],
+  [
+   "media/usecases/x28_kepochnik_1.mp4",
+   2533836
+  ],
+  [
+   "media/usecases/x29_noclipepe_1.jpg",
+   52902
+  ],
+  [
+   "media/usecases/x29_noclipepe_1.mp4",
+   3393678
+  ],
+  [
+   "media/usecases/x31_ericzakariasson_1.jpg",
+   25462
+  ],
+  [
+   "media/usecases/x31_ericzakariasson_1.mp4",
+   1857689
+  ],
+  [
+   "media/usecases/x32_bowie_HQ_1.jpg",
+   41144
+  ],
+  [
+   "media/usecases/x32_bowie_HQ_1.mp4",
+   11352400
+  ],
+  [
+   "media/usecases/x33_vutruongart_1-poster.jpg",
+   43530
+  ],
+  [
+   "media/usecases/x34_FuckingSlaveMan_1.jpg",
+   34244
+  ],
+  [
+   "media/usecases/x34_FuckingSlaveMan_1.mp4",
+   1883507
+  ],
+  [
+   "media/usecases/x38_starmexxx_1.jpg",
+   94499
+  ],
+  [
+   "media/usecases/x38_starmexxx_1.mp4",
+   725898
+  ],
+  [
+   "media/usecases/x39_pricedin_mkts_1.jpg",
+   70972
+  ],
+  [
+   "media/usecases/x40_coastyai_1.jpg",
+   35043
+  ],
+  [
+   "media/usecases/x40_coastyai_1.mp4",
+   628504
+  ],
+  [
+   "media/usecases/x41_coastyai_1.jpg",
+   22976
+  ],
+  [
+   "media/usecases/x41_coastyai_1.mp4",
+   482227
+  ],
+  [
+   "media/usecases/x42_coastyai_1.jpg",
+   35397
+  ],
+  [
+   "media/usecases/x42_coastyai_1.mp4",
+   877096
+  ],
+  [
+   "media/usecases/x43_EvoLinkAi_1.jpg",
+   43692
+  ],
+  [
+   "media/usecases/x43_EvoLinkAi_1.mp4",
+   141697
+  ],
+  [
+   "media/usecases/x44_qi9098_1.jpg",
+   30499
+  ],
+  [
+   "media/usecases/x44_qi9098_1.mp4",
+   553712
+  ],
+  [
+   "media/usecases/x46_necrophosalpha_1.jpg",
+   56037
+  ],
+  [
+   "media/usecases/x46_necrophosalpha_1.mp4",
+   427025
+  ],
+  [
+   "media/usecases/x49_iamMalk_1.jpg",
+   44037
+  ],
+  [
+   "media/usecases/x49_iamMalk_1.mp4",
+   1041246
+  ],
+  [
+   "media/usecases/x49_iamMalk_2.jpg",
+   139810
+  ],
+  [
+   "media/usecases/x51_Ferhan_XRB_1.jpg",
+   27297
+  ],
+  [
+   "media/usecases/x51_Ferhan_XRB_1.mp4",
+   1124645
+  ],
+  [
+   "media/usecases/x55_aisavvy1_1.jpg",
+   70525
+  ],
+  [
+   "media/usecases/x55_aisavvy1_1.mp4",
+   7691832
+  ],
+  [
+   "media/usecases/x56_RafaCrackYT_1.jpg",
+   41149
+  ],
+  [
+   "media/usecases/x56_RafaCrackYT_1.mp4",
+   1348419
+  ],
+  [
+   "media/usecases/x57_EvoLinkAi_1.jpg",
+   53649
+  ],
+  [
+   "media/usecases/x57_EvoLinkAi_1.mp4",
+   532540
+  ],
+  [
+   "media/usecases/x58_XtraAi_1.jpg",
+   93237
+  ],
+  [
+   "media/usecases/x59_RobertBeckebans_1.jpg",
+   70038
+  ],
+  [
+   "media/usecases/x59_RobertBeckebans_2.jpg",
+   53785
+  ]
+ ]
+}

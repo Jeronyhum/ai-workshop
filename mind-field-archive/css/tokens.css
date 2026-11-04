@@ -1,0 +1,147 @@
+/* MIND FIELD tokens.
+   Three materials carry the whole system:
+     field   — the dark, grainy ground where headlines arrive as noise   (moodboard: near-black + grain)
+     paper   — evidence; the only material that casts a shadow          (arXiv first pages, Anthropic editorial collages)
+     drawing — how a thing is built; hairlines, dimensions, dot grid    (enesozturk spec sheets, Jakubantalik MOTION.CSS)
+   Palette values are the moodboard's own (refs/무드_컨셉보드_ui-library.md). Derived values are noted. */
+
+@font-face { font-family: "Archivo MF"; src: url("../fonts/Archivo-Variable.ttf") format("truetype"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "JetBrains Mono MF"; src: url("../fonts/JetBrainsMono-Variable.ttf") format("truetype"); font-weight: 100 800; font-display: swap; }
+/* Gothic A1 (OFL), subset to the Hangul this site uses — see README "Fonts". Display only. */
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Black-subset.woff") format("woff"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Bold-subset.woff") format("woff"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Regular-subset.woff") format("woff"); font-weight: 400; font-display: swap; }
+
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #D4261C; }
+
+:root {
+  /* ── colour: field ─────────────────────────────── */
+  --field:        #0B0B0C;  /* moodboard near-black (base) */
+  --field-1:      #131314;  /* derived: raised panel */
+  --field-2:      #1B1B1D;  /* derived: control well */
+  --charcoal:     #2A2A2C;  /* moodboard charcoal: hairlines, surfaces */
+  --charcoal-2:   #3A3A3D;  /* derived: strong hairline */
+  --fog:          #8E8B85;  /* derived: secondary text on field, 5.8:1 */
+  --bone:         #E8E4DC;  /* moodboard bone: text on field, 15.5:1 */
+
+  /* ── colour: paper ─────────────────────────────── */
+  --paper:        #E8E4DC;  /* bone is also the paper stock */
+  --paper-2:      #DCD6CA;  /* derived: paper in shadow, table rule */
+  --paper-edge:   #C9C2B4;  /* derived: deckle */
+  --ink:          #0B0B0C;  /* field printed on paper, 15.5:1 */
+  --ink-2:        #4A4741;  /* derived: secondary ink, 7.3:1 on paper */
+
+  /* ── colour: signals (one accent per frame) ────── */
+  --signal:       #D4261C;  /* moodboard signal red: Part 1, the world, corrections. Large type + marks only (3.8:1 on field) */
+  --signal-text:  #FF5B48;  /* derived: red small text on field, 6.4:1 */
+  --signal-ink:   #A3160E;  /* derived: red small text on paper, 6.2:1 */
+  --acid:         #B6F23A;  /* moodboard acid green: Part 2, "you", the bridge. Sparing */
+  --acid-ink:     #3F5A00;  /* derived: acid as text on paper, 6.2:1 */
+  --ember:        #E8541E;  /* moodboard ember: conditional status, heat. Never as a glow on UI chrome */
+  --ember-ink:    #9A3108;  /* derived: ember as text on paper, 5.9:1 */
+  --accent:       var(--signal);
+
+  /* ── colour: status (shape first, colour second) ─ */
+  --st-verified:     var(--bone);   /* 확정 ● filled */
+  --st-conditional:  var(--ember);  /* 단서 ◐ half */
+  --st-unverified:   var(--fog);    /* 미확인 ○ outline */
+  --st-excluded:     var(--signal); /* 제외 ⊘ struck */
+
+  /* ── type ─────────────────────────────────────── */
+  --f-display:  "Archivo MF", "Archivo", "Arial Narrow", sans-serif;               /* Latin + numerals, condensed */
+  --f-display-ko: "Gothic A1 MF", "Gothic A1", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
+  --f-text:     "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Gothic A1 MF", "Noto Sans CJK KR", sans-serif;
+  --f-mono:     "JetBrains Mono MF", "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; /* credits, stamps, tokens, logs */
+
+  --wdth-poster: 62;   /* Archivo width axis: condensed poster */
+  --wdth-text:   100;
+
+  /* classical scale (Bringhurst): 12 14 17 21 28 36 48 72 */
+  --t-micro:  0.75rem;   /* 12 — credits */
+  --t-small:  0.875rem;  /* 14 */
+  --t-body:   1.0625rem; /* 17 */
+  --t-lead:   1.3125rem; /* 21 */
+  --t-h3:     1.75rem;   /* 28 */
+  --t-h2:     2.25rem;   /* 36 */
+  --t-h1:     3rem;      /* 48 */
+  --t-poster: 4.5rem;    /* 72 */
+  --t-mega:   clamp(6rem, 21vw, 22rem);
+
+  --lh-ko:      1.68;  /* Korean body */
+  --lh-tight:   1.08;
+  --lh-poster:  0.84;
+  --track-poster: -0.015em;
+  --measure: 38em;     /* < 80 characters */
+
+  /* ── space: 4px base ─────────────────────────── */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 144px;
+  --gutter: clamp(20px, 5.5vw, 96px);
+
+  /* ── radius: by material, not one value for all ─ */
+  --r-paper: 1px;     /* paper is cut, not rounded */
+  --r-ctl:   6px;     /* controls on field */
+  --r-pill:  999px;   /* chips: the only pills */
+  --r-node:  50%;     /* knowledge nodes */
+
+  /* ── elevation: only paper casts a shadow ─────── */
+  --shadow-paper:   0 1px 0 rgba(0,0,0,.35), 0 18px 36px -18px rgba(0,0,0,.7);
+  --shadow-lifted:  0 2px 0 rgba(0,0,0,.35), 0 34px 60px -24px rgba(0,0,0,.85);
+
+  /* ── drawing ─────────────────────────────────── */
+  --draw-line:  1px;
+  --draw-dash:  3px 3px;
+  --draw-grid:  16px;  /* dot grid pitch, Jakubantalik */
+
+  /* ── motion: durations ───────────────────────── */
+  --dur-press:   120ms;
+  --dur-morph:   180ms;   /* label-morph, Jakubantalik MOTION.CSS */
+  --dur-resize:  240ms;   /* label-morph resize */
+  --dur-expand:  250ms;   /* accordion expand/collapse */
+  --dur-strike:  280ms;
+  --dur-digit:   500ms;   /* digit roll */
+  --dur-enter:   320ms;
+  --dur-exit:    200ms;   /* "Exits faster than it enters" (animate-ui) */
+  --dur-hold:    600ms;   /* a beat of nothing, on purpose */
+  --dur-scene:   900ms;
+
+  /* ── motion: easings ─────────────────────────── */
+  --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);    /* text-morph / accordion ease */
+  --ease-over:    cubic-bezier(0.34, 1.45, 0.64, 1); /* digit ease: a tiny overshoot */
+  --ease-in:      cubic-bezier(0.55, 0, 0.75, 0.06); /* exits */
+  --ease-inout:   cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-linear:  linear;                             /* the "PowerPoint move", shown only as a foil */
+  --spring-k: 140;  /* stiffness — "spring 140/15" (animate-ui) */
+  --spring-c: 15;   /* damping   → ζ≈0.63, ≈8% overshoot */
+
+  /* ── motion: distances, blur, stagger ─────────── */
+  --rise:        8px;    /* digit distance */
+  --blur-morph:  2px;
+  --blur-depth:  6px;
+  --stagger-tight: 30ms; /* list items */
+  --stagger-digit: 70ms;
+  --press-scale: 0.97;
+
+  --motion: 1;  /* set to 0 by reduced motion */
+
+  /* ── texture ─────────────────────────────────── */
+  --grain-opacity: .085;
+
+  color-scheme: dark;
+}
+
+/* Reduced motion: everything that moves either stops or becomes a short crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    --motion: 0;
+    --dur-press: 0ms; --dur-morph: 0ms; --dur-resize: 0ms; --dur-expand: 0ms; --dur-strike: 0ms;
+    --dur-digit: 0ms; --dur-enter: 120ms; --dur-exit: 120ms; --dur-hold: 0ms; --dur-scene: 160ms;
+    --rise: 0px; --blur-morph: 0px; --blur-depth: 0px; --stagger-tight: 0ms; --stagger-digit: 0ms; --press-scale: 1;
+  }
+}
+:root[data-motion="reduced"] {
+  --motion: 0;
+  --dur-press: 0ms; --dur-morph: 0ms; --dur-resize: 0ms; --dur-expand: 0ms; --dur-strike: 0ms;
+  --dur-digit: 0ms; --dur-enter: 120ms; --dur-exit: 120ms; --dur-hold: 0ms; --dur-scene: 160ms;
+  --rise: 0px; --blur-morph: 0px; --blur-depth: 0px; --stagger-tight: 0ms; --stagger-digit: 0ms; --press-scale: 1;
+}

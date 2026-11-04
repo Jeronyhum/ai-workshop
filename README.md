@@ -45,3 +45,7 @@ SSU_DRY_RUN=1 SSU_SKIP_APPS=1 SSU_SKIP_TOOLS=1 SSU_ROOT=<임시폴더> SSU_ARGS=
 ```
 
 API 키는 파일·로그에 평문 기록 금지. `.env`(SSU_API_KEY)와 환경변수로만 흘린다.
+
+## MIND FIELD exhibition archive
+
+`mind-field-archive/`: a non-linear archive of the AI vibe-coding workshop. Run it with `cd mind-field-archive && python3 -m http.server 8766`. Credits are in `mind-field-archive/CREDITS.md`, and the review prompt is in `mind-field-archive/review-meta-prompt.md`.
