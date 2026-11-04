@@ -37,13 +37,21 @@
     if (!s) return null;
     return AR.assetsReady.includes(slot) ? s.file : s.fallback;
   };
+  /* v6: a floor image starts on its small copy (lod/); js/app.js upgradeImages steps it up to the middle copy (lod/m/)
+     and then the full file, each only when it is drawn wider than the copy it shows. Returns the first src and the attributes. */
+  AR.lodImg = (src) => {
+    const l = AR.lod && AR.lod[src];
+    if (!l) return { src, attrs: "" };
+    return { src: l.lod, attrs: ` data-full="${src}" data-w="${l.w}"` + (l.mid ? ` data-mid="${l.mid}" data-mw="${l.mw}"` : "") };
+  };
   /* <img> for a slot: the delivered file if ready, with the fallback as onerror */
   AR.assetImg = (slot, cls) => {
     const s = AR.assetSlots[slot], src = AR.asset(slot);
     if (!src) return "";
     const fb = AR.assetsReady.includes(slot) && s.fallback ? ` onerror="this.onerror=null;this.dataset.gen='';this.src='${s.fallback}'"` : "";
     const gen = AR.assetsReady.includes(slot) ? "" : " data-gen";
-    return `<img class="${cls}" src="${src}" alt="" data-slot="${slot}"${gen}${fb}>`;
+    const lod = AR.lodImg(src);
+    return `<img class="${cls}" src="${lod.src}"${lod.attrs} alt="" decoding="async" data-slot="${slot}"${gen}${fb}>`;
   };
   /* CSS custom properties for the background slots */
   AR.applyAssetVars = (root = document.documentElement) => {

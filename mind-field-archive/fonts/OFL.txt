@@ -1,12 +1,24 @@
-Archivo-Variable.ttf
+All files in this folder are WOFF2 subsets of fonts licensed under the SIL Open Font License, Version 1.1.
+Subset to the characters this site draws by tools/subset_ko.py (Korean) and tools/subset_latin.py (Latin);
+outlines unchanged. The copyright lines below are read from each file's name table.
+
+Archivo-subset.woff2 (width 62-100 and weight 400-900 kept from the variable font)
 Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
 
-JetBrainsMono-Variable.ttf
+JetBrainsMono-subset.woff2
 Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
 
-GothicA1-Black-subset.woff, GothicA1-Bold-subset.woff, GothicA1-Regular-subset.woff
+InstrumentSerif-Regular-subset.woff2, InstrumentSerif-Italic-subset.woff2
+Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+
+NotoSerifKR-Regular-subset.woff2, NotoSerifKR-Bold-subset.woff2 (Korean face of Noto Serif CJK)
+© 2017-2024 Adobe (http://www.adobe.com/).
+
+Pretendard-Regular-subset.woff2, Pretendard-Medium-subset.woff2, Pretendard-Bold-subset.woff2
+Copyright © 2023 Kil Hyung-jin
+
+GothicA1-Black-subset.woff2, GothicA1-Bold-subset.woff2, GothicA1-Regular-subset.woff2
 (C) Copyright HanYang I&C Co.,Ltd. Licensed under the SIL Open Font License, Version 1.1.
-Subset by tools/subset_ko.py to the characters this site uses; outlines unchanged.
 
 These Font Software files are licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -20,7 +20,7 @@
 
   /* posts that are also on the floor, and the audit's word where it applies */
   const PIECE = {
-    "d-OpenAI-2097374640582668336": { id: "science", gate: "감사 B-0 :106: 밀레니엄 문제 본체가 아니라 강제 있는 NS에 대한 주장 단계" },
+    "d-OpenAI-2097374640582668336": { id: "science", gate: "감수 판정(정정): 밀레니엄 문제 본체가 아니라 강제 있는 NS에 대한 주장 단계" },
     "d-zealcaiden-2117359490257629331": { id: "claudia" },
     "d-motion_so-2107136416342061418": { id: "motionso" },
     "d-PrimeIntellect-2108672479007047952": { id: "graph" },
@@ -77,7 +77,7 @@
         <img src="${raw(m.poster)}" alt="" loading="lazy" decoding="async"><span class="gl-dur">${mmss(m.dur)}${m.excerpt ? ` <small>앞 2분 발췌 · 원본 ${mmss(m.srcDur)}</small>` : ""}</span><i aria-hidden="true"></i>
       </button></div>`;
   }
-  function tile(it, lead) {
+  function tile(it, lead, kicker) {
     const text = decode(it.text);
     const short = text.length > 220;
     const pc = PIECE[it.key];
@@ -88,6 +88,7 @@
       ${it.rank ? `<span class="gl-rank" aria-label="순위 ${it.rank}">${it.rank}</span>` : ""}
       ${media(it)}
       <div class="gl-cap">
+        ${kicker ? `<p class="gl-kick">${esc(kicker)}</p>` : ""}
         ${it.computerUse ? `<p class="gl-flag">컴퓨터 사용 데모 <span>실제 사무 업무가 아니라, 에이전트가 화면을 조작하는 시연</span></p>` : ""}
         ${it.made ? `<p class="gl-made">${esc(decode(it.made))}</p>` : ""}
         ${it.origin === "web" ? "" : `<p class="gl-text${short ? " is-clamp" : ""}">${esc(text)}</p>${short ? `<details class="gl-full"><summary>게시물 전문</summary><p>${esc(text)}</p></details>` : ""}`}
@@ -97,18 +98,29 @@
         <p class="gl-why"><b>고른 이유</b> ${esc(it.reason)}</p>
         <p class="gl-meta">${who}${it.date ? ` · ${esc(it.date)}` : ""}${it.likes != null ? ` · 좋아요 ${it.likes.toLocaleString("en-US")} (수집 시점)` : ""}</p>
         <p class="gl-links"><a href="${raw(it.url)}" target="_blank" rel="noopener noreferrer" data-kind="${raw(it.linkKind)}">${esc(it.linkKind)}</a>${floorLink}</p>
-        <p class="q-ref">${esc(it.src)}${it.textSrc && it.textSrc.l ? ` · 문구 ${esc(it.textSrc.f)} :${it.textSrc.l}` : ""}</p>
       </div></li>`;
   }
-  const grid = (list, leadFirst) => `<ol class="gl-grid">${list.map((it, i) => tile(it, leadFirst && i === 0 && list.length > 2)).join("")}</ol>`;
+  /* a lone tile gets the whole row (picture beside its text), so a one-example group never leaves an empty grid */
+  const grid = (list, leadFirst, kicker) => `<ol class="gl-grid${list.length === 1 ? " is-solo" : ""}">${list.map((it, i) => tile(it, leadFirst && i === 0 && list.length > 2, kicker && kicker(it))).join("")}</ol>`;
+  /* v6 (Dots browser review 4): groups with one example share one grid inside their family, each tile labelled with its
+     group; families with one example share a last block. Groups of two or more keep their own heading. */
+  /* v6 (Dots browser review 4): no group or family of one gets a row of its own. A one-example group joins its family's
+     larger group (its name on the tile); one-example families share one block at the end, each tile naming its family. */
   function showcase(s) {
-    return G.families.map((f) => {
-      const list = s.items.filter((i) => i.family === f.key);
-      if (!list.length) return "";
-      const groups = [...new Set(list.map((i) => i.group))];
-      return `<div class="gl-famblock" data-fam="${f.key}"><h4 class="gl-fam-h"><b>${esc(f.name)}</b>${f.sub ? ` <span>${esc(f.sub)}</span>` : ""}<em>${list.length}</em></h4>
-        ${groups.map((g) => { const l = list.filter((i) => i.group === g).sort(likes); return `<div class="gl-sub"><h5>${esc(g)}<span>${l.length}</span></h5>${grid(l, true)}</div>`; }).join("")}</div>`;
-    }).join("");
+    const fams = G.families.map((f) => ({ f, list: s.items.filter((i) => i.family === f.key) })).filter((x) => x.list.length);
+    const head = (name, sub, n) => `<h4 class="gl-fam-h"><b>${esc(name)}</b>${sub ? ` <span>${esc(sub)}</span>` : ""}<em>${n}</em></h4>`;
+    const block = ({ f, list }) => {
+      const groups = [...new Set(list.map((i) => i.group))].map((g) => ({ g, l: list.filter((i) => i.group === g).sort(likes) }));
+      const multi = groups.filter((x) => x.l.length > 1), ones = groups.filter((x) => x.l.length === 1);
+      if (!multi.length) return `<div class="gl-famblock" data-fam="${f.key}">${head(f.name, f.sub, list.length)}<div class="gl-sub">${grid(list.slice().sort(likes), true, (it) => it.group)}</div></div>`;
+      return `<div class="gl-famblock" data-fam="${f.key}">${head(f.name, f.sub, list.length)}
+        ${multi.map((x, k) => { const extra = k === multi.length - 1 ? ones : [];
+          return `<div class="gl-sub"><h5>${esc(x.g)}<span>${x.l.length}</span>${extra.map((o) => `<i>+ ${esc(o.g)} <span>${o.l.length}</span></i>`).join("")}</h5>${grid([...x.l, ...extra.map((o) => o.l[0])], true, (it) => (it.group === x.g ? "" : it.group))}</div>`; }).join("")}</div>`;
+    };
+    const big = fams.filter((x) => x.list.length > 1), solo = fams.filter((x) => x.list.length === 1);
+    const famOf = new Map(solo.map((x) => [x.list[0].key, x.f]));
+    return big.map(block).join("") + (solo.length ? `<div class="gl-famblock" data-fam="more">${head("한 건씩", solo.map((x) => x.f.name).join(", "), solo.length)}
+      <div class="gl-sub">${grid(solo.map((x) => x.list[0]), false, (it) => `${famOf.get(it.key).name} · ${it.group}`)}</div></div>` : "");
   }
   function office(s) {
     const web = s.items.filter((i) => i.origin === "web").sort((a, b) => a.rank - b.rank);
@@ -120,7 +132,8 @@
   }
   function build() {
     const total = G.items.length;
-    const bar = sections.map((s) => `<span class="gl-seg" data-sec="${s.key}" style="--w:${(s.items.length / total) * 100}%"><b>${s.items.length}</b><em>${esc(s.name)}</em></span>`).join("");
+    /* v6 (blind review 16): one row, not two. The share bar is also the jump menu (it used to repeat as a link row) */
+    const bar = sections.map((s) => `<a class="gl-seg" data-sec="${s.key}" href="#gl-${s.key}" style="--w:${(s.items.length / total) * 100}%"><b>${s.items.length}</b><em>${esc(s.name)}</em></a>`).join("");
     const secHTML = sections.map((s) => `
       <section class="gl-fam" id="gl-${s.key}" data-sec="${s.key}"><h3><b>${esc(s.name)}</b><span class="gl-famsub">${esc(s.sub)}</span><span class="gl-n">${s.items.length}</span></h3>
         ${s.key === "showcase" ? showcase(s) : s.key === "office" ? office(s) : `<div class="gl-sub">${grid(s.items.slice().sort(likes), true)}</div>`}
@@ -128,15 +141,13 @@
     const n = (o) => G.items.filter((i) => i.origin === o).length;
     body.innerHTML = `
       <header class="gl-head">
-        <button type="button" class="btn btn-quiet gl-x" data-close>바닥으로 <kbd>Esc</kbd></button>
         <h2 id="gallery-title">프런티어 모델 활용 사례</h2>
-        <p class="gl-big"><b>${total}</b><span>눈에 띄는 것만 고른 사례. Drive usecases ${n("drive")}건, X 수집 ${n("scout")}건, 웹 오피스 ${n("web")}건</span></p>
+        <p class="gl-big"><b>${total}</b><span>눈에 띄는 것만 고른 사례. 워크숍 자료 ${n("drive")}건, X 게시물 ${n("scout")}건, 공식 웹 사례 ${n("web")}건</span></p>
         <p class="gl-note"><span class="st st-s" data-st="unverified">미확인</span> ${esc(G.note)} 웹 오피스 사례 중 공식 출처 다섯 건만 <span class="st st-s" data-st="verified">확인됨</span>입니다.</p>
-        <div class="gl-bar" role="img" aria-label="${raw(sections.map((s) => `${s.name} ${s.items.length}건`).join(", "))}">${bar}</div>
-        <nav class="gl-nav" aria-label="묶음으로 이동">${sections.map((s) => `<a href="#gl-${s.key}">${esc(s.name)} <span>${s.items.length}</span></a>`).join("")}</nav>
       </header>
+      <div class="gl-sticky"><nav class="gl-bar" aria-label="묶음으로 이동, 칸 너비는 건수 비율">${bar}</nav><button type="button" class="btn btn-quiet gl-x" data-close>바닥으로 <kbd>Esc</kbd></button></div>
       ${secHTML}
-      <footer class="gl-foot"><p class="q-ref">출처: refs/drive/usecases/ (X 링크는 파일 이름에서), refs/old-claude-design-brief.md (Drive 게시물 첫 줄), refs/x-frontier-cases/cases.json, refs/web-office-cases/cases.json. 고른 기준과 이유: tools/curation.json. 미디어: tools/build_gallery.py.</p></footer>`;
+      <footer class="gl-foot"><p class="q-src">출처: 워크숍 자료에 모인 사례, X 게시물, 공식 웹 사례. 고른 기준과 이유, 원본 파일 위치는 이 아카이브의 기록(README)에 있습니다.</p></footer>`;
     built = true;
   }
   let built = false, opener = null;
@@ -153,13 +164,11 @@
     } else { dlg.scrollTop = 0; $(".gl-x", body).focus({ preventScroll: true }); }
     history.replaceState(null, "", "#gallery");
   }
-  function close() {
-    if (!dlg.open) return;
-    dlg.querySelectorAll("video").forEach((v) => v.pause());
-    dlg.querySelectorAll("iframe").forEach((f) => f.remove());
-    dlg.close();
-  }
+  function close() { if (dlg.open) dlg.close(); }
+  /* v6: every way out (button, Esc, a floor link) ends here, so a playing video or YouTube iframe never outlives the room */
   dlg.addEventListener("close", () => {
+    dlg.querySelectorAll("video").forEach((v) => { v.pause(); v.removeAttribute("src"); v.load(); });
+    dlg.querySelectorAll("iframe").forEach((f) => f.remove());
     history.replaceState(null, "", location.pathname + location.search);
     window.ARchive && window.ARchive.resumeFloor && window.ARchive.resumeFloor();
     if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
@@ -186,9 +195,9 @@
     }
     const pc = e.target.closest(".gl-piece");
     if (pc) { close(); window.ARchive.openRoom(pc.dataset.piece); return; }
-    const nav = e.target.closest(".gl-nav a");
-    if (nav) { e.preventDefault(); document.querySelector(nav.getAttribute("href")).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return; }
-    if (e.target.closest("[data-close]") || e.target === dlg) close();
+    const nav = e.target.closest(".gl-bar a");
+    if (nav) { e.preventDefault(); document.querySelector(nav.getAttribute("href")).scrollIntoView({ behavior: window.ARchive && window.ARchive.reduced() ? "auto" : "smooth" }); return; }
+    if (e.target.closest("[data-close]")) close();
   });
 
   window.ARG = { open, close, get isOpen() { return dlg.open; } };

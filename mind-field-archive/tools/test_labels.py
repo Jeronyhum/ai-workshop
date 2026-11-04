@@ -1,6 +1,6 @@
 """Part 2 overview: no two visible labels overlap. Run from archive/:  python3 tools/test_labels.py
 Needs Playwright for Python and Chrome (/usr/bin/google-chrome). Serves archive/ on a free local port, presses 2 (the Part 2
-overview) at 1440×900 and 390×844, with motion full and reduced, and measures every visible line of text on the floor:
+overview) at 1440×900 and 1920×1080 (desktop only, per the v6 brief), with motion full and reduced, and measures every visible line of text on the floor:
 each line box of each HTML text node (Range.getClientRects) and each SVG <text>. A label counts when it is rendered (not
 display:none, not visibility:hidden, effective opacity above 0.15) and lies inside the floor's visible area. Two labels
 overlap when their boxes share more than 2px in both directions. Fixed UI (top bar, HUD, map, zoom) is not a label of the
@@ -48,8 +48,8 @@ def main():
         url = f"http://127.0.0.1:{httpd.server_address[1]}/"
         fails = 0
         with sync_playwright() as p:
-            b = p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
-            for w, h in ((1440, 900), (390, 844)):
+            b = p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
+            for w, h in ((1440, 900), (1920, 1080)):
                 for motion in ("no-preference", "reduce"):
                     pg = b.new_context(viewport={"width": w, "height": h}, reduced_motion=motion).new_page()
                     pg.goto(url); pg.wait_for_timeout(4800)

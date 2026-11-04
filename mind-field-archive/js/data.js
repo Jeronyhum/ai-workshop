@@ -15,8 +15,10 @@
         T3 = P + "P2_용어와필수개념.md", AU = P + "감독관_감사.md", ME = P + "학생의미_메타.md",
         PD = P + "보완_PD수첩_통계검증.md", XP = "refs/x-opus-motion-prompts.md";
   const x = (h, id) => ({ kind: "X 원본", label: "@" + h, url: `https://x.com/${h}/status/${id}` });
+  /* v6 (전사본): 민성의 나레이션 블록, 그 사실 검증, 메타 분석 (이 아카이브 안의 사본) */
+  const TR = "archive/materials/transcript/", BL = TR + "보완_전사본_근본내용_블록.md", FC = TR + "보완_전사본_사실검증.md", MT = TR + "보완_전사본_메타와꼬리질문.md";
 
-  AR.world = { w: 12700, h: 5600 };
+  AR.world = { w: 15500, h: 5600 };
 
   AR.zones = {
     p1: { name: "1부", title: "AI 시대의 변화", x: 0, w: 4600, key: "Digit1", anchor: "accounting",
@@ -24,6 +26,8 @@
     br: { name: "다리", title: "학생에게 어떤 의미인가", x: 4600, w: 1000, key: "Digit3", anchor: "bridgeA",
           src: { f: P + "패키지_빌드브리프.md", l: 13 } },
     gal: { name: "사례관", title: "프런티어 모델 활용 사례", x: 10000, w: 2700, key: "Digit4", src: { f: "refs/x-frontier-cases/cases.json" } },
+    /* v6: the end of the exhibition. Visitors leave with a decision: what to build today, the words they need, and the installer. */
+    exit: { name: "출구", title: "오늘 뭘 만들고 싶은가?", x: 12700, w: 2800, key: "Digit5" },
     p2: { name: "2부", title: "에이전트와 만드는 법", x: 5600, w: 4400, key: "Digit2", anchor: "paradigm",
           src: { f: P + "패키지_빌드브리프.md", l: 12 } },
   };
@@ -53,7 +57,7 @@
 
   AR.plaque = {
     text: "마치 내 머릿속 AI 지식들을 소개시켜주는 느낌으로, 난잡하게 흩어진 지식들과 그 근거 자료들을 이미지와 통계, 영상 자료 등으로 같이 볼 수 있게 하는 거지.",
-    src: { f: P + "마스터프롬프트_원문_20261103.md", l: 15, by: "사용자 원문, 2026-11-03" },
+    src: { f: P + "마스터프롬프트_원문_20261103.md", l: 15, by: "기획자의 원문, 2026-11-03" },
     x: 5100, y: 330,
   };
 
@@ -71,6 +75,214 @@
   /* Pieces. Part 1 sits on a scattered 5×6 field (col,row); the bridge stacks in the corridor;
      Part 2 sits in its paradigm ring (ring, angle in degrees, 0 = east, clockwise) or at a corner (x,y). */
   AR.pieces = [
+    /* ───────── v6 (전사본): 1부 여는 이야기 ─────────
+       민성의 나레이션 블록 C-01–C-20 (archive/materials/transcript/보완_전사본_근본내용_블록.md) 순서대로: 역사 → 에이전트의 등장 → 활용.
+       voice = 그의 말 그대로 (전사 오인식 LMM→LLM만 사실검증 (e)표대로 읽음, tools/check.py가 원문과 대조).
+       날짜·수치·귀속은 보완_전사본_사실검증.md가 정본 (빌드브리프 :52). metaphor = 비유 넷, 각각 그림 하나. */
+    {
+      id: "s-vibe", zone: "p1", cluster: "역사", w: 560, kind: "story",
+      title: "바이브 코딩, 2025년 2월 2일",
+      lede: "느낌(바이브)을 타는 코딩이지, 대충 하는 코딩이 아니다.",
+      voice: [{ t: "쉽게 말해서 느낌 좋은 코딩, 줄여서 느적 코딩이라는 느낌일 것이다.", s: { f: BL, l: 57 } }],
+      vis: { type: "date", d: "2025.02.02", en: "vibe coding", ko: "느적 코딩", koSrc: { f: BL, l: 57 }, s: { f: FC, l: 30 } },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "안드레 카파시(Andrej Karpathy)가 2025년 2월 2일 X 게시물에서 \"vibe coding\"이라는 말을 처음 썼다.", s: { f: FC, s: "1. 바이브코딩 기원", l: 31 } },
+        { st: "verified", t: "그 게시물의 정의: \"fully give in to the vibes, embrace exponentials, and forget that the code even exists\"", s: { f: FC, s: "1. 바이브코딩 기원", l: 32 } },
+        { st: "verified", t: "'느적 코딩'은 카파시의 표현이 아니라 강의자(민성)의 한국어 의역이다.", s: { f: FC, s: "E-1", l: 119 } },
+      ],
+      src: [{ f: BL, s: "C-01", l: 48 }, { f: FC, s: "E-1", l: 117 }],
+      links: [{ kind: "X 게시물", label: "@karpathy: \"vibe coding\" (2025-02-02)", url: "https://x.com/karpathy/status/1886192184808149383" },
+              { kind: "기사", label: "Scrimba: What is vibe coding", url: "https://scrimba.com/articles/what-is-vibe-coding/" }],
+    },
+    {
+      id: "s-model", zone: "p1", cluster: "역사", w: 600, kind: "story",
+      title: "모델은 GPT, ChatGPT는 그 위의 대화 환경",
+      voice: [{ t: "그래서 모델명을 ChatGPT라고 생각하면 안 된다. 모델명은 GPT인 것이다.", s: { f: BL, l: 71 } },
+              { t: "LLM은 단순히 모델이다. LLM에게 말을 할 수 있는 능력은 없다.", s: { f: BL, l: 70 } }],
+      vis: { type: "model", line: [
+        { d: "2018.06", t: "GPT-1 논문", s: { f: FC, l: 124 } },
+        { d: "2022.11", t: "ChatGPT (GPT-3.5 기반)", s: { f: FC, l: 131 } },
+        { d: "2023.03", t: "GPT-4", s: { f: FC, l: 40 } },
+      ] },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "GPT-1: 2018년 6월 11일 논문 \"Improving Language Understanding by Generative Pre-Training\"로 공개.", s: { f: FC, s: "E-2", l: 124 } },
+        { st: "verified", t: "ChatGPT: 2022년 11월 30일, GPT-3.5 계열 모델을 대화용으로 다듬어 출시.", s: { f: FC, s: "E-3", l: 131 } },
+        { st: "verified", t: "GPT-4: 2023년 3월 14일 출시.", s: { f: FC, s: "2. LLM 역사", l: 40 } },
+      ],
+      src: [{ f: BL, s: "C-02", l: 62 }, { f: FC, s: "E-2, E-3", l: 124 }],
+      links: [{ kind: "기사", label: "TechCrunch: OpenAI releases GPT-4 (2023-03-14)", url: "https://techcrunch.com/2023/03/14/openai-releases-gpt-4-ai-that-it-claims-is-state-of-the-art/" }],
+    },
+    {
+      id: "s-tide", zone: "p1", cluster: "역사", w: 1100, kind: "story", metaphor: "tide",
+      title: "발전은 썰물처럼 고르지 않게 온다",
+      voice: [{ t: "인공지능의 발전은 전반적인 영역에서 일어나는 게 아니라 한 영역에서 마치 파도처럼 일어난다. · 썰물은 균일하게 밀려오지 않는다.", s: { f: BL, l: 85 } }],
+      vis: { type: "tide", blank: "내 전공은?", s: { f: MT, l: 178 } },
+      st: "verified",
+      rows: [
+        { st: "conditional", t: "GPT-3.5 터보 시절엔 한국어를 시키기 어려웠고, GPT-4에서 한국어가 크게 좋아졌다. 수치가 아닌 발표자의 체감이다.", s: { f: FC, s: "C-9", l: 419 } },
+      ],
+      src: [{ f: BL, s: "C-03", l: 77 }, { f: MT, s: "D3", l: 178 }],
+    },
+    {
+      id: "s-deeper", zone: "p1", cluster: "역사", w: 600, kind: "story",
+      title: "더 크게에서, 더 깊게 생각하게로",
+      voice: [{ t: "이대로는 답이 없다고 생각한 GPT 업체에서는, OpenAI에서는 한 가지 생각을 하게 된다. 추론을 만들어주는 것이다.", s: { f: BL, l: 100 } }],
+      vis: { type: "deeper", marks: [
+        { d: "2024.09", t: "o1 (추론 모델)", s: { f: FC, l: 42 } },
+        { d: "2024.12", t: "o1 프로, 수능 수학 30번", s: { f: FC, l: 152 } },
+        { d: "2025.07", t: "실험용 추론 모델, IMO 35/42", s: { f: FC, l: 224 } },
+        { d: "2025.08", t: "GPT-5 (통합 시스템)", s: { f: FC, l: 43 } },
+      ] },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "2024년 9월 12일 o1-preview: 답하기 전에 안에서 추론 사슬을 만드는 첫 추론 모델 계열.", s: { f: FC, s: "2. LLM 역사", l: 42 } },
+        { st: "verified", t: "수능 수학 30번: GPT-4는 풀지 못했고, 같은 문제를 맞힌 것은 2024년 12월부터 나온 추론 모델 o1 프로였다 (중앙일보 팩플 실측).", s: { f: FC, s: "E-6", l: 152 } },
+        { st: "verified", t: "IMO 2025: 금메달 컷과 같은 35/42점을 받은 것은 OpenAI의 미출시 실험용 추론 모델이다. 공식 참가가 아니라 메달은 없다.", s: { f: FC, s: "O-2", l: 224 } },
+        { st: "verified", t: "GPT-5: 2025년 8월 7일 출시. 빠른 모델과 생각하는 모델을 실시간 라우터로 묶은 통합 시스템.", s: { f: FC, s: "2. LLM 역사", l: 43 } },
+        { st: "conditional", t: "o1(2024)에서 시작된 추론 계열이 GPT-5에 통합됐다는 평가가 나왔다. OpenAI가 이 인과를 공식 확인한 것은 아니다.", s: { f: FC, s: "U-11", l: 355 } },
+      ],
+      src: [{ f: BL, s: "C-04", l: 91 }, { f: FC, s: "E-6, O-2, U-11", l: 152 }],
+      links: [{ kind: "기사", label: "TechTarget: OpenAI o1 explained", url: "https://www.techtarget.com/news/OpenAI-o1-explained-Everything-you-need-to-know/871976/" },
+              { kind: "기사", label: "Simon Willison: OpenAI 실험 모델의 IMO 결과 (2025-07)", url: "https://simonwillison.net/tags/openai/?page=6" },
+              { kind: "기사", label: "9to5Mac: OpenAI announces GPT-5 (2025-08-07)", url: "https://9to5mac.com/2025/08/07/openai-gpt-5-chatgpt-announcement/" }],
+    },
+    {
+      id: "s-outside", zone: "p1", cluster: "역사", w: 360, kind: "story",
+      title: "판을 흔든 외부자, 딥시크",
+      voice: [{ t: "하지만 그걸 또 바꾼 게 있었으니 딥시크다.", s: { f: BL, l: 112 } }],
+      st: "verified",
+      rows: [
+        { st: "verified", t: "DeepSeek R1: 2025년 1월 20일 MIT 라이선스 오픈웨이트로 공개.", s: { f: FC, s: "2. LLM 역사", l: 46 } },
+        { st: "verified", t: "2025년 1월 27일 엔비디아 하루 -16.9%, 시가총액 약 $589B 증발 (미국 증시 사상 최대 단일일 손실).", s: { f: FC, s: "O-13", l: 291 } },
+        { st: "conditional", t: "DeepSeek-V3의 $5.576M은 최종 학습 1회 실행 비용이다. 사전 연구·실험 비용을 뺀 수치라 총개발비 비교가 아니다.", s: { f: FC, s: "O-7", l: 255 } },
+        { st: "verified", t: "트랜스포머 논문 공저자 노엄 샤지어: 2024년 8월 구글이 약 $2.7B 라이선싱 딜로 데려와 Gemini를 맡겼고, 2026년 6월 OpenAI로 옮겼다.", s: { f: FC, s: "E-9", l: 175 } },
+      ],
+      src: [{ f: BL, s: "C-05", l: 105 }, { f: FC, s: "O-7, O-13, E-9", l: 255 }],
+    },
+    {
+      id: "s-lag", zone: "p1", cluster: "역사", w: 360, kind: "story",
+      title: "두 세대 전 모델로 지금을 평가한다",
+      voice: [{ t: "즉, 현대의 모델은 두 세대 전 모델의 단점으로 인해서 까이고 있는 것이다.", s: { f: BL, l: 124 } }],
+      st: "verified",
+      src: [{ f: BL, s: "C-06", l: 117 }],
+    },
+    {
+      id: "s-tools", zone: "p1", cluster: "에이전트의 등장", w: 620, kind: "story",
+      title: "도구를 붙이자, 에이전트가 됐다",
+      voice: [{ t: "이 구즈라는 것은 LMM에게 도구를 붙여주는 것이다.", s: { f: BL, l: 142 } },
+              { t: "그래서 우리 컴퓨터를 직접 들여다보고 파일을 수정하고 작성하고 만들게 할 수 있으면 그것으로 코딩 에이전트, 즉 우리를 대신해서 일을 하는 무언- LLM이 탄생한 것이다.", s: { f: BL, l: 143 } }],
+      vis: { type: "fork", tools: ["Bash", "Read", "Write", "Edit"], toolsSrc: { f: BL, l: 138 }, marks: [
+        { d: "2025.01.28", t: "Goose (Block)", s: { f: FC, l: 218 } },
+        { d: "2025.02.24", t: "Claude Code 프리뷰", s: { f: FC, l: 145 } },
+        { d: "2025.05.22", t: "Claude Code 정식", s: { f: FC, l: 145 } },
+      ] },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "Goose: Block(Square·Cash App의 모회사)이 2025년 1월 28일 오픈소스로 공개한 에이전트. MCP를 붙인 초기 에이전트로 평가받는다.", s: { f: FC, s: "O-1", l: 218 } },
+        { st: "conditional", t: "에이전트 자체는 AutoGPT(2023) 등이 먼저다. Goose를 '최초의 에이전트'라고 하지 않는다.", s: { f: FC, s: "O-1", l: 218 } },
+        { st: "verified", t: "Claude Code: 2025년 2월 24일 리서치 프리뷰, 2025년 5월 22일 Claude 4와 함께 정식 출시. 이야기의 축이 LLM에서 에이전트로 넘어가는 분기점.", s: { f: FC, s: "E-5", l: 145 } },
+      ],
+      src: [{ f: BL, s: "C-07, C-08", l: 133 }, { f: FC, s: "O-1, E-5", l: 145 }],
+      links: [{ kind: "공식", label: "Goose 저장소 (GitHub)", url: "https://github.com/aaif-goose/goose" },
+              { kind: "기사", label: "Claude Code 연표 (scriptbyai)", url: "https://www.scriptbyai.com/claude-code-timeline/" }],
+    },
+    {
+      id: "s-define", zone: "p1", cluster: "에이전트의 등장", w: 1100, kind: "story",
+      title: "에이전트: 목적을 가지고 루프를 도는 LLM",
+      voice: [{ t: "목적을 가지고 루프를 반복해서 목적을 달성하려고 노력하는 LMM", s: { f: BL, l: 170 } },
+              { t: "목적을 완수하기 위해서 계속해서 루프를 도는 LMM을 에이전트라고 한다. 나는 이렇게 정의를 할 것이다.", s: { f: BL, l: 171 } }],
+      vis: { type: "define", pre: { t: "학계에서 인정한 정의는 없지만", s: { f: BL, l: 170 } } },
+      st: "verified",
+      src: [{ f: BL, s: "C-09", l: 161 }],
+    },
+    {
+      id: "s-harness", zone: "p1", cluster: "에이전트의 등장", w: 1100, kind: "story", metaphor: "harness",
+      title: "하네스: 말에게 물리는 견장",
+      voice: [{ t: "모델에게 방향을 조정시키고 그 방향으로만 나오게끔 제약을 추가하는 것, 그것이 하네스다.", s: { f: BL, l: 184 } },
+              { t: "하네스란 여기서 말의 견장의 의미로서 · 방향을 조정하는 방향타 역할을 하는 것이 하네스이다.", s: { f: BL, l: 184 } },
+              { t: "그 하네스를 일종의 에이전트, 즉 전체적인 틀로 만들고 계약을 붙이고 도구를 붙여주고 등등 했을 때 만들어지는 게 코딩 에이전트다.", s: { f: BL, l: 186 } }],
+      vis: { type: "harness" },
+      st: "verified",
+      rows: [
+        { st: "conditional", t: "컨텍스트가 길어질수록 성능이 떨어지는 현상이 보고된다 (민성의 말로 '컨텍스트 부식'). 몇 %에서 시작되는지는 확인된 수치가 없다.", s: { f: FC, s: "O-12", l: 287 } },
+        { st: "verified", t: "100만 토큰은 영문 약 75만 단어, 책 10권 안팎이다.", s: { f: FC, s: "O-8", l: 263 } },
+      ],
+      src: [{ f: BL, s: "C-10", l: 175 }, { f: FC, s: "O-8, O-12", l: 285 }],
+    },
+    {
+      id: "s-chat", zone: "p1", cluster: "에이전트의 등장", w: 360, kind: "story",
+      title: "채팅 세션 ≠ 코딩 에이전트",
+      voice: [{ t: "그것은 코딩 툴이 아니다. 즉, 여러분의 컴퓨터를 조작하고 파일을 만들고 외부랑 연결될 수 없는 것이다.", s: { f: BL, l: 199 } }],
+      st: "verified",
+      src: [{ f: BL, s: "C-11", l: 191 }],
+    },
+    {
+      id: "s-anatomy", zone: "p1", cluster: "에이전트의 등장", w: 1100, kind: "story", metaphor: "anatomy",
+      title: "머리만 있는 LLM에 손과 발을",
+      voice: [{ t: "도구라는 손과 발을 달아준다. · 인터넷도 연결시켜주면 거의 완벽하다고 볼 수 있다.", s: { f: BL, l: 249 } },
+              { t: "얘가 멈추지 않고 계속해서 턴을 이어나갈 수 있게끔 채찍을 휘두르는 것이다. 그런 것을 이제 훅이라고 하는데", s: { f: BL, l: 251 } }],
+      vis: { type: "anatomy", hands: ["Read", "Write", "Edit", "웹 서치"], head: "LLM", prompt: "시스템 프롬프트", rules: "agents.md · claude.md", hook: "훅", turn: ["탐색", "계획", "도구 확정", "파일 수정"], s: { f: BL, l: 243 } },
+      st: "verified",
+      src: [{ f: BL, s: "C-14", l: 239 }],
+    },
+    {
+      id: "s-now", zone: "p1", cluster: "활용", w: 620, kind: "story",
+      title: "가장 어려운 시험의 점수 (HLE)",
+      lede: "같은 시험도 조건에 따라 숫자가 갈린다. 공식 리더보드 최고는 54.8%.",
+      vis: { type: "climb", unit: "%", pts: [
+        { v: 2.7, t: "GPT-4o", d: "2025.01", s: { f: FC, l: 159 } },
+        { v: 20.3, t: "o3", d: "2025.04", s: { f: FC, l: 159 } },
+        { v: 37.5, t: "Gemini 3 Pro", d: "2025.11", s: { f: FC, l: 159 } },
+        { v: 54.8, t: "GPT-6 Astra", d: "2026.09", s: { f: FC, l: 249 } },
+      ] },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "HLE(Humanity's Last Exam) 출시 때(2025년 1월) GPT-4o는 2.7%. o3는 20.3%(2025년 4월), Gemini 3 Pro는 37.5%(2025년 11월).", s: { f: FC, s: "E-7", l: 159 } },
+        { st: "verified", t: "공식 리더보드(Scale/CAIS) 최고는 GPT-6 Astra 54.8% (2026년 9월 결과, 도구 없는 조건).", s: { f: FC, s: "O-6", l: 249 } },
+        { st: "conditional", t: "도구를 쓰는 조건에서는 67.7%(Claude Opus 5.5, Anthropic 자체 보고)처럼 다른 숫자가 나온다. 조건을 함께 적어야 한다.", s: { f: FC, s: "2. LLM 역사", l: 52 } },
+      ],
+      src: [{ f: BL, s: "C-15", l: 259 }, { f: FC, s: "E-7, O-6", l: 249 }],
+      links: [{ kind: "기사", label: "BenchLeader: Humanity's Last Exam", url: "https://www.benchleader.com/benchmarks/hle" }],
+    },
+    {
+      id: "s-guard", zone: "p1", cluster: "활용", w: 1100, kind: "story", metaphor: "guardrail",
+      title: "가드레일이 끊은 회로, 그리고 환각",
+      voice: [{ t: "박사급의 추론 능력을 가지고 있는 사람의 뇌를 깐, 머리를 깐 다음에 그 질문을 했을 때 빛나는 뇌의 회로들 · 시냅스 구조를 다 잘라버린다. · 그런 의미에서 환각이 발생하게 되는 것인데", s: { f: BL, l: 298 } },
+              { t: "이 환각을 안 일으키려는 방향으로 인간이 사후에 강화 학습을 진행한다.", s: { f: BL, l: 299 } }],
+      vis: { type: "guardrail" },
+      st: "conditional",
+      cond: "환각이 왜 생기는지에 대한 발표자의 비유입니다. 측정된 사실이 아니라 이해를 돕는 그림으로 읽으세요.",
+      src: [{ f: BL, s: "C-17", l: 289 }, { f: MT, s: "B9, D3", l: 181 }],
+    },
+    {
+      id: "s-security", zone: "p1", cluster: "활용", w: 600, kind: "story",
+      title: "바이브 코딩으로 만들 거면, 보안부터",
+      voice: [{ t: "여러분들도 뭔가 바이브 코딩 서비스를 만들거나 할 때에는 보안에 신경 써서 만드는 것이 굉장히 중요하다고 할 수 있다.", s: { f: BL, l: 314 } }],
+      vis: { type: "rules", items: ["API 키를 코드·채팅에 그대로 붙이지 않기", "남의 자료를 함부로 다운로드·실행하지 않기", "만든 서비스를 공개할 땐 로그인부터"], s: { f: MT, l: 146 } },
+      st: "verified",
+      rows: [
+        { st: "verified", t: "2026년 9월 30일 신한은행 침해 확인을 시작으로 금융 전 업권 16개사 침해가 확인됐다(중간 집계). 동일 공격 IP와 AI 침투 도구 ARTEX를 쓴 정황이 보도됐다.", s: { f: FC, s: "C-2", l: 372 } },
+        { st: "verified", t: "침해가 확인된 7개 금융사: 신한·KB국민·하나·BNK부산은행, 예가람·웰컴저축은행, 현대캐피탈.", s: { f: FC, s: "E-11", l: 187 } },
+        { st: "conditional", t: "특정 AI 모델이 쓰였는지는 금융당국이 아직 조사 중이다.", s: { f: FC, s: "U-4", l: 316 } },
+        { st: "verified", t: "거절을 지우는 기법의 정식 이름은 abliteration이고, 오픈 웨이트 모델에서 실제로 유통된다.", s: { f: FC, s: "C-5", l: 393 } },
+      ],
+      src: [{ f: BL, s: "C-18", l: 303 }, { f: FC, s: "C-2, E-11", l: 187 }, { f: MT, s: "R6", l: 146 }],
+      links: [{ kind: "기사", label: "연합뉴스: 금융권 해킹 (2026-10-02)", url: "https://www.yna.co.kr/view/AKR20261002098551017" },
+              { kind: "기사", label: "한겨레: 금융권 침해", url: "https://www.hani.co.kr/arti/economy/finance/1280795.html" },
+              { kind: "기사", label: "IT동아: AI 침투 도구", url: "https://it.donga.com/109653/" }],
+    },
+    {
+      id: "s-intent", zone: "p1", cluster: "활용", w: 1100, kind: "story",
+      title: "의도를 챙겨 주는 것",
+      voice: [{ t: "그래서 이 의도를 챙겨주는 것이 코딩, 바이브 코딩 안에서 굉장히 중요할 수 있다.", s: { f: BL, l: 346 } },
+              { t: "제품을 어떻게 개발해야 되는지 스펙이 있고 제품에 대해서 명세는 있지만 왜 이렇게 개발해야 되는지에 대한 의도가 없기 때문에", s: { f: BL, l: 346 } },
+              { t: "그래서 여러분들이 프롬프트를 짤 때 메타 프롬프트 짜달라고 하고 클로드나 GPT한테 프롬프트까지 짜자는 것까지 맡겨주는 편이 아주 좋은 수준의 좋은 방법이 될 수 있다.", s: { f: BL, l: 345 } }],
+      vis: { type: "intent", layers: ["목표", "완수 조건", "의도"], s: { f: BL, l: 349 } },
+      st: "verified",
+      src: [{ f: BL, s: "C-20", l: 333 }],
+    },
     /* ───────── 1부 · 가능성 ───────── */
     {
       id: "claudia", zone: "p1", cluster: "가능성", cell: [0, 0], w: 470, kind: "media",
@@ -479,11 +691,14 @@
       cond: "12월 수치는 계절성이 크다.",
       rows: [
         { st: "verified", t: "30대 '쉬었음' 연간 30만 9,000명 (역대 최대).", s: { f: AU, s: "B-1", l: 124 } },
+        { st: "verified", t: "12월 기준으로는 1999년 6월 통계 작성 이후 최대, 실업률 4.1%.", s: { f: S3, s: "§1-2", l: 52 } },
+        { st: "conditional", t: "이 수치를 올린 커뮤니티 글 제목의 'IMF'는 글쓴이의 비유다. 외환위기 당시와 직접 비교한 수치가 아니며, 12월 급증에는 계절 요인(노인일자리 사업 신청 집중, 연말 공공일자리 종료 등)도 상당 부분 작용한다.", s: { f: S3, s: "§1-2", l: 54 } },
       ],
       src: [{ f: S3, s: "§1-2", l: 52, g: "감사 B-1 :124" }],
       links: [
         { kind: "공식", label: "국가데이터처 고용동향", url: "https://www.mods.go.kr/board.es?mid=a10301010000&bid=210&act=view&list_no=443017" },
         { kind: "기사", label: "조선일보 (2026-01-14)", url: "https://www.chosun.com/economy/economy_general/2026/01/14/3MOKOBBHNZEU3AWM4H6HCTOIII/" },
+        { kind: "커뮤니티 게시물", label: "디시인사이드 특이점 갤러리 (2026-11-03): 이 수치를 가져온 출발점", url: "https://m.dcinside.com/board/thesingularity/1509631" },
       ],
     },
     {
@@ -500,6 +715,7 @@
       links: [
         { kind: "공식", label: "한국은행 이슈노트", url: "https://www.bok.or.kr/portal/bbs/P0002353/view.do?nttId=11065913&menuNo=200433" },
         { kind: "기사", label: "연합뉴스 (2026-08-18)", url: "https://www.yna.co.kr/view/AKR20260818079400002" },
+        { kind: "커뮤니티 게시물", label: "디시인사이드 특이점 갤러리 (2026-10-26): 이 수치를 가져온 출발점", url: "https://m.dcinside.com/board/thesingularity/1499916" },
       ],
     },
     {
@@ -994,6 +1210,43 @@
     self:        { tier: 3, at: [9680, 3380], w: 320 },
   };
 
+  /* v6 (전사본): Part 1 now opens with 민성's story (x 0 to OPEN), in the order of his narration blocks: 역사 → 에이전트의
+     등장 → 활용 (보완_전사본_근본내용_블록.md :3, :46, :131, :257). Everything that used to start at x 0 moves right by OPEN,
+     here, once; the rest of the code reads these numbers and never assumes where a zone starts. */
+  const OPEN = 3800;
+  AR.world.w += OPEN;
+  AR.zones.p1.w += OPEN;
+  ["br", "p2", "gal", "exit"].forEach((k) => (AR.zones[k].x += OPEN));
+  AR.clusters.forEach((c) => (c.x += OPEN));
+  AR.rings.cx += OPEN;
+  AR.plaque.x += OPEN;
+  Object.values(AR.layout).forEach((L) => (L.at[0] += OPEN));
+  AR.zones.p1.anchor = "s-vibe";
+  AR.zones.p1.open = OPEN;
+  /* the three acts as painted floor headings, and where each act's pieces stand */
+  AR.acts = [
+    { name: "역사", sub: "모델이 자라 온 길", x: 120, s: { f: BL, l: 46 } },
+    { name: "에이전트의 등장", sub: "도구를 붙인 LLM", x: 1360, s: { f: BL, l: 131 } },
+    { name: "활용", sub: "지금 쓰는 법과 조심할 것", x: 2600, s: { f: BL, l: 257 } },
+  ];
+  Object.assign(AR.layout, {
+    "s-vibe":     { tier: 2, at: [400, 1560], w: 560 },
+    "s-model":    { tier: 2, at: [1010, 1600], w: 560 },
+    "s-tide":     { tier: 1, at: [700, 2780], w: 1120 },
+    "s-deeper":   { tier: 2, at: [430, 4020], w: 600 },
+    "s-outside":  { tier: 3, at: [1010, 3900], w: 360 },
+    "s-lag":      { tier: 3, at: [1010, 4560], w: 360 },
+    "s-tools":    { tier: 2, at: [1650, 1600], w: 620 },
+    "s-chat":     { tier: 3, at: [2250, 1520], w: 340 },
+    "s-define":   { tier: 1, at: [1940, 2620], w: 1100 },
+    "s-harness":  { tier: 1, at: [1940, 3700], w: 1100 },
+    "s-anatomy":  { tier: 1, at: [1940, 4880], w: 1100 },
+    "s-now":      { tier: 2, at: [2900, 1620], w: 620 },
+    "s-guard":    { tier: 1, at: [3180, 2780], w: 1100 },
+    "s-security": { tier: 2, at: [2900, 4000], w: 600 },
+    "s-intent":   { tier: 1, at: [3180, 4980], w: 1100 },
+  });
+
   /* Derived pictures. Every number below is computed from the pieces' sourced figures; the legend says how. */
   AR.viz = {
     cve:      { unit: 100, legend: "점 1개 = CVE 레코드 100건 (반올림)" },
@@ -1095,6 +1348,25 @@
 
   /* Threads: [a, b, why]. Colour comes from the zones they join (red inside 1부, acid inside 2부, ember across). */
   AR.threads = [
+    /* v6 (전사본): his story in block order, then where it meets the evidence already on the floor */
+    ["s-vibe", "s-model", "말이 생기기 전: 모델과 대화 환경"],
+    ["s-model", "s-tide", "GPT-4에서 한국어가 따라왔다: 고르지 않은 물결"],
+    ["s-tide", "s-deeper", "다음 물결: 크기 대신 추론"],
+    ["s-deeper", "s-outside", "같은 시기, 판 밖에서 온 충격"],
+    ["s-deeper", "s-lag", "그래서 두 세대 전 인상은 버린다"],
+    ["s-lag", "s-tools", "부족했던 한 조각: 도구"],
+    ["s-tools", "s-chat", "도구가 없으면 채팅일 뿐"],
+    ["s-tools", "s-define", "도구를 쥔 LLM을 뭐라고 부를까"],
+    ["s-define", "s-harness", "루프를 돌게 하는 틀"],
+    ["s-harness", "s-anatomy", "틀 안의 부품: 머리, 손발, 훅"],
+    ["s-anatomy", "s-now", "그래서 지금 얼마나 하나"],
+    ["s-now", "s-guard", "점수가 올라도 남는 것: 환각"],
+    ["s-guard", "s-security", "가드레일을 지우는 쪽도 있다"],
+    ["s-security", "s-intent", "잘 시키는 법: 의도"],
+    ["s-now", "accounting", "조건을 떼면 틀리는 숫자: 회계 100%와 56.4%"],
+    ["s-security", "gtg", "같은 보안 이야기, 해외 사례"],
+    ["s-harness", "harness", "견장에서 Agent = Model + Harness로"],
+    ["s-define", "loop", "목적과 루프: 루프 엔지니어링"],
     ["accounting", "gdpval", "같은 질문, 다른 시험: 전문가를 이겼나"],
     ["accounting", "bridgeA", "완승과 56.4% 사이: 자신 있게 틀린 숫자"],
     ["bridgeA", "loop", "검증을 사람의 기억이 아니라 루프에 넣는다"],
@@ -1155,10 +1427,10 @@
   AR.threadSrc = { paradigmGaps: { f: T1, s: "§9", l: 221 } };
 
   AR.status = {
-    verified:    { word: "확정",   mark: "●", note: "감사 B-1: 그대로 실어도 되는 주장" },
-    conditional: { word: "단서",   mark: "◐", note: "감사 B-2 또는 출처가 스스로 밝힌 조건: 조건을 함께 보인다" },
-    unverified:  { word: "미확인", mark: "○", note: "게시물·이미지·카피: 맥락이지 증거가 아니다" },
-    excluded:    { word: "제외",   mark: "⊘", note: "감사 B-3: 사실로 쓰지 않는다" },
-    corrected:   { word: "정정",   mark: "/", note: "감사 B-0: 원문 표현이 전제부터 어긋난 것" },
+    verified:    { word: "확정",   mark: "●", note: "공식·1차 자료로 확인된 내용", audit: "감수 판정 B-1" },
+    conditional: { word: "단서",   mark: "◐", note: "조건이 붙은 내용. 조건을 함께 읽어야 합니다", audit: "감수 판정 B-2 또는 출처가 밝힌 조건" },
+    unverified:  { word: "미확인", mark: "○", note: "게시물·이미지·카피. 분위기를 보여 줄 뿐 증거가 아닙니다", audit: "감수 범위 밖" },
+    excluded:    { word: "제외",   mark: "⊘", note: "사실로 쓰지 않는 주장", audit: "감수 판정 B-3" },
+    corrected:   { word: "정정",   mark: "/", note: "원래 표현이 전제부터 틀려서 고친 것", audit: "감수 판정 B-0" },
   };
 })();

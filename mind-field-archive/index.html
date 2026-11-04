@@ -11,17 +11,23 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/archive.css">
 <script src="js/data.js" defer></script>
+<script src="js/glossary.js" defer></script>
+<script src="js/exit-data.js" defer></script>
+<script src="js/lod.js" defer></script>
 <script src="js/assets.js" defer></script>
 <script src="js/anchors.js" defer></script>
 <script src="js/gallery-data.js" defer></script>
 <script src="js/render.js" defer></script>
 <script src="js/explain.js" defer></script>
+<script src="js/story.js" defer></script>
 <script src="js/app.js" defer></script>
 <script src="js/gallery.js" defer></script>
+<script src="js/exit.js" defer></script>
+<script src="js/terms.js" defer></script>
+<script src="js/field.js" defer></script>
 </head>
 <body>
-<a class="skip" href="#index-open">목록 보기로 건너뛰기</a>
-<div class="grain" aria-hidden="true"></div>
+<button type="button" class="skip" id="skip-list">목록으로 바로 가기</button>
 
 <header class="topbar">
   <a class="bar-mark" href="#" data-jump="all" aria-label="MIND FIELD 아카이브, 전시장 전체 보기">MIND FIELD<i aria-hidden="true"></i><span>아카이브</span></a>
@@ -31,9 +37,11 @@
     <button type="button" data-jump="br" data-zone="br"><kbd>3</kbd><span>다리</span></button>
     <button type="button" data-jump="p2" data-zone="p2"><kbd>2</kbd><span>2부</span></button>
     <button type="button" data-jump="gal" data-zone="gal"><kbd>4</kbd><span>사례관</span></button>
+    <button type="button" data-jump="exit" data-zone="exit"><kbd>5</kbd><span>출구</span></button>
   </nav>
   <div class="bar-tools">
     <button type="button" class="tool" id="docent-btn" aria-pressed="false"><kbd>D</kbd><span>도슨트</span></button>
+    <button type="button" class="tool" id="terms-btn"><kbd>T</kbd><span>용어</span></button>
     <button type="button" class="tool" id="index-open"><kbd>L</kbd><span>목록</span></button>
     <button type="button" class="tool" id="motion-btn" aria-pressed="false"><kbd>M</kbd><span>모션 <b>기본</b></span></button>
     <button type="button" class="tool" id="keys-btn" aria-haspopup="dialog"><kbd>?</kbd><span>단축키</span></button>
@@ -42,9 +50,19 @@
 
 <main>
   <section class="floor" id="floor" aria-roledescription="전시장 바닥" aria-label="전시장 바닥: 관람 순서 없음" aria-describedby="floor-help">
-    <p class="sr-only" id="floor-help">방향키로 가까운 조각에, Tab으로 실로 이어진 이웃 조각에 갑니다. Enter로 열고 Esc로 한 단계씩 돌아갑니다. D는 도슨트 조명, 숫자 0~4는 구역 이동, G는 사례관입니다. 2부 도식은 마침표(.)와 쉼표(,)로 한 단계씩 넘깁니다.</p>
+    <p class="sr-only" id="floor-help">방향키로 가까운 조각에, Tab으로 실로 이어진 이웃 조각에 갑니다. Enter로 열고 Esc로 한 단계씩 돌아갑니다. D는 도슨트 조명, 숫자 0~5는 구역 이동(4는 사례관, 5는 출구), T는 낱말 풀이입니다. 2부 도식은 마침표(.)와 쉼표(,)로 한 단계씩 넘깁니다.</p>
     <div class="world" id="world"></div>
   </section>
+
+  <aside class="entry" id="entry" aria-labelledby="entry-t">
+    <p class="entry-k">바이브코딩 워크숍 아카이브</p>
+    <h1 id="entry-t">순서 없이 걷는 전시장</h1>
+    <p class="entry-d">AI가 바꾸는 것(1부)에서 에이전트와 만드는 법(2부)까지, 워크숍 자료를 바닥에 펼쳐 두었습니다. 끌어서 둘러보고, 조각을 누르면 열립니다.</p>
+    <p class="entry-story">1부는 발표자 <b>민성의 이야기</b>로 시작합니다. <span>역사</span> → <span>에이전트의 등장</span> → <span>활용</span></p>
+    <p class="entry-x">마지막은 <b>출구</b>입니다. 오늘 뭘 만들지 고르고, 필요한 낱말과 설치 순서를 챙겨 나가는 곳이에요.</p>
+    <p class="entry-acts"><button type="button" class="btn" data-intro="p1">이야기부터 보기 <kbd>1</kbd></button><button type="button" class="btn btn-acid" data-intro="exit">출구로 가기 <kbd>5</kbd></button></p>
+    <p class="entry-keys"><kbd>T</kbd> 낱말 풀이 <kbd>D</kbd> 도슨트 조명 <kbd>?</kbd> 단축키</p>
+  </aside>
 
   <aside class="hud" id="hud" aria-label="지금 선 자리">
     <div class="hud-now" id="hud-now"></div>
@@ -81,6 +99,12 @@
   <div class="gallery-in" id="gallery-in"></div>
 </dialog>
 
+<dialog class="exit" id="exit" aria-labelledby="exit-title">
+  <div class="exit-in" id="exit-in"></div>
+</dialog>
+
+<div class="term-tip" id="term-tip" role="tooltip" popover="manual"></div>
+
 <dialog class="keys" id="keys" aria-labelledby="keys-title">
   <h2 id="keys-title">단축키</h2>
   <dl>
@@ -91,7 +115,8 @@
     <div><dt><kbd>Esc</kbd></dt><dd>한 단계씩 뒤로: 방 → 조각 → 구역 → 전체 → 위쪽 메뉴</dd></div>
     <div><dt><kbd>D</kbd></dt><dd>도슨트 조명: 지금 조각과 이어진 실만 밝히고 나머지는 어둡게, 글자는 크게</dd></div>
     <div><dt><kbd>.</kbd> <kbd>,</kbd></dt><dd>2부 도식을 한 단계씩 앞뒤로 넘기기 (바닥과 방 모두)</dd></div>
-    <div><dt><kbd>0</kbd> <kbd>1</kbd> <kbd>3</kbd> <kbd>2</kbd> <kbd>4</kbd></dt><dd>전체, 1부, 다리, 2부, 사례관</dd></div>
+    <div><dt><kbd>0</kbd> <kbd>1</kbd> <kbd>3</kbd> <kbd>2</kbd> <kbd>4</kbd> <kbd>5</kbd></dt><dd>전체, 1부, 다리, 2부, 사례관, 출구</dd></div>
+    <div><dt><kbd>T</kbd></dt><dd>낱말 풀이: 바이브코딩 용어를 쉬운 말로. 점선 밑줄 낱말에 마우스를 올려도 됩니다</dd></div>
     <div><dt><kbd>G</kbd></dt><dd>사례관 열기: 프런티어 모델 활용 사례 (모델 표기는 모두 확인되지 않음)</dd></div>
     <div><dt><kbd>+</kbd> <kbd>−</kbd></dt><dd>확대·축소. 끌어서 둘러보고, Ctrl을 누른 채 휠로도 확대</dd></div>
     <div><dt><kbd>L</kbd></dt><dd>목록으로 보기</dd></div>

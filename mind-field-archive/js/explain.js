@@ -67,7 +67,7 @@
     const s = d(P, Q) / d(pt(p), pt(q)), [ax, ay] = pt(a), id = `xsm${++maskN}`;
     return `<defs><radialGradient id="${id}g"><stop offset=".62" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>
       <mask id="${id}" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#${id}g)"/></mask></defs>
-      <image class="xs-img ${cls}" href="${A.assetSlots[slot].file}" x="${r1(T[0] - ax * s)}" y="${r1(T[1] - ay * s)}" width="${r1(W * s)}" height="${r1(H * s)}" preserveAspectRatio="none" mask="url(#${id})" data-slot="${slot}" onerror="this.remove()"/>`;
+      <image class="xs-img ${cls}" href="${A.lodImg(A.assetSlots[slot].file).src}"${A.lodImg(A.assetSlots[slot].file).attrs} x="${r1(T[0] - ax * s)}" y="${r1(T[1] - ay * s)}" width="${r1(W * s)}" height="${r1(H * s)}" preserveAspectRatio="none" mask="url(#${id})" data-slot="${slot}" onerror="this.remove()"/>`;
   }
 
   /* the graph explainer follows the constellation Dots drew: its eight nodes, its ten edges, its one acid edge.
@@ -322,11 +322,13 @@
       <path class="a" d="${rr(244, 136, 112, 28, 14)}"/>${[[258, 278], [286, 306], [314, 328], [336, 344]].map(([a, b]) => `<path class="a" d="M${a} 150 H${b}"/>`).join("")}</svg>`;
 
   /* ── rooms: the figure stays, the steps scroll past it ── */
-  const ref = (s) => `<p class="q-ref">${esc(R.refFull(s))}</p>`;
+  const ref = (s) => `<p class="q-src">${esc(/^ai-workshop\//.test(s.f) ? "워크숍 설치기 저장소" : R.srcLabel(s))}</p>`;
   const quote = (st) => {
     const qs = st.q ? [].concat(st.q) : [st.line];
     return `<details class="xr-q"><summary>원문</summary><blockquote>${qs.map((q) => `<p>${esc(q)}</p>`).join("")}</blockquote>${ref(st.s)}</details>`;
   };
+  /* v6: one plain sentence per concept, from the shared glossary (js/glossary.js) */
+  const PLAIN = { context: "context", harness: "harness", loop: "loop", graph: "graph", paradigm: "agent" };
   R.xRoom = (p) => {
     const ex = A.explain[p.id], n = ex.steps.length;
     const cards = ex.steps.map((st, i) => `
@@ -352,6 +354,7 @@
           <li class="xr-card xr-intro" data-k="0">
             <p class="rm-st-line">${R.st(p.st, true)}</p>
             <h2 id="room-title">${esc(p.title)}</h2>
+            ${PLAIN[p.id] && A.glossary ? `<p class="xr-plain"><b>쉽게 말하면</b> ${esc(A.glossary.find((g) => g.id === PLAIN[p.id]).plain)}</p>` : ""}
             <p class="xr-hint">스크롤하거나 <kbd>.</kbd> <kbd>,</kbd> 키로 한 단계씩 넘기세요</p>
           </li>${cards}
         </ol>
@@ -428,7 +431,7 @@
     const ex = A.explain[p.id], out = [];
     const sec = (cls, h, body, foot) => `<section class="xr-x ${cls}"><h3>${h}</h3>${body}${foot ? `<div class="xr-foot">${foot}</div>` : ""}</section>`;
     if (p.id === "paradigm") {
-      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("dots2-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p><p class="q-ref">${esc(R.refFull(ex.gaps.s))}</p>`));
+      out.push(sec("xr-gaps", "명명 간격", gaps(p, true) + bgSlot("dots2-gap-arches"), `<p class="legend">${esc(A.viz.paradigm.legend)}</p><p class="q-src">${esc(R.srcLabel(ex.gaps.s))}</p>`));
       out.push(sec("xr-tl", "날짜가 있는 사건만", timeline(ex), `<p class="legend">줄은 표의 ‘단계’ 칸에 있는 낱말로 나눴습니다. 날짜가 월까지만 있으면 그달 15일에, 기간이면 첫날에 표시했습니다. 아래는 2025년 5월~2026년 9월을 확대한 것입니다.</p><details class="xr-q"><summary>사건 목록</summary><ol class="xr-tl-list">${ex.timeline.rows.map((r) => `<li><time>${esc(r[0])}</time> ${esc(r[1])} <span>${esc(r[2])}</span></li>`).join("")}</ol>${ref(ex.timeline.s)}</details>`));
     }
     if (p.id === "loop") out.push(sec("xr-kinds xm-wrap", esc(ex.kinds.label), loopKinds(ex), `<details class="xr-q"><summary>원문</summary><blockquote>${ex.kinds.rows.map((r) => `<p>${esc(r.t)}</p>`).join("")}</blockquote>${ref(ex.kinds.s)}</details>`));
@@ -529,6 +532,7 @@
   X.mountRoom = (el) => {
     X.unmountRoom();
     roomEl = el;
+    el.querySelectorAll("[data-full]").forEach((im) => { im.setAttribute(im.tagName === "image" ? "href" : im.tagName === "VIDEO" ? "poster" : "src", im.dataset.full); im.removeAttribute("data-full"); });
     el.querySelectorAll("figure.xs").forEach((f) => { if (!f.closest(".xr")) setStep(f, A.explain[f.dataset.x].floor, true); });
     el.querySelectorAll(".xm, .xm-wrap svg").forEach((f) => f.classList.toggle("play", !reduced()));
     const xr = el.querySelector(".xr"); if (!xr) return;

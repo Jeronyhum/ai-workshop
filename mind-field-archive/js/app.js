@@ -19,7 +19,7 @@
     const b = $("#motion-btn");
     b.setAttribute("aria-pressed", String(reduced()));
     $("b", b).textContent = reduced() ? "줄임" : "기본";
-    document.body.classList.toggle("grain-live", !reduced());
+
   }
 
   /* ── layout ─────────────────────────────────────── */
@@ -73,7 +73,10 @@
       const shown = A.assets.filter((a) => a.zone === k && A.asset(a.slot));
       return shown.length ? `<span class="asset-cap" style="left:${z[k].x + 28}px;top:${H - 80}px">${shown[0].cap} <span>${shown.map((a) => A.asset(a.slot)).join(" · ")}</span></span>` : "";
     }).join("");
-    const clusters = A.clusters.map((c) => `<span class="cluster" style="left:${c.x}px;top:${c.y}px" aria-hidden="true">${c.name}</span>`).join("");
+    const clusters = A.clusters.map((c) => `<span class="cluster" style="left:${c.x}px;top:${c.y}px" aria-hidden="true">${c.name}</span>`).join("")
+      /* v6 (전사본): the three acts of 민성's story head their columns, numbered in his order */
+      + (A.acts || []).map((a, i) => `<span class="act" style="left:${a.x}px;top:900px" aria-hidden="true"><i>${i + 1}</i><b>${a.name}</b><em>${a.sub}</em></span>`).join("")
+      + (z.p1.open ? `<span class="act-rule" style="left:${z.p1.open - 40}px;height:${H}px" aria-hidden="true"></span>` : "");
     const ringSvg = `<svg class="floor-rings" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
       <defs><clipPath id="p2clip"><rect x="${z.p2.x}" y="0" width="${z.p2.w}" height="${H}"/></clipPath></defs>
       <g clip-path="url(#p2clip)">
@@ -88,11 +91,11 @@
     }).join("");
     const plaque = `<figure class="plaque" style="left:${A.plaque.x}px;top:${A.plaque.y}px">
       <blockquote><p>${R.esc(A.plaque.text)}</p></blockquote>
-      <figcaption><span class="ref">${R.esc(R.refFull(A.plaque.src))}</span> ${R.esc(A.plaque.src.by)}</figcaption>
+      <figcaption>${R.esc(A.plaque.src.by)}</figcaption>
     </figure>`;
     const threadSvg = `<svg class="threads" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"></svg>`;
     const pcs = pieces.map((p) => `
-      <div class="pc${mat(p) === "paper" ? " on-paper" : ""}" role="button" id="pc-${p.id}" data-id="${p.id}" data-kind="${p.kind}" data-zone="${p.zone}" data-mat="${mat(p)}" data-tier="${p.tier}" tabindex="-1"
+      <div class="pc${mat(p) === "paper" ? " on-paper" : ""}" role="button" id="pc-${p.id}" data-id="${p.id}" data-kind="${p.kind}" data-zone="${p.zone}" data-mat="${mat(p)}" data-tier="${p.tier}"${p.kind === "story" ? ` data-act="${(A.acts || []).findIndex((a) => a.name === p.cluster) + 1}"` : ""} tabindex="-1"
         aria-labelledby="t-${p.id}" aria-describedby="floor-help"
         style="left:${p.x}px;top:${p.y}px;width:${p.w}px;--rot:${p.rot.toFixed(2)}deg;--i:${p.k}">${R.piece(p)}</div>`).join("");
     world.innerHTML = zoneHTML + seam + clusters + ringSvg + ringLabels + assetCaps + `<div class="dim" aria-hidden="true" style="width:${W}px;height:${H}px"></div>` + threadSvg + `<div class="tlabels" aria-hidden="true"></div>` + plaque + spark + pcs;
@@ -115,7 +118,13 @@
       const dx = x2 - x1, dy = y2 - y1, d = Math.hypot(dx, dy) || 1;
       const bend = (i % 2 ? 1 : -1) * Math.min(260, d * 0.16);
       const cx = (x1 + x2) / 2 - (dy / d) * bend, cy = (y1 + y2) / 2 + (dx / d) * bend;
-      const lx = 0.25 * x1 + 0.5 * cx + 0.25 * x2, ly = 0.25 * y1 + 0.5 * cy + 0.25 * y2;
+      /* v6: slide the label along its thread until it sits clear of every piece (sized for the near view, z ≈ 0.6) */
+      const lw = (why.length * 14 + 28) / 0.6, lh = 30 / 0.6;
+      const at = (t) => [(1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * cx + t * t * x2, (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * cy + t * t * y2];
+      const hit = ([x, y]) => pieces.reduce((s, q) => s + Math.max(0, Math.min(x + lw / 2, q.x + q.w / 2 + 16) - Math.max(x - lw / 2, q.x - q.w / 2 - 16)) * Math.max(0, Math.min(y + lh / 2, q.y + q.h / 2 + 16) - Math.max(y - lh / 2, q.y - q.h / 2 - 16)), 0);
+      const nx = -(y2 - y1) / d, ny = (x2 - x1) / d, cands = [];
+      [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].forEach((t) => [0, 1, -1, 2, -2].forEach((k) => { const [px, py] = at(t); cands.push([px + nx * k * lh * 1.4, py + ny * k * lh * 1.4, Math.abs(k) * 0.01 + Math.abs(t - 0.5) * 0.01]); }));
+      const [lx, ly] = cands.map((c) => [c[0], c[1], hit(c) + c[2]]).sort((a, b) => a[2] - b[2])[0];
       const delay = Math.min(1.5, Math.abs((P.x + Q.x) / 2 - midX) / 2600);
       paths += `<path class="th" data-tone="${tone(P, Q)}" data-a="${a}" data-b="${b}" d="M${x1.toFixed(1)} ${y1.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" pathLength="1" style="--d:${delay.toFixed(2)}s"/>`
              + `<circle class="th-end" data-tone="${tone(P, Q)}" data-a="${a}" data-b="${b}" cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}"/><circle class="th-end" data-tone="${tone(P, Q)}" data-a="${a}" data-b="${b}" cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}"/>`;
@@ -130,21 +139,56 @@
   const zMin = () => Math.min(vp().w / W, vp().h / H) * 0.9;
   const zMax = 2.4;
   let level = "all";
+  /* v6: the level decides the chrome. piece: the HUD panel on the left, no map. zone/free: the map, no HUD. all: the
+     entrance card. Framing then fits into whatever the chrome leaves free (box), so nothing lands under it. */
+  function setLevel(l) { level = l; root.dataset.level = l; if (l !== "all") floor.classList.remove("is-first"); }
+  const BAR = 56, GAP = 24;
+  function box() {
+    const v = vp(), piece = level === "piece" || docent;
+    const hud = $("#hud"), hw = piece && hud ? Math.max(hud.offsetWidth, 300) + GAP * 2 : GAP;
+    const mapH = level === "zone" || level === "free" ? ($("#map").offsetHeight || 120) + GAP * 2 : level === "all" ? ($("#entry")?.offsetHeight || 0) + GAP * 2 : GAP;
+    return { x: hw, y: BAR + GAP, w: Math.max(200, v.w - hw - GAP), h: Math.max(200, v.h - BAR - GAP - mapH) };
+  }
+  let glideUntil = 0;
+  /* v6 performance: the world is not a promoted layer (no will-change, a 2D transform). Promoted, even only while the
+     camera moved, it repainted far more than needed whenever anything inside it animated: 1 to 4 frames a second at piece
+     level with a software GPU, 30 without. A glide is still composited while its transition runs, and the text redraws
+     sharp at the new scale when it ends. */
   function apply(glide) {
     world.classList.toggle("glide", !!glide && !reduced());
-    world.style.transform = `translate3d(${cam.x.toFixed(2)}px, ${cam.y.toFixed(2)}px, 0) scale(${cam.z.toFixed(4)})`;
+    if (glide && !reduced()) glideUntil = performance.now() + 650;
+    world.style.transform = `translate(${cam.x.toFixed(2)}px, ${cam.y.toFixed(2)}px) scale(${cam.z.toFixed(4)})`;
     world.style.setProperty("--z", cam.z.toFixed(4));
     floor.style.setProperty("--z", cam.z.toFixed(4));
     floor.dataset.scale = cam.z < 0.3 ? "far" : cam.z < 0.62 ? "mid" : "near";
     floor.toggleAttribute("data-whole", cam.z <= zMin() * 1.2);
     paintMap(); placeSpot(); markZone(); queueVideos();
+    if (window.ARF) ARF.camera(cam, floor.dataset.scale);
   }
 
   /* ambient video: muted loops play only while on screen and large enough to see; never in reduced motion */
   let vq, floorPaused = false;
   function queueVideos() { clearTimeout(vq); vq = setTimeout(updateVideos, glideMs() + 60); }
   const glideMs = () => (world.classList.contains("glide") ? 900 : 0);
+  /* v6: floor images start as small copies (lod/, tools/lod_images.py); one that is near the screen and drawn wider than
+     its copy gets the next one up (a 1280-px middle copy, then the full file). The overview never needs one, so the first
+     load stays light, and a close view does not decode 2560-px files it draws at 600. */
+  function upgradeImages() {
+    const fr = floor.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2), mx = fr.width * 0.25, my = fr.height * 0.25;
+    $$("[data-full]", world).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.right < fr.left - mx || r.left > fr.right + mx || r.bottom < fr.top - my || r.top > fr.bottom + my) return;
+      const need = r.width * dpr;
+      if (need <= (+el.dataset.w || 480) * 1.15) return;
+      if (+getComputedStyle(el).opacity < 0.3) return;  /* a texture at 4–10% opacity never needs more than its small copy */
+      const mid = el.dataset.mid && need <= +el.dataset.mw * 1.15;
+      el.setAttribute(el.tagName === "image" ? "href" : el.tagName === "VIDEO" ? "poster" : "src", mid ? el.dataset.mid : el.dataset.full);
+      if (mid) el.dataset.w = el.dataset.mw; else el.removeAttribute("data-full");
+      el.removeAttribute("data-mid"); el.removeAttribute("data-mw");
+    });
+  }
   function updateVideos() {
+    upgradeImages();
     const fr = floor.getBoundingClientRect();
     $$("video.amb, .pc figure.xs", world).forEach((v) => {
       const r = v.getBoundingClientRect();
@@ -156,41 +200,44 @@
     });
   }
   function fit(r, glide, maxZ = 1.1, pad = 0.07) {
-    const v = vp();
-    cam.z = Math.max(zMin(), Math.min(maxZ, (v.w * (1 - 2 * pad)) / r.w, (v.h * (1 - 2 * pad)) / r.h));
-    cam.x = v.w / 2 - (r.x + r.w / 2) * cam.z;
-    cam.y = v.h / 2 - (r.y + r.h / 2) * cam.z;
+    const b = box();
+    cam.z = Math.max(zMin(), Math.min(maxZ, (b.w * (1 - 2 * pad)) / r.w, (b.h * (1 - 2 * pad)) / r.h));
+    cam.x = b.x + b.w / 2 - (r.x + r.w / 2) * cam.z;
+    cam.y = b.y + b.h / 2 - (r.y + r.h / 2) * cam.z;
     apply(glide);
   }
   const zoneRect = (k) => {
     if (k === "all") return { x: 0, y: 0, w: W, h: H };
-    if (k === "gal") { const z = A.zones.gal, v = vp(); return { x: z.x, y: 0, w: z.w, h: (z.w * v.h) / v.w }; }
-    const a = byId.get(A.zones[k].anchor), v = vp();
-    const w = k === "br" ? A.zones.br.w + 700 : A.zones[k].w, h = (w * v.h) / v.w;
-    return { x: k === "br" ? A.zones.br.x - 350 : A.zones[k].x, y: Math.max(0, Math.min(H - h, a.y - h / 2)), w, h };
+    const b = box();
+    if (k === "p1" && A.zones.p1.open) { const w = A.zones.p1.open, h = (w * b.h) / b.w; return { x: 0, y: Math.max(0, Math.min(H - h, 820)), w, h }; }  /* v6: 1 opens on the story */
+    if (k === "gal") { const z = A.zones[k]; return { x: z.x, y: 0, w: z.w, h: Math.min(H, (z.w * b.h) / b.w) }; }
+    if (k === "exit") { const z = A.zones[k], wl = $(".exit-wall", world); return { x: z.x, y: wl ? wl.offsetTop - 120 : 0, w: z.w, h: (z.w * b.h) / b.w }; }
+    const a = byId.get(A.zones[k].anchor);
+    const w = k === "br" ? A.zones.br.w + 700 : A.zones[k].w, h = (w * b.h) / b.w;
+    return { x: k === "br" ? A.zones.br.x - 350 : A.zones[k].x, y: a.y < h * 0.8 ? 0 : Math.max(0, Math.min(H - h, a.y - h / 2)), w, h };  /* a zone whose anchor sits high starts at its title */
   };
   function zoomAt(f, sx, sy, glide) {
     const z = Math.max(zMin(), Math.min(zMax, cam.z * f));
     const wx = (sx - cam.x) / cam.z, wy = (sy - cam.y) / cam.z;
     cam.z = z; cam.x = sx - wx * z; cam.y = sy - wy * z;
-    level = "free"; apply(glide);
+    setLevel("free"); apply(glide);
   }
   function framePiece(p, glide) {
+    setLevel("piece");
     if (docent) {
       const ids = [p.id, ...near.get(p.id).map((n) => n.id)];
       const xs = ids.map((id) => byId.get(id)), pad = 80;
       const x0 = Math.min(...xs.map((q) => q.x - q.w / 2)) - pad, x1 = Math.max(...xs.map((q) => q.x + q.w / 2)) + pad;
       const y0 = Math.min(...xs.map((q) => q.y - q.h / 2)) - pad, y1 = Math.max(...xs.map((q) => q.y + q.h / 2)) + pad;
       fit({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, glide, 0.95, 0.05);
-      const v = vp(), need = Math.min((v.h * 0.5) / p.h, (v.w * 0.32) / p.w);
-      if (cam.z < need * 0.62) { cam.z = Math.min(0.95, need * 0.62); cam.x = v.w / 2 - p.x * cam.z; cam.y = v.h / 2 - p.y * cam.z; apply(glide); }
+      const b = box(), need = Math.min((b.h * 0.6) / p.h, (b.w * 0.4) / p.w);
+      if (cam.z < need * 0.62) { cam.z = Math.min(0.95, need * 0.62); cam.x = b.x + b.w / 2 - p.x * cam.z; cam.y = b.y + b.h / 2 - p.y * cam.z; apply(glide); }
     } else {
-      const v = vp(), f = { 1: [0.74, 0.8, 0.9], 2: [0.42, 0.66, 1.15], 3: [0.3, 0.42, 1.4] }[p.tier];
-      cam.z = Math.max(0.2, Math.min(f[2], (v.h * f[1]) / p.h, (v.w * f[0]) / p.w));
-      cam.x = v.w / 2 - p.x * cam.z; cam.y = v.h / 2 - p.y * cam.z;
+      const b = box(), f = { 1: [0.9, 0.9, 0.9], 2: [0.5, 0.8, 1.15], 3: [0.36, 0.5, 1.4] }[p.tier];
+      cam.z = Math.max(0.2, Math.min(f[2], (b.h * f[1]) / p.h, (b.w * f[0]) / p.w));
+      cam.x = b.x + b.w / 2 - p.x * cam.z; cam.y = b.y + b.h / 2 - p.y * cam.z;
       apply(glide);
     }
-    level = "piece";
   }
 
   /* ── current piece, docent, hud ─────────────────── */
@@ -198,6 +245,7 @@
   const trail = [];
   function setCurrent(id, { glide = true, frame = true, announce = true, push = true } = {}) {
     const p = byId.get(id); if (!p) return;
+    floor.classList.remove("is-first");
     if (push && cur && cur !== id) { trail.push(cur); if (trail.length > 40) trail.shift(); }
     const prev = cur;
     cur = id;
@@ -214,12 +262,12 @@
     });
     if (!reduced()) { void world.offsetWidth; $$(".th.hot", world).forEach((t) => t.classList.add("draw")); }
     if (document.activeElement !== el && !room.open && !index.open && !keys.open) el.focus({ preventScroll: true });
-    if (frame) framePiece(p, glide); else placeSpot();
     paintHud(p);
+    if (frame) framePiece(p, glide); else placeSpot();
     if (announce) live.textContent = `${A.zones[p.zone].name} ${p.title}. ${A.status[p.st].word}. 이웃 ${near.get(id).length}개.`;
   }
   function paintHud(p) {
-    $("#hud-now").innerHTML = `<p class="hud-where">${A.zones[p.zone].name}</p><p class="hud-t">${R.esc(p.title)}</p><p>${R.st(p.st, true)} <span class="ref">${R.esc(R.ref(p.src[0]))}</span></p>`;
+    $("#hud-now").innerHTML = `<p class="hud-where">${A.zones[p.zone].name}</p><p class="hud-t">${R.esc(p.title)}</p><p class="hud-src">${R.st(p.st, true)} <span>${R.esc(R.srcLabel(p.src[0]))}</span></p>`;
     const next = nextNeighbour(p.id);
     $("#hud-now").insertAdjacentHTML("beforeend", next ? `<p class="hud-tab"><kbd>Tab</kbd> ${R.esc(byId.get(next).title)}</p>` : "");
     $("#hud-next").innerHTML = nearOf(p.id).map((n) => `<li${n.id === next ? ' class="is-next"' : ""}><button type="button" data-go="${n.id}" data-zone="${n.p.zone}"><span>${R.esc(n.p.title)}</span><small>${R.esc(n.why)}</small></button></li>`).join("");
@@ -269,16 +317,17 @@
     });
     if (best) setCurrent(best.id);
   }
-  function jump(k) {
-    level = k === "all" ? "all" : "zone";
+  function jump(k, { open = true } = {}) {
+    setLevel(k === "all" ? "all" : "zone");
     fit(zoneRect(k), true, k === "all" ? 1 : 0.62, k === "all" ? 0.03 : 0);
-    if (k === "gal") $(".gal-open", world)?.focus({ preventScroll: true });
+    if (k === "gal") { $(".gal-open", world)?.focus({ preventScroll: true }); if (open && window.ARG) window.ARG.open(); }
+    else if (k === "exit") { $(".exit-open", world)?.focus({ preventScroll: true }); if (open && window.ARE) window.ARE.open(); }
     else if (k !== "all") setCurrent(A.zones[k].anchor, { frame: docent, glide: true });
     else if (docent && cur) placeSpot();
   }
   function markZone() {
     const v = vp(), cx = (v.w / 2 - cam.x) / cam.z;
-    const inView = cam.z <= zMin() * 1.15 ? "all" : cx < A.zones.br.x ? "p1" : cx < A.zones.p2.x ? "br" : cx < A.zones.gal.x ? "p2" : "gal";
+    const inView = cam.z <= zMin() * 1.15 ? "all" : cx < A.zones.br.x ? "p1" : cx < A.zones.p2.x ? "br" : cx < A.zones.gal.x ? "p2" : cx < A.zones.exit.x ? "gal" : "exit";
     $$(".bar-zones button").forEach((b) => b.toggleAttribute("aria-current", b.dataset.jump === inView));
   }
 
@@ -295,7 +344,7 @@
     map.addEventListener("click", (e) => {
       const r = map.querySelector("svg").getBoundingClientRect();
       const wx = ((e.clientX - r.left) / r.width) * W, wy = ((e.clientY - r.top) / r.height) * H, v = vp();
-      cam.z = Math.max(cam.z, 0.35); cam.x = v.w / 2 - wx * cam.z; cam.y = v.h / 2 - wy * cam.z; level = "free"; apply(true);
+      cam.z = Math.max(cam.z, 0.35); cam.x = v.w / 2 - wx * cam.z; cam.y = v.h / 2 - wy * cam.z; setLevel("free"); apply(true);
     });
   }
   function paintMap() {
@@ -312,11 +361,15 @@
     const p = byId.get(id); if (!p) return;
     if (mode === "forward" && room.open && room.dataset.id) roomTrail.push(room.dataset.id);
     if (mode === "new") roomTrail.length = 0;
-    setCurrent(id, { glide: true, announce: false, push: mode !== "back" });
+    /* the camera does not glide behind the opening room: it frames the piece once the floor has stopped painting
+       (floorOff), so closing the room lands on the piece last shown, and the reveal draws over a still floor */
+    setCurrent(id, { frame: false, announce: false, push: mode !== "back" });
+    if (document.body.classList.contains("floor-off")) framePiece(p, false); else frameLater = () => framePiece(p, false);
     const el = $("#pc-" + id), r = el.getBoundingClientRect();
     room.style.setProperty("--ox", (r.left + r.width / 2).toFixed(0) + "px");
     room.style.setProperty("--oy", (r.top + r.height / 2).toFixed(0) + "px");
     roomIn.innerHTML = R.room(p, nearOf(id));
+    $$("[data-full]", roomIn).forEach((el) => { el.setAttribute(el.tagName === "image" ? "href" : el.tagName === "VIDEO" ? "poster" : "src", el.dataset.full); el.removeAttribute("data-full"); });
     if (window.ARX) ARX.mountRoom(roomIn);
     room.dataset.zone = p.zone; room.dataset.id = id; room.dataset.kind = p.kind;
     const nx = nextNeighbour(id);
@@ -329,24 +382,44 @@
     live.textContent = `${p.title} 열림. ${A.status[p.st].word}.`;
   }
   /* exits faster than it enters (animate-ui): a 200ms fade, then close */
-  function closeRoom() {
+  /* v6 performance: rooms, the gallery, the exit and the list are opaque full-screen dialogs. Once one has finished opening,
+     the floor (and its WebGL field) stops painting behind it; it comes back the moment a dialog starts to close.
+     Measured in headless Chrome: a room over a live floor drew 1.5 frames a second, over a hidden floor 60. */
+  const fullDialogs = () => [room, index, $("#gallery"), $("#exit")].filter(Boolean);
+  let offT = 0, frameLater = null;
+  function floorOff(on) {
+    clearTimeout(offT);
+    if (on) offT = setTimeout(() => { document.body.classList.add("floor-off"); if (frameLater) frameLater(); frameLater = null; }, reduced() ? 0 : 950);
+    else { frameLater = null; document.body.classList.remove("floor-off"); if (window.ARF) ARF.kick(); }
+  }
+  const watchOpen = new MutationObserver(() => floorOff(fullDialogs().some((d) => d.open)));
+  fullDialogs().forEach((d) => watchOpen.observe(d, { attributes: true, attributeFilter: ["open"] }));
+  /* the dialog hands focus back to whatever opened it first; while it does, the floor must not follow that focus */
+  function closeRoom(then) {
     if (!room.open || room.classList.contains("is-closing")) return;
-    if (reduced()) return room.close();
+    const done = () => { restoring = true; room.close(); restoring = false; if (then) then(); };
+    floorOff(false);
+    if (reduced()) return done();
     room.classList.add("is-closing");
-    setTimeout(() => { room.classList.remove("is-closing"); room.close(); }, 200);
+    setTimeout(() => { room.classList.remove("is-closing"); done(); }, 200);
   }
   room.addEventListener("cancel", (e) => { e.preventDefault(); closeRoom(); });
+  let restoring = false;
   room.addEventListener("close", () => {
+    restoring = false;
     $$("video", roomIn).forEach((v) => v.pause());
     if (window.ARX) ARX.unmountRoom();
     history.replaceState(null, "", location.pathname + location.search);
-    if (cur) { const el = $("#pc-" + cur); el.focus({ preventScroll: true }); live.textContent = `바닥으로 돌아옴: ${byId.get(cur).title}`; }
+    if (cur) { const el = $("#pc-" + cur); requestAnimationFrame(() => el.focus({ preventScroll: true })); live.textContent = `바닥으로 돌아옴: ${byId.get(cur).title}`; }
     updateVideos();
   });
   room.addEventListener("click", (e) => {
+    const exitBtn = e.target.closest("[data-exit]");  /* v6: the story's last rooms hand over to the exit */
+    if (exitBtn) return closeRoom(() => window.ARE && window.ARE.open(exitBtn.dataset.exit));
     const go = e.target.closest("[data-go]");
     if (go) return openRoom(go.dataset.go, { mode: "forward" });
-    if (e.target.closest("[data-close]") || e.target === room) closeRoom();
+    if (e.target.closest("[data-home]")) return closeRoom(() => jump("all"));
+    if (e.target.closest("[data-close]")) closeRoom();
   });
 
   /* ── index (list view) ─────────────────────────── */
@@ -354,7 +427,7 @@
     const groups = [];
     ["p1", "br", "p2"].forEach((z) => {
       const ps = pieces.filter((p) => p.zone === z);
-      const keysIn = z === "p1" ? A.clusters.map((c) => c.name) : z === "p2" ? [...A.rings.bands.map((b) => b.key), undefined] : [undefined];
+      const keysIn = z === "p1" ? [...(A.acts || []).map((a) => a.name), ...A.clusters.map((c) => c.name)] : z === "p2" ? [...A.rings.bands.map((b) => b.key), undefined] : [undefined];
       const sec = keysIn.map((k) => {
         const list = ps.filter((p) => (z === "p1" ? p.cluster === k : z === "p2" ? p.ring === k : true));
         if (!list.length) return "";
@@ -368,7 +441,7 @@
   index.addEventListener("click", (e) => {
     const o = e.target.closest("[data-open]");
     if (o) { index.close(); openRoom(o.dataset.open); return; }
-    if (e.target.closest("[data-close]") || e.target === index) index.close();
+    if (e.target.closest("[data-close]")) index.close();
   });
   keys.addEventListener("click", (e) => { if (e.target.closest("[data-close]") || e.target === keys) keys.close(); });
 
@@ -396,7 +469,7 @@
     if (!drag) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.moved && Math.hypot(dx, dy) > 5) { drag.moved = true; floor.setPointerCapture(e.pointerId); floor.classList.add("is-dragging"); }
-    if (drag.moved) { cam.x = drag.cx + dx; cam.y = drag.cy + dy; level = "free"; apply(false); suppressClick = true; }
+    if (drag.moved) { cam.x = drag.cx + dx; cam.y = drag.cy + dy; setLevel("free"); apply(false); suppressClick = true; }
   });
   const endPtr = (e) => {
     ptrs.delete(e.pointerId);
@@ -406,8 +479,11 @@
   floor.addEventListener("pointerup", endPtr); floor.addEventListener("pointercancel", endPtr);
   floor.addEventListener("click", (e) => {
     if (suppressClick) { suppressClick = false; return; }
+    if (performance.now() < glideUntil && !e.target.closest("button")) return;
     const gt = e.target.closest("[data-gal]");
     if (gt && window.ARG) return window.ARG.open(gt.dataset.gal);
+    const ex = e.target.closest("[data-exit]");
+    if (ex && window.ARE) return window.ARE.open(ex.dataset.exit);
     const pc = e.target.closest(".pc");
     if (pc) openRoom(pc.dataset.id);
   });
@@ -415,10 +491,11 @@
     e.preventDefault();
     const fr = floor.getBoundingClientRect();
     if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.0022), e.clientX - fr.left, e.clientY - fr.top, false);
-    else { cam.x -= e.deltaX; cam.y -= e.deltaY; level = "free"; apply(false); }
+    else { cam.x -= e.deltaX; cam.y -= e.deltaY; setLevel("free"); apply(false); }
   }, { passive: false });
   floor.addEventListener("scroll", () => { floor.scrollTop = 0; floor.scrollLeft = 0; });
   floor.addEventListener("focusin", (e) => {
+    if (restoring || room.open) return;
     const pc = e.target.closest(".pc");
     if (pc && pc.dataset.id !== cur) setCurrent(pc.dataset.id, { frame: true });
   });
@@ -434,20 +511,27 @@
   /* hud and bar */
   $("#hud").addEventListener("click", (e) => { const g = e.target.closest("[data-go]"); if (g) setCurrent(g.dataset.go); });
   $$("[data-jump]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); jump(b.dataset.jump); }));
-  $("#docent-btn").addEventListener("click", () => setDocent(!docent));
+  $("#docent-btn").addEventListener("click", () => { setDocent(!docent); if (cur && !room.open) $("#pc-" + cur).focus({ preventScroll: true }); });
+  $("#skip-list").addEventListener("click", () => { index.showModal(); $("[data-open]", index)?.focus(); });
+  $("#terms-btn")?.addEventListener("click", () => window.ARE && window.ARE.open("terms"));
+  $$("[data-intro]").forEach((b) => b.addEventListener("click", () => { const k = b.dataset.intro; if (k === "exit") jump("exit"); else { jump(k, { open: false }); } }));
   $("#index-open").addEventListener("click", (e) => { e.preventDefault(); index.showModal(); $("[data-open]", index)?.focus(); });
   $("#keys-btn").addEventListener("click", () => keys.showModal());
   $("#zoom-in").addEventListener("click", () => { const v = vp(); zoomAt(1.3, v.w / 2, v.h / 2, true); });
   $("#zoom-out").addEventListener("click", () => { const v = vp(); zoomAt(1 / 1.3, v.w / 2, v.h / 2, true); });
   $("#motion-btn").addEventListener("click", toggleMotion);
-  function toggleMotion() { root.dataset.motion = reduced() ? "full" : "reduced"; setMotionLabel(); if (window.ARX) ARX.motion(); updateVideos(); }
+  function toggleMotion() {
+    root.dataset.motion = reduced() ? "full" : "reduced"; setMotionLabel(); if (window.ARX) ARX.motion(); updateVideos();
+    if (window.ARF) ARF.motion(); live.textContent = reduced() ? "움직임 줄임" : "움직임 기본";
+  }
 
   /* ── keyboard ──────────────────────────────────── */
   document.addEventListener("keydown", (e) => {
     if (e.isComposing || e.keyCode === 229) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const c = e.code;
-    if (keys.open || index.open || (window.ARG && window.ARG.isOpen)) return; /* native dialogs handle Esc and Tab */
+    if (c === "KeyM" && !e.repeat && (room.open || keys.open || index.open || (window.ARG && window.ARG.isOpen) || (window.ARE && window.ARE.isOpen))) { toggleMotion(); return; }
+    if (keys.open || index.open || (window.ARG && window.ARG.isOpen) || (window.ARE && window.ARE.isOpen)) return; /* native dialogs handle Esc and Tab */
     if (room.open) {
       if (e.target.closest && e.target.closest("video")) return;
       if (c === "ArrowRight") { e.preventDefault(); openRoom(nextNeighbour(room.dataset.id), { mode: "forward" }); }
@@ -463,6 +547,8 @@
       case "Digit2": case "Numpad2": return jump("p2");
       case "Digit3": case "Numpad3": return jump("br");
       case "Digit4": case "Numpad4": return jump("gal");
+      case "Digit5": case "Numpad5": return jump("exit");
+      case "KeyT": e.preventDefault(); return window.ARE && window.ARE.open("terms");
       case "KeyG": e.preventDefault(); return window.ARG && window.ARG.open();
       case "KeyD": return setDocent(!docent);
       case "KeyL": e.preventDefault(); index.showModal(); $("[data-open]", index)?.focus(); return;
@@ -485,7 +571,7 @@
       e.preventDefault(); if (cur) openRoom(cur);
     } else if (c === "Escape") {
       e.preventDefault();
-      if (level === "piece" || level === "free") { const z = byId.get(cur)?.zone ?? "all"; level = "zone"; fit(zoneRect(z), true, 0.62, 0); }
+      if (level === "piece" || level === "free") { const z = byId.get(cur)?.zone ?? "all"; setLevel("zone"); fit(zoneRect(z), true, 0.62, 0); }
       else if (level === "zone") jump("all");
       else $(".bar-zones button").focus();
     }
@@ -497,6 +583,7 @@
 
   /* ── start ─────────────────────────────────────── */
   if (!root.dataset.motion && osReduced.matches) root.dataset.motion = "reduced";
+  setLevel("all");
   setMotionLabel();
   A.applyAssetVars();
   buildWorld();
@@ -514,6 +601,12 @@
       setTimeout(() => { world.classList.remove("intro", "twist", "lock"); updateVideos(); }, 4200);
     } else updateVideos();
     $("#pc-" + A.zones.p1.anchor).tabIndex = 0;
+    /* v6 (Dots browser review 1): the first screen lights one piece, the one "1부부터 보기" opens, and dims the rest
+       until the visitor moves (any zoom, jump or chosen piece ends it) */
+    const hero = $("#pc-" + A.zones.p1.anchor), hr = hero.getBoundingClientRect(), wr = world.getBoundingClientRect();
+    hero.dataset.hero = "";
+    world.insertAdjacentHTML("beforeend", `<span class="hero-tag" aria-hidden="true" style="left:${((hr.left - wr.left) / cam.z).toFixed(0)}px;top:${((hr.bottom - wr.top) / cam.z).toFixed(0)}px">여기서 시작</span>`);  /* under the piece: the zone title sits above it */
+    floor.classList.add("is-first");
     const hash = decodeURIComponent(location.hash.slice(1));
     if (byId.has(hash)) openRoom(hash);
     document.body.classList.add("is-ready");
@@ -524,7 +617,7 @@
     if (byId.has(id) && room.dataset.id !== id) openRoom(id);
   });
 
-  window.ARchive = { cam, fit, setCurrent, openRoom, jump, setDocent, pieces, byId, near: nearOf,
+  window.ARchive = { cam, fit, setCurrent, openRoom, jump, setDocent, pieces, byId, near: nearOf, reduced, box, get level() { return level; }, get current() { return cur; },
     pauseFloor() { floorPaused = true; $$("video.amb", world).forEach((v) => v.pause()); },
     resumeFloor() { floorPaused = false; updateVideos(); } };
 })();

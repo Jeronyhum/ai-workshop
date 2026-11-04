@@ -5,12 +5,12 @@
      drawing — how a thing is built; hairlines, dimensions, dot grid    (enesozturk spec sheets, Jakubantalik MOTION.CSS)
    Palette values are the moodboard's own (refs/무드_컨셉보드_ui-library.md). Derived values are noted. */
 
-@font-face { font-family: "Archivo MF"; src: url("../fonts/Archivo-Variable.ttf") format("truetype"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
-@font-face { font-family: "JetBrains Mono MF"; src: url("../fonts/JetBrainsMono-Variable.ttf") format("truetype"); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: "Archivo MF"; src: url("../fonts/Archivo-subset.woff2") format("woff2"); font-weight: 400 900; font-stretch: 62% 100%; font-display: swap; }
+@font-face { font-family: "JetBrains Mono MF"; src: url("../fonts/JetBrainsMono-subset.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
 /* Gothic A1 (OFL), subset to the Hangul this site uses — see README "Fonts". Display only. */
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Black-subset.woff") format("woff"); font-weight: 900; font-display: swap; }
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Bold-subset.woff") format("woff"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Regular-subset.woff") format("woff"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Black-subset.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Bold-subset.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Regular-subset.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 
 @property --accent { syntax: "<color>"; inherits: true; initial-value: #D4261C; }
 

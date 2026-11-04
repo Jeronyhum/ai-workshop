@@ -13,7 +13,7 @@ chars = set(text) | set(map(chr, range(0x20, 0x7F))) | set("‘’“”·…–
 unicodes = sorted(ord(c) for c in chars if ord(c) >= 0x20)
 args = sys.argv[1:]
 for src, dst in zip(args[0::2], args[1::2]):
-    opts = subset.Options(); opts.flavor = "woff"; opts.layout_features = ["*"]; opts.name_IDs = ["*"]; opts.notdef_outline = True
+    opts = subset.Options(); opts.flavor = "woff2" if dst.endswith(".woff2") else "woff"; opts.layout_features = ["*"]; opts.name_IDs = ["*"]; opts.notdef_outline = True
     if "#" in src: src, idx = src.split("#"); opts.font_number = int(idx)  # "collection.ttc#1" picks one face
     font = subset.load_font(src, opts)
     sub = subset.Subsetter(opts); sub.populate(unicodes=unicodes); sub.subset(font)
