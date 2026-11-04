@@ -194,16 +194,94 @@ function Read-KeyInteractive($prompt) {
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 }
 
+function Enable-ConsolePaste {
+    # Classic Windows consoles often have QuickEdit off, which kills both
+    # Ctrl+V and right-click paste at prompts (hit on a real machine,
+    # 2026-11-04). Turn QuickEdit + extended flags on for this console.
+    try {
+        Add-Type -MemberDefinition @"
+[DllImport("kernel32.dll")] public static extern IntPtr GetStdHandle(int h);
+[DllImport("kernel32.dll")] public static extern bool GetConsoleMode(IntPtr h, out int m);
+[DllImport("kernel32.dll")] public static extern bool SetConsoleMode(IntPtr h, int m);
+"@ -Name ConsoleMode -Namespace SSU -ErrorAction Stop
+        $h = [SSU.ConsoleMode]::GetStdHandle(-10)
+        $m = 0
+        if ([SSU.ConsoleMode]::GetConsoleMode($h, [ref]$m)) {
+            [void][SSU.ConsoleMode]::SetConsoleMode($h, $m -bor 0x0040 -bor 0x0080)
+        }
+    } catch {}
+}
+
+function Read-KeyGui {
+    # A real text box: paste and the right-click menu always work here,
+    # unlike the console SecureString prompt.
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        Add-Type -AssemblyName System.Drawing
+        $form = New-Object System.Windows.Forms.Form
+        $form.Text = "SSU API 키 입력"
+        $form.Size = New-Object System.Drawing.Size(540, 200)
+        $form.StartPosition = "CenterScreen"
+        $form.TopMost = $true
+        $label = New-Object System.Windows.Forms.Label
+        $label.Text = "대시보드에서 만든 API 키를 붙여넣으세요. (Ctrl+V 또는 우클릭 - 붙여넣기)"
+        $label.AutoSize = $true
+        $label.Location = New-Object System.Drawing.Point(16, 14)
+        $form.Controls.Add($label)
+        $box = New-Object System.Windows.Forms.TextBox
+        $box.Location = New-Object System.Drawing.Point(16, 46)
+        $box.Size = New-Object System.Drawing.Size(492, 24)
+        $form.Controls.Add($box)
+        $okBtn = New-Object System.Windows.Forms.Button
+        $okBtn.Text = "확인"
+        $okBtn.Size = New-Object System.Drawing.Size(88, 30)
+        $okBtn.Location = New-Object System.Drawing.Point(324, 92)
+        $okBtn.DialogResult = [System.Windows.Forms.DialogResult]::OK
+        $form.Controls.Add($okBtn)
+        $cancelBtn = New-Object System.Windows.Forms.Button
+        $cancelBtn.Text = "취소"
+        $cancelBtn.Size = New-Object System.Drawing.Size(88, 30)
+        $cancelBtn.Location = New-Object System.Drawing.Point(420, 92)
+        $cancelBtn.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+        $form.Controls.Add($cancelBtn)
+        $form.AcceptButton = $okBtn
+        $form.CancelButton = $cancelBtn
+        $form.Add_Shown({ $box.Focus() })
+        if ($form.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { return $box.Text.Trim() }
+        return ""
+    } catch { return "" }
+}
+
+function Read-KeyAny($prompt) {
+    # Paste into the console is unreliable, so the primary path needs no
+    # paste at all: the student copies the key in the browser, presses
+    # Enter here, and we read the clipboard (masked confirm). GUI box
+    # next, console prompt last.
+    Enable-ConsolePaste
+    Read-Host "대시보드에서 키를 복사한 뒤 Enter를 누르세요"
+    $clip = ""
+    try { $clip = (Get-Clipboard -Raw).Trim() } catch {}
+    if ($clip -and $clip.Length -ge 8 -and $clip -notmatch "\s") {
+        $masked = $clip.Substring(0, 4) + "..." + $clip.Substring($clip.Length - 4) + " (길이 $($clip.Length))"
+        $yn = Read-Host "클립보드의 키 $masked 를 사용할까요? (Y/n)"
+        if ($yn -ne "n" -and $yn -ne "N") { return $clip }
+    }
+    else { Warn "클립보드에서 키를 찾지 못했습니다. 입력 창을 띄웁니다." }
+    $gui = Read-KeyGui
+    if ($gui) { return $gui }
+    Say "  입력한 키는 화면에 보이지 않습니다."
+    return Read-KeyInteractive $prompt
+}
+
 function Ask-Key {
     if ($Key) { return $Key }
     if ($DryRun) { return "sk-dry-run" }
     Say ""
-    Say "SSU 대시보드에서 API 키를 발급받아 붙여넣으세요."
+    Say "SSU 대시보드에서 API 키를 발급받아 복사하세요."
     Say "  https://ssu.factchat.bot/dashboard/developers  ->  Keys  ->  Create key"
-    Say "  입력한 키는 화면에 보이지 않습니다."
     # Open the dashboard for them — creating the key is the one manual step.
     try { Start-Process "https://ssu.factchat.bot/dashboard/developers" } catch {}
-    return Read-KeyInteractive "API 키"
+    return Read-KeyAny "API 키"
 }
 
 function Test-Key($k) {
@@ -307,7 +385,7 @@ while (-not $check.ok -and $tries -lt 3) {
     # Always ask for a FRESH key here. Ask-Key would return the same $Key that just
     # failed (when it came from -Key/env) and burn all retries on an identical check.
     if ($DryRun) { break }
-    $apiKey = Read-KeyInteractive "새 API 키"
+    $apiKey = Read-KeyAny "새 API 키"
     if (-not $apiKey) { exit 1 }
     $check = Test-Key $apiKey
     $tries++
