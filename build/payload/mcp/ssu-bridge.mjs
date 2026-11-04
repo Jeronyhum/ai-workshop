@@ -10,6 +10,10 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_DIR = process.env.SSU_CONFIG_DIR || path.resolve(HERE, "..");
 const BASE = "https://factchat-cloud.mindlogic.ai/v1/gateway";
+// 이미지 생성 경로 — 확정 (2026-11-04, 대시보드 개발자 문서 실측):
+// POST /v1/gateway/images/generate/ 가 정본이다.
+// (기각된 후보: /images/generations 404, chat/completions에 이미지 모델 지정 404)
+const IMAGE_PATH = "/images/generate/";
 const ENV_CANDIDATES = [
   process.env.SSU_ENV_FILE,
   path.join(CONFIG_DIR, ".env"),
@@ -159,6 +163,21 @@ const tools = [
     description: "남은 크레딧 잔액과 월 할당·구매분 내역. 무료.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
+  {
+    name: "image",
+    description:
+      "이미지를 생성한다. 유료(이미지 1장당 과금). 기본 모델은 gpt-image-2.5-sunburst (Artificial Analysis Image Arena 1위, Elo 1222). 응답이 b64면 현재 작업 폴더에 png 파일로 저장하고 경로를 돌려주고, url이면 url을 돌려준다.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prompt: { type: "string", description: "만들 이미지 설명" },
+        model: { type: "string", description: "이미지 모델 (기본 gpt-image-2.5-sunburst). 가성비는 gemini-nano-banana-2.1" },
+        size: { type: "string", description: "크기 (기본 1024x1024, 예: 1536x1024)" },
+      },
+      required: ["prompt"],
+      additionalProperties: false,
+    },
+  },
 ];
 
 async function callTool(name, args) {
@@ -232,6 +251,37 @@ async function callTool(name, args) {
     case "credits": {
       const { data } = await gw("/credits/", { method: "GET" });
       return asText(JSON.stringify(data, null, 2));
+    }
+    case "image": {
+      const body = {
+        model: args.model || "gpt-image-2.5-sunburst",
+        prompt: args.prompt,
+        n: 1,
+        size: args.size || "1024x1024",
+      };
+      const { data, charged } = await gw(IMAGE_PATH, { body });
+      const items = Array.isArray(data?.data) ? data.data : [];
+      const lines = [];
+      const saveB64 = (b64, i) => {
+        const suffix = items.length > 1 ? "-" + (i + 1) : "";
+        const file = path.join(process.cwd(), "ssu-image-" + Date.now() + suffix + ".png");
+        fs.writeFileSync(file, Buffer.from(b64, "base64"));
+        return "저장됨: " + file;
+      };
+      items.forEach((item, i) => {
+        if (item?.b64_json) {
+          lines.push(saveB64(item.b64_json, i));
+        } else if (typeof item?.url === "string" && item.url.startsWith("data:image/")) {
+          // 실측 (2026-11-04): gpt-image 계열은 b64_json 대신 data URI를 url에 담아
+          // 돌려준다. 그대로 출력하면 거대한 문자열이 되므로 파일로 저장한다.
+          lines.push(saveB64(item.url.split(",", 2)[1] || "", i));
+        } else if (item?.url) {
+          lines.push(item.url);
+        }
+      });
+      // 예상과 다른 응답 형식이면 추측으로 버리지 않고 원문을 그대로 돌려준다.
+      if (!lines.length) return asText(JSON.stringify(data, null, 2) + billingLine(charged));
+      return asText(lines.join("\n") + billingLine(charged));
     }
     default:
       return asError("unknown tool: " + name);

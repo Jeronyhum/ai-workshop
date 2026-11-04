@@ -221,12 +221,28 @@ function pickTier(re, { exclude = null, cheapest = true, prefer = null } = {}) {
   return c[0];
 }
 const NOT_FRONTIER = /mini|nano|flash|haiku|luna|gemma|decision/i;
+// Advisor = highest Artificial Analysis Intelligence Index available in the
+// catalog. Owner rule (2026-11-04): benchmark standing decides, not price —
+// on this gateway price is a poor proxy (gpt-5.4-pro input $30 scored below
+// every model on this list; claude-opus-5-5 input $4 tops it).
+// AA Index snapshot 2026-11-04 (artificialanalysis.ai/leaderboards/models):
+// Gemini 4 Carbon 60 (not in catalog), Claude Opus 5.5 59, GPT-6 Astra 57,
+// GPT-6.1 Sol 55, Claude Sonnet 5.5 55, Gemini 4 Argon 50, Claude Fable 5.1 50.
+const AA_ADVISOR_ORDER = [
+  "gemini-4-carbon", "claude-opus-5-5", "gpt-6-astra", "gpt-6.1-sol",
+  "claude-sonnet-5-5", "gemini-4-argon", "claude-fable-5-1",
+];
+const aaPick = AA_ADVISOR_ORDER
+  .map((p) => allChat.find((m) => m.id === p || m.id.startsWith(p)))
+  .find(Boolean) || null;
 const tierModels = {
   "w-flash": pickTier(/flash/i),
   "w-haiku": pickTier(/haiku/i),
   "w-luna": pickTier(/luna/i, { exclude: /decision/i }),
   "w-gemma": pickTier(/gemma/i, { prefer: /gemma[-_ ]?4|gemma4/i }),
-  advisor: pickTier(/opus|gpt-6|gpt-5/i, { exclude: NOT_FRONTIER, cheapest: false }) ||
+  advisor: aaPick ||
+    pickTier(/opus/i, { cheapest: false }) ||
+    pickTier(/gpt-6|gpt-5/i, { exclude: NOT_FRONTIER, prefer: /pro/i, cheapest: false }) ||
     pickTier(/./, { cheapest: false }),
 };
 const AGENT_DEFS = {

@@ -318,6 +318,87 @@ else
   fi
 fi
 
+# --- Open Design (선택 구성요소: 실패해도 전체 설치를 막지 않는다) ---
+open_design_present() {
+  [ -d "/Applications/OpenDesign.app" ] || [ -d "/Applications/Open Design.app" ] \
+    || [ -d "$HOME/Applications/OpenDesign.app" ] || [ -d "$HOME/Applications/Open Design.app" ]
+}
+
+wire_open_design_mcp() {
+  # OpenCode에 Open Design MCP 연결 (best-effort).
+  # macOS의 /usr/bin/od는 시스템 유틸리티(octal dump)라 Open Design CLI로 취급하지 않는다.
+  local od="" cand
+  cand="$(command -v od || true)"
+  if [ -n "$cand" ] && [ "$cand" != "/usr/bin/od" ]; then od="$cand"; fi
+  if [ -z "$od" ]; then
+    for cand in \
+      "/Applications/OpenDesign.app/Contents/Resources/od" \
+      "/Applications/Open Design.app/Contents/Resources/od" \
+      "$HOME/.local/bin/od"; do
+      if [ -x "$cand" ]; then od="$cand"; break; fi
+    done
+  fi
+  if [ -n "$od" ]; then
+    if "$od" mcp install opencode >/dev/null 2>&1; then ok "Open Design MCP를 OpenCode에 연결"
+    else warn "Open Design MCP 연결 실패 — 직접 실행: od mcp install opencode"; fi
+  else
+    warn "od CLI를 찾지 못해 MCP 연결을 건너뜁니다. Open Design을 한 번 실행한 뒤 다시 시도하거나 직접 실행하세요: od mcp install opencode"
+  fi
+}
+
+install_open_design_darwin() {
+  if open_design_present; then ok "Open Design 이미 설치됨"; return 0; fi
+  if have brew; then
+    say "  Open Design 설치 중 (Homebrew cask)"
+    if brew install --cask open-design >/dev/null 2>&1; then ok "Open Design 설치"; return 0; fi
+    warn "brew cask 설치 실패 — dmg 다운로드로 다시 시도합니다"
+  fi
+  local suffix json url dmg mnt app base
+  case "$ARCH" in
+    arm64) suffix="arm64" ;;
+    x86_64) suffix="x64" ;;
+    *) warn "Open Design: 지원하지 않는 아키텍처입니다 ($ARCH)"; return 1 ;;
+  esac
+  json="$(curl -fsSL https://api.github.com/repos/nexu-io/open-design/releases/latest 2>/dev/null)" \
+    || { warn "Open Design 릴리스 조회 실패"; return 1; }
+  url="$(printf '%s' "$json" | grep -o "https://[^\"]*mac-${suffix}\.dmg" | head -1)"
+  [ -n "$url" ] || { warn "Open Design dmg를 찾지 못했습니다. 직접 설치: https://github.com/nexu-io/open-design/releases"; return 1; }
+  say "  Open Design dmg 내려받는 중 (약 450MB)"
+  dmg="/tmp/open-design-${suffix}.dmg"
+  curl -fsSL "$url" -o "$dmg" || { warn "Open Design 다운로드 실패"; return 1; }
+  mnt="/tmp/open-design-mnt"
+  mkdir -p "$mnt"
+  if ! hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mnt" >/dev/null 2>&1; then
+    warn "Open Design dmg 마운트 실패"; rm -f "$dmg"; return 1
+  fi
+  app="$(ls -d "$mnt"/*.app 2>/dev/null | head -1)"
+  if [ -z "$app" ]; then
+    warn "Open Design dmg 안에서 앱을 찾지 못했습니다"
+    hdiutil detach "$mnt" >/dev/null 2>&1 || true
+    rm -f "$dmg"
+    return 1
+  fi
+  base="$(basename "$app")"
+  if cp -R "$app" /Applications/ 2>/dev/null || sudo cp -R "$app" /Applications/ 2>/dev/null; then
+    ok "Open Design 설치 ($base)"
+    hdiutil detach "$mnt" >/dev/null 2>&1 || true
+    rm -f "$dmg"
+    return 0
+  fi
+  warn "Open Design을 /Applications로 복사하지 못했습니다. dmg를 열어 직접 설치하세요: $dmg"
+  hdiutil detach "$mnt" >/dev/null 2>&1 || true
+  return 1
+}
+
+if [ "$DRY" = "1" ]; then
+  say "  (연습 모드) Open Design 설치 계획만 표시합니다 — macOS: brew cask 또는 최신 dmg, Linux: 프리빌드가 없어 안내만"
+elif [ "$OS" = "Darwin" ]; then
+  if install_open_design_darwin; then wire_open_design_mcp; fi
+else
+  warn "Open Design은 Linux 공식 프리빌드가 없어 건너뜁니다"
+  say "    소스 실행: Node 24 + pnpm 필요 — https://github.com/nexu-io/open-design"
+fi
+
 # ---------------- 6. intent + hud ----------------
 head_ "6/6 시작 설정"
 if [ "$DRY" = "1" ]; then

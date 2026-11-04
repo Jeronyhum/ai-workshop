@@ -13,7 +13,7 @@
 
 1. OpenCode Desktop (+ Node/Git/uv 자동 설치)
 2. SSU BAZE API 키 입력 (https://ssu.factchat.bot/dashboard/developers 에서 발급, 화면에서만 입력)
-3. 게이트웨이 전 모델(61개) + MCP(35+) 설정을 라이브 카탈로그에서 생성
+3. 게이트웨이 전 모델(61개) + MCP 35종(공공데이터 스위트 34 + ssu-bridge) 설정을 라이브 카탈로그에서 생성
 4. 크레딧/컨텍스트 HUD (Windows WPF 바 / 그 외 브라우저 대시보드)
 5. 코드 도구: Serena (MCP 등록, 심볼 단위 탐색·편집) + graphify (구조 지도 스킬)
 6. 워크플로: pstack 58 스킬 (cursor/plugins 기준) + spec-kit
@@ -22,6 +22,9 @@
    명세 → Jev 동적 라우팅(난이도·비용·캐시 고려)으로 티어 서브에이전트
    (flash/gemma/haiku/luna) 배정 → 막히면 advisor가 국소만 개입 → 검증·회고.
    Task 호출마다 Jev가 재배정을 판정하는 `jev-router` 플러그인 포함
+   이미지 생성은 ssu-bridge `image` 도구로 호출 (기본 모델 gpt-image-2.5-sunburst)
+9. Open Design 디자인 워크스페이스 (nexu-io/open-design) — 디자인·프로토타입이
+   필요할 때 앱/CLI로 실행, SSU 게이트웨이와 연결
 
 ## 저장소 구조
 

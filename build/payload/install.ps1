@@ -342,6 +342,79 @@ else {
     else { Warn "graphify 설치 실패 (code $($r.code)): $(Tail $r.out 2)" }
 }
 
+# Open Design (선택 구성요소): 로컬 퍼스트 AI 디자인 데스크톱 앱 (nexu-io/open-design).
+# 실패해도 전체 설치를 중단하지 않고 Warn으로 끝낸다.
+function Install-OpenDesign {
+    if ($DryRun) { Step "(dry-run) Open Design: 최신 릴리스의 Windows 설치 파일로 설치 예정"; return }
+    $appDirs = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign"),
+        (Join-Path $env:LOCALAPPDATA "Programs\Open Design"),
+        (Join-Path $env:ProgramFiles "OpenDesign"),
+        (Join-Path $env:ProgramFiles "Open Design")
+    )
+    $pf86 = ${env:ProgramFiles(x86)}
+    if ($pf86) {
+        $appDirs += (Join-Path $pf86 "OpenDesign")
+        $appDirs += (Join-Path $pf86 "Open Design")
+    }
+    $found = $appDirs | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($found) {
+        Ok "Open Design 이미 설치됨"
+    }
+    else {
+        Step "Open Design 설치 중 (디자인 도구, 약 465MB 내려받음)"
+        try {
+            $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/nexu-io/open-design/releases/latest" -TimeoutSec 60
+            $asset = $rel.assets | Where-Object { $_.name -like "open-design-*-win-x64-setup.exe" } | Select-Object -First 1
+            if (-not $asset) { throw "최신 릴리스에서 Windows 설치 파일(open-design-*-win-x64-setup.exe)을 찾지 못했습니다" }
+            $exe = Join-Path $env:TEMP $asset.name
+            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $exe -TimeoutSec 1800
+            # electron-builder NSIS 설치 파일: /S 무인 설치를 시도한다.
+            $p = Start-Process $exe -ArgumentList "/S" -Wait -PassThru
+            if ($p.ExitCode -eq 0) { Ok "Open Design 설치 ($($rel.tag_name))" }
+            else {
+                Warn "Open Design 무인 설치 실패 (code $($p.ExitCode)). 설치 파일을 직접 실행해 설치하세요: $exe"
+                return
+            }
+        }
+        catch {
+            Warn "Open Design 설치를 건너뜁니다: $($_.Exception.Message)"
+            Warn "직접 설치: https://github.com/nexu-io/open-design/releases"
+            return
+        }
+    }
+
+    # OpenCode에 Open Design MCP 연결 (best-effort). od가 없으면 건너뛴다.
+    Refresh-Path
+    $od = $null
+    if (Have od) { $od = (Get-Command od).Source }
+    if (-not $od) {
+        $cands = @(
+            (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\od.exe"),
+            (Join-Path $env:LOCALAPPDATA "Programs\Open Design\od.exe"),
+            (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\resources\od.exe"),
+            (Join-Path $env:LOCALAPPDATA "Programs\Open Design\resources\od.exe"),
+            (Join-Path $env:ProgramFiles "OpenDesign\od.exe")
+        )
+        $od = $cands | Where-Object { Test-Path $_ } | Select-Object -First 1
+    }
+    if ($od) {
+        $r = Invoke-Native $od @("mcp", "install", "opencode")
+        if ($r.code -eq 0) { Ok "Open Design MCP를 OpenCode에 연결" }
+        else { Warn "Open Design MCP 연결 실패 (code $($r.code)). 직접 실행: od mcp install opencode" }
+    }
+    else {
+        Warn "od CLI를 찾지 못해 MCP 연결을 건너뜁니다. Open Design을 한 번 실행한 뒤 다시 시도하거나 직접 실행하세요: od mcp install opencode"
+    }
+}
+
+if ($SkipTools) {
+    Warn "Open Design 건너뜁니다 (-SkipTools)"
+}
+else {
+    Install-OpenDesign
+}
+
 # ---------------- 6. 스킬 팩 (pstack / spec-kit) ----------------
 Head "6/7 워크플로 스킬 (pstack, spec-kit)"
 $workDir = Join-Path $env:USERPROFILE "ssu-workshop"

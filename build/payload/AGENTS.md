@@ -89,6 +89,22 @@ pstack은 poteto가 Cursor에서 쓰는 엔지니어링 스킬 모음(cursor/plu
 - poteto-mode가 서브에이전트마다 effort를 고르는 개념은, 이 하네스에서는
   위의 **티어 라우팅(Jev 판정)** 으로 구현돼 있다.
 
+### Open Design (디자인 작업)
+
+- 디자인·프론트엔드 디자인·프로토타입·발표 덱이 필요하면 코드를 바로
+  짜지 말고 **Open Design을 먼저 띄운다**: 데스크톱 앱을 실행해 사용자가
+  화면을 보며 직접 다듬는 형태로 진행한다 (CLI `od`가 Open Design의
+  것으로 잡히는 환경이면 터미널 실행도 가능 — macOS의 시스템 `od`와
+  이름이 겹치니 앱 실행이 기본이다).
+- Open Design의 모델 연결에는 SSU 게이트웨이를 OpenAI 호환
+  엔드포인트(`https://factchat-cloud.mindlogic.ai/v1/gateway`)로 물릴
+  수 있다 (BYOK 방식). 모델은 게이트웨이 카탈로그의 것을 그대로 쓰고,
+  키는 사용자 본인 키를 설정 화면에서만 입력한다 — 채팅에 키를
+  붙여넣게 하지 않는다.
+- 이미지 에셋이 필요하면 ssu-bridge의 `image` 도구를 쓴다. 기본 모델은
+  `gpt-image-2.5-sunburst` (Artificial Analysis Image Arena 1위),
+  가성비를 우선하면 `gemini-nano-banana-2.1`.
+
 ## 첫 대화 규칙
 
 새 세션의 첫 사용자 메시지를 받으면, 아래 순서로만 움직인다.

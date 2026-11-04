@@ -86,6 +86,9 @@ argument-hint: 만들고 싶은 것 한 줄 (비우면 PROJECT_INTENT에서 시�
 2. 서브태스크는 Task 도구로 티어 에이전트(`w-flash`·`w-haiku`·`w-luna`·
    `w-gemma`)에게 배정한다. 독립 태스크는 병렬로 동시 실행한다.
 3. 구조 질문은 graphify, 심볼 단위 편집은 serena를 쓴다 (AGENTS.md 규칙).
+4. 디자인 성격의 서브태스크(화면·프로토타입·덱)는 Open Design을 띄워
+   사용자가 보며 함께 다듬는 형태로 진행하고, 필요한 이미지 에셋은
+   ssu-bridge의 `image` 도구로 만든다.
 
 ## Phase 5 — 막힘 프로토콜 (어드바이저는 국소에만)
 
