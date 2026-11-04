@@ -40,7 +40,14 @@ function tierToken(v) {
     return TIERS[t] ? TIERS[t] : null;
   }
   if (v && typeof v === "object") {
-    // e.g. {value: "luna", confidence: 0.9} or {answer: "flash"}
+    // Jev choice answers look like {type: "choice", choice: "flash", ...} —
+    // prefer the explicit verdict fields before scanning other values.
+    for (const k of ["choice", "answer", "value", "result"]) {
+      if (k in v) {
+        const r = tierToken(v[k]);
+        if (r) return r;
+      }
+    }
     for (const val of Object.values(v)) {
       const r = tierToken(val);
       if (r) return r;
@@ -98,16 +105,21 @@ export default async () => {
               taskText,
             questions: {
               tier: {
-                type: "categorical",
+                // Gateway-verified shape (2026-11-04, jev-1.13.0): type must be
+                // "choice" and criteria an option -> description object.
+                type: "choice",
                 instructions:
                   "Pick the cheapest agent tier that can reliably complete this subtask. " +
-                  "Consider: (1) difficulty — mechanical/bulk work is flash, long reading and " +
-                  "first-pass organization is gemma, light judgment is haiku, general mid-tier " +
-                  "work is luna, advisor is ONLY for a stuck local problem that already failed; " +
-                  "(2) cost efficiency — never pick a tier stronger than the task needs; " +
-                  "(3) prompt-cache reuse — if the task re-reads a large shared context that a " +
-                  "previous step already processed, keeping the current tier preserves cache reads.",
-                criteria: "flash|haiku|luna|gemma|advisor",
+                  "Consider difficulty, cost efficiency, and prompt-cache reuse: if the task " +
+                  "re-reads a large shared context a previous step already processed, keeping " +
+                  "the current tier preserves cache reads.",
+                criteria: {
+                  flash: "Mechanical, bulk or repetitive work. Cheapest and fastest.",
+                  gemma: "Long reading, large-context scanning, first-pass organization.",
+                  haiku: "Light judgment: summaries, classification, small edits.",
+                  luna: "General mid-tier implementation and analysis.",
+                  advisor: "ONLY a stuck local problem that has already failed twice.",
+                },
               },
             },
           }),

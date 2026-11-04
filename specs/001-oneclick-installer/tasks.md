@@ -89,6 +89,17 @@
   재사용. 1차는 /start가 decide 도구로, 2차는 plugins/jev-router.js가
   Task 호출마다 /decisions/(jev-latest)로 판정·재배정·로깅. fail-open을
   스텁 서버와 무응답 서버로 각각 검증 (advisor 호출은 재배정 제외).
+  **실측 정정 (2026-11-04 밤, 실키)**: 질문 형식은 type "choice" +
+  criteria를 선택지→설명 객체로 줘야 한다 ("categorical"·문자열 criteria는
+  400). 응답은 answers.tier.choice. 실호출 검증: 기계적 반복 작업→flash
+  (신뢰도 1.0), 2회 실패한 디버깅→advisor (0.6). 플러그인 파서도 실응답
+  봉투로 재검증함.
+- [x] T043 실키 E2E 1차 (2026-11-04 밤) — 보안창으로 받은 실키로 실제
+  카탈로그 확인: chat 61개 (claude 12·gpt 16·compat 33), MCP 스위트 34개.
+  티어 선택 실측: w-flash=qwen3.8-flash(flash 중 최저가, 중국 오픈웨이트),
+  w-haiku=claude-haiku-5-5, w-luna=gpt-6-luna, w-gemma=gemma-4-31B,
+  advisor=gpt-5.4-pro(프론티어 중 입력 단가 최고). 크레딧 잔액 2,478/5,000
+  (월 할당 3,000 중 522 사용).
 - [x] T042 pstack 역할 재편 — README(cursor/plugins, poteto) 기준으로
   poteto-mode 플레이북 + 단계 스킬 + principle을 규율 레이어로 재정의하고
   AGENTS.md에 반영. poteto-mode의 서브에이전트 effort 개념은 티어
