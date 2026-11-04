@@ -67,7 +67,8 @@ argument-hint: 만들고 싶은 것 한 줄 (비우면 PROJECT_INTENT에서 시�
   재사용(같은 긴 컨텍스트를 반복하면 같은 모델 유지가 유리하다)을 함께
   고려해라. 어려운 태스크(난이도 L)에는 flash·gemma 티어라도 max를
   배정해라 — 이 계열은 max에서 성능이 크게 뛴다. 단 max의 사고는 길게
-  늘어나므로 출력 예산이 전제돼야 한다.", "criteria": {"flash": "기계적·대량·반복", "gemma": "긴
+  늘어나므로 출력 예산이 전제돼야 한다 (단계별 예산: high 64K ·
+  xhigh 96K · max 128K — AGENTS.md의 노력 단계 운용 참조).", "criteria": {"flash": "기계적·대량·반복", "gemma": "긴
   읽기·초벌 정리", "haiku": "가벼운 판단", "luna": "중간 난이도 일반",
   "advisor": "이미 2회 실패한 국소 문제만"}}}`
   응답은 `answers.tier.choice`에 티어 이름이 온다.
