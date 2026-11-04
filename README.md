@@ -7,17 +7,19 @@
 Windows — PowerShell을 열고:
 
 ```powershell
-irm jeronyhum.github.io/ai-workshop/i.ps1 | iex
+irm https://cdn.jsdelivr.net/gh/Jeronyhum/ai-workshop@main/docs/i.ps1 | iex
 ```
 
 macOS — 터미널에서:
 
 ```bash
-curl -fsSL jeronyhum.github.io/ai-workshop/i.sh | bash
+curl -fsSL https://cdn.jsdelivr.net/gh/Jeronyhum/ai-workshop@main/docs/i.sh | bash
 ```
 
 git·Python 사전 설치 불필요. 위 한 줄이 설치 파일(`build/ssu-opencode-setup.cmd`)을
 받아 실행한다. 파일을 직접 받고 싶으면 아래 납품물을 더블클릭해도 된다.
+(레포 Settings → Pages에서 main /docs를 켜면 같은 스크립트를
+`jeronyhum.github.io/ai-workshop/i.ps1` · `i.sh` 짧은 주소로도 쓸 수 있다.)
 
 ## 납품물 (참가자에게 배포할 파일, 딱 이것 하나)
 
