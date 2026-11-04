@@ -43,7 +43,7 @@
     wall.innerHTML = `
       <button type="button" class="gal-open" data-gal="" aria-label="사례관 열기: 고른 사례 ${G.items.length}건">사례관 열기 <kbd>G</kbd></button>
       <p class="gal-note">X 게시물의 모델 표기와 주장은 확인되지 않았습니다 <span class="st st-s" data-st="unverified">미확인</span></p>
-      ${sections.map((s) => `<section class="gal-fam" data-sec="${s.key}" aria-hidden="true"><h3><b>${esc(s.name)}</b> <span>${s.items.length}</span></h3>
+      ${sections.map((s) => `<section class="gal-fam" data-sec="${s.key}" aria-hidden="true"><h3><b lang="en">${esc(secName(s))}</b> <span>${s.items.length}</span></h3>
         <div class="gal-tiles">${s.items.slice().sort((a, b) => (a.rank || 99) - (b.rank || 99) || likes(a, b)).map((it) => {
           const p = it.thumb || firstPoster(it);
           return `<span class="gal-tile" data-gal="${it.key}" role="presentation">${p ? `<img src="${raw(p)}" alt="" loading="lazy" decoding="async">` : `<i class="gal-ph"><b>${esc(it.author)}</b></i>`}</span>`;
@@ -101,6 +101,10 @@
       </div></li>`;
   }
   /* a lone tile gets the whole row (picture beside its text), so a one-example group never leaves an empty grid */
+  /* v6 (민성 t1193u/t1194u): the section headings are loanwords (쇼케이스, 오피스); in display type they read better in
+     English, set in Inter. The Korean subtitle under each keeps what the section is. */
+  const EN = { showcase: "Showcase", office: "Office", blender: "Blender" };
+  const secName = (s) => EN[s.key] || s.name;
   const grid = (list, leadFirst, kicker) => `<ol class="gl-grid${list.length === 1 ? " is-solo" : ""}">${list.map((it, i) => tile(it, leadFirst && i === 0 && list.length > 2, kicker && kicker(it))).join("")}</ol>`;
   /* v6 (Dots browser review 4): groups with one example share one grid inside their family, each tile labelled with its
      group; families with one example share a last block. Groups of two or more keep their own heading. */
@@ -133,9 +137,9 @@
   function build() {
     const total = G.items.length;
     /* v6 (blind review 16): one row, not two. The share bar is also the jump menu (it used to repeat as a link row) */
-    const bar = sections.map((s) => `<a class="gl-seg" data-sec="${s.key}" href="#gl-${s.key}" style="--w:${(s.items.length / total) * 100}%"><b>${s.items.length}</b><em>${esc(s.name)}</em></a>`).join("");
+    const bar = sections.map((s) => `<a class="gl-seg" data-sec="${s.key}" href="#gl-${s.key}" style="--w:${(s.items.length / total) * 100}%"><b>${s.items.length}</b><em lang="en">${esc(secName(s))}</em></a>`).join("");
     const secHTML = sections.map((s) => `
-      <section class="gl-fam" id="gl-${s.key}" data-sec="${s.key}"><h3><b>${esc(s.name)}</b><span class="gl-famsub">${esc(s.sub)}</span><span class="gl-n">${s.items.length}</span></h3>
+      <section class="gl-fam" id="gl-${s.key}" data-sec="${s.key}"><h3><b lang="en">${esc(secName(s))}</b><span class="gl-famsub">${esc(s.sub)}</span><span class="gl-n">${s.items.length}</span></h3>
         ${s.key === "showcase" ? showcase(s) : s.key === "office" ? office(s) : `<div class="gl-sub">${grid(s.items.slice().sort(likes), true)}</div>`}
       </section>`).join("");
     const n = (o) => G.items.filter((i) => i.origin === o).length;

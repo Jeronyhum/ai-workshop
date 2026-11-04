@@ -46,18 +46,16 @@ Generated images in assets/ (Muse, Dots, Grok) are design assets only and aren't
 
 ## 글꼴 (모두 SIL Open Font License 1.1)
 
-`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
+`fonts/`의 파일은 모두 이 사이트가 쓰는 글자만 남긴 WOFF2 서브셋입니다. v6 글꼴 정리(민성 t1193u)로 세리프와 명조(Noto Serif KR, Instrument Serif)와 쓰이지 않던 Gothic A1을 지웠습니다. 합계 4가족 6파일, 388KB입니다. 저작권 줄은 각 파일의 이름 표에서 읽었고, 라이선스 전문은 `fonts/OFL.txt`에 있습니다.
 
 | 글꼴 | 저작권 | 파일 | 크기 |
 |---|---|---|---|
-| Archivo (가변, 폭 62–100, 굵기 400–900) | Copyright 2020 The Archivo Project Authors | `Archivo-subset.woff2` | 44KB |
-| JetBrains Mono (가변) | Copyright 2020 The JetBrains Mono Project Authors | `JetBrainsMono-subset.woff2` | 35KB |
-| Instrument Serif Regular, Italic | Copyright 2022 The Instrument Serif Project Authors | `InstrumentSerif-*-subset.woff2` | 각 17KB |
-| Noto Serif CJK KR Regular, Bold | © 2017-2024 Adobe | `NotoSerifKR-*-subset.woff2` | 각 약 210KB |
-| Pretendard Regular, Medium, Bold | Copyright © 2023 Kil Hyung-jin | `Pretendard-*-subset.woff2` | 각 77KB |
-| Gothic A1 Regular, Bold, Black | (C) Copyright HanYang I&C Co.,Ltd. | `GothicA1-*-subset.woff2` (화면에서 쓰지 않아 내려받지 않음) | 52–66KB |
+| Pretendard Regular, Medium, Bold | Copyright © 2023 Kil Hyung-jin | `Pretendard-{Regular,Medium,Bold}-subset.woff2` | 각 77KB (76,648 / 76,732 / 76,668바이트) |
+| Inter (가변, 굵기 100–900, 광학 크기 14–32, 세운꼴) | Copyright 2016 The Inter Project Authors | `Inter-subset.woff2` | 79KB (78,940바이트) |
+| Archivo (가변, 폭 62–100, 굵기 400–900) | Copyright 2020 The Archivo Project Authors | `Archivo-subset.woff2` | 44KB (43,744바이트) |
+| JetBrains Mono (가변) | Copyright 2020 The JetBrains Mono Project Authors | `JetBrainsMono-subset.woff2` | 35KB (35,252바이트) |
 
-서브셋의 원본 TTF는 `tools/fonts-src/`에 있고 사이트는 내려받지 않습니다. 다시 만드는 법: `python3 tools/subset_latin.py`(라틴), `python3 tools/subset_ko.py`(한글).
+서브셋의 원본은 `tools/fonts-src/`(Archivo, JetBrains Mono, Inter 4.001)와 시스템의 Pretendard 1.3.9 OTF이고, 사이트는 내려받지 않습니다. 다시 만드는 법: `python3 tools/subset_latin.py`(라틴), `python3 tools/subset_ko.py`(한글).
 
 ## 규칙만 가져온 것
 

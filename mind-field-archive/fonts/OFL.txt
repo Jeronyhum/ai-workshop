@@ -1,24 +1,19 @@
 All files in this folder are WOFF2 subsets of fonts licensed under the SIL Open Font License, Version 1.1.
 Subset to the characters this site draws by tools/subset_ko.py (Korean) and tools/subset_latin.py (Latin);
 outlines unchanged. The copyright lines below are read from each file's name table.
+(v6, 2026-11-04: Noto Serif KR, Instrument Serif and Gothic A1 were removed; no serif or brush face is shipped.)
+
+Pretendard-Regular-subset.woff2, Pretendard-Medium-subset.woff2, Pretendard-Bold-subset.woff2
+Copyright © 2023 Kil Hyung-jin
+
+Inter-subset.woff2 (Inter 4.001, variable: weight 100-900, optical size 14-32; upright)
+Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
 
 Archivo-subset.woff2 (width 62-100 and weight 400-900 kept from the variable font)
 Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
 
 JetBrainsMono-subset.woff2
 Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
-
-InstrumentSerif-Regular-subset.woff2, InstrumentSerif-Italic-subset.woff2
-Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
-
-NotoSerifKR-Regular-subset.woff2, NotoSerifKR-Bold-subset.woff2 (Korean face of Noto Serif CJK)
-© 2017-2024 Adobe (http://www.adobe.com/).
-
-Pretendard-Regular-subset.woff2, Pretendard-Medium-subset.woff2, Pretendard-Bold-subset.woff2
-Copyright © 2023 Kil Hyung-jin
-
-GothicA1-Black-subset.woff2, GothicA1-Bold-subset.woff2, GothicA1-Regular-subset.woff2
-(C) Copyright HanYang I&C Co.,Ltd. Licensed under the SIL Open Font License, Version 1.1.
 
 These Font Software files are licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

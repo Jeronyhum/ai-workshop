@@ -348,6 +348,16 @@ for f in site + docs:
             if re.search(rx, ln) and not (unless and re.search(unless, ln)): fails.append(f"fact gate: {name} at {f.relative_to(ARC)}:{i}")
 print(f"story: {len(story)} pieces in block order, metaphors {', '.join(f'{m} 1' for m in METAPHORS)}; fact gate: {len(GATE)} rules over {len(site + docs)} files")
 
+# v6 (민성 t1193u): no serif, myeongjo, 궁서 or brush face. Every font-family stack and every shipped font file is sans or mono.
+SERIFISH = re.compile(r"(?<!sans-)\bserif\b|Myeongjo|명조|Batang|바탕|Gungsuh|궁서|Brush|Nanum Pen|cursive|Instrument Serif|Noto Serif", re.I)
+for f in sorted(ARC.glob("css/*.css")):
+    for i, ln in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+        for decl in re.findall(r"(?:font-family|--f-[a-z-]+|--serif[a-z-]*)\s*:\s*([^;]+);", ln):
+            if SERIFISH.search(decl): fails.append(f"font: a serif or brush face in {f.relative_to(ARC)}:{i}: {decl.strip()[:60]}")
+        if re.search(r"var\(--serif", ln): fails.append(f"font: the removed serif stack is used at {f.relative_to(ARC)}:{i}")
+for f in sorted((ARC / "fonts").glob("*.woff2")):
+    if SERIFISH.search(f.stem): fails.append(f"font: serif or brush file shipped: fonts/{f.name}")
+
 links = sorted({l["url"] for p in data["pieces"] for l in p.get("links", [])} | {m["by"]["url"] for p in data["pieces"] for m in p.get("media", []) if m.get("by")})
 print(f"{len(data['pieces'])} pieces, {len(data['threads'])} threads, {len(links)} distinct external links")
 if gal: print(f"gallery: {len(gal['items'])} posts, {sum(len(i['media']) for i in gal['items'])} media items, all links from filenames or cases.json")

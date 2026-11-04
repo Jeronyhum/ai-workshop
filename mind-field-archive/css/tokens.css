@@ -7,10 +7,6 @@
 
 @font-face { font-family: "Archivo MF"; src: url("../fonts/Archivo-subset.woff2") format("woff2"); font-weight: 400 900; font-stretch: 62% 100%; font-display: swap; }
 @font-face { font-family: "JetBrains Mono MF"; src: url("../fonts/JetBrainsMono-subset.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
-/* Gothic A1 (OFL), subset to the Hangul this site uses — see README "Fonts". Display only. */
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Black-subset.woff2") format("woff2"); font-weight: 900; font-display: swap; }
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Bold-subset.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Gothic A1 MF"; src: url("../fonts/GothicA1-Regular-subset.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 
 @property --accent { syntax: "<color>"; inherits: true; initial-value: #D4261C; }
 
@@ -49,8 +45,8 @@
 
   /* ── type ─────────────────────────────────────── */
   --f-display:  "Archivo MF", "Archivo", "Arial Narrow", sans-serif;               /* Latin + numerals, condensed */
-  --f-display-ko: "Gothic A1 MF", "Gothic A1", "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
-  --f-text:     "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Gothic A1 MF", "Noto Sans CJK KR", sans-serif;
+  --f-display-ko: "Pretendard MF", "Pretendard Variable", Pretendard, "NanumGothic", "Apple SD Gothic Neo", sans-serif;  /* v6: was Gothic A1 */
+  --f-text:     "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "NanumGothic", "Noto Sans CJK KR", sans-serif;
   --f-mono:     "JetBrains Mono MF", "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; /* credits, stamps, tokens, logs */
 
   --wdth-poster: 62;   /* Archivo width axis: condensed poster */

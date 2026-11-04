@@ -132,6 +132,24 @@
 - Karpathy 보조 블록 A-1–A-15: 블록 파일이 "개념 보강용이며 연표 출처로 쓰지 말 것"이라고 했습니다. 바닥에 조각으로 세우지 않았습니다.
 - 직언("돈 아깝다" 등): 메타 파일 D6에 따라 발표자 대사로 남기고 바닥에는 올리지 않았습니다.
 
+### 글꼴: 궁서체 같은 세리프를 걷어 냄 (민성 t1193u, t1194u)
+
+민성의 말: "이 특유의 궁서체가 상당히 거슬리는데 다른 글꼴을 써줘. 나눔폰트나 무료 한글 폰트로." 출구의 "오늘 뭘 만들고 싶은가?"에서 본 글꼴입니다.
+
+- **원인:** 붓글씨나 궁서 글꼴 파일은 처음부터 없었습니다. 제목, 인용, 바닥 라벨, 그림 속 글자가 `--serif`(Noto Serif KR, 명조)를 썼고, 그 대체 글꼴 묶음이 Nanum Myeongjo와 generic `serif`로 끝났습니다. 명조가 내려받아지지 않는 환경에서는 운영체제 기본 세리프가 나와 궁서처럼 보일 수 있습니다. 영어 등식과 인용은 `--serif-en`(Instrument Serif, 기울임)이었습니다.
+- **바꾼 것:**
+  - 한국어는 전부 Pretendard입니다. 대체 글꼴은 나눔고딕, 그다음 시스템 고딕입니다.
+  - 영어 제목, 라벨, 등식은 Inter입니다. 대체 글꼴은 Helvetica Neue, Helvetica, Arial입니다.
+  - 기울임꼴 여덟 곳은 세운꼴로 바꾸고, 강조는 굵기와 색으로 옮겼습니다.
+  - CSS, SVG 글자(그림 속 라벨), 그림 설명 모두 같은 두 글꼴 묶음을 씁니다. 캔버스에 그리는 글자는 없습니다(`js/field.js`는 글자를 그리지 않음).
+- **dale-ui 규칙:** keep-all, 큰 한국어 제목만 -0.01em, 나머지 한국어는 자간 0, 제목 행간 1.2, 본문 1.5–1.625, 굵기 400/500/700을 따릅니다. 영어 제목은 크기가 클수록 자간을 좁히고 굵기를 올렸습니다(Inter 600–800, -0.02 ~ -0.04em).
+- **영어로 바꾼 제목 (한국어가 꼭 필요한 정보가 아닌 곳만):**
+  - 사례관 섹션 이름: "쇼케이스" → **Showcase**, "오피스" → **Office**. 외래어라 영어가 더 깔끔하고, 아래의 한국어 부제("모델별로 묶은 결과물" 등)가 뜻을 그대로 전합니다. 바닥의 사례관 벽, 비율 막대, 사례관 제목 모두 해당합니다.
+  - 출구 키커: "출구" → **Exit**. 위쪽 메뉴의 "5 출구"와 바로 아래 한국어 질문이 같은 정보를 줍니다.
+  - 위쪽 메뉴의 표지: "MIND FIELD 아카이브" → "MIND FIELD **Archive**".
+- **한국어로 남긴 제목 (꼭 필요한 정보):** 출구 질문 "오늘 뭘 만들고 싶은가?", 부와 구역 제목(AI 시대의 변화 등), 민성 이야기의 세 막(역사, 에이전트의 등장, 활용), 조각 제목, 바닥 축 라벨(가능성, 측정의 함정…), 2부 고리 이름(프롬프트, 컨텍스트, 하네스, 루프, 그래프: 낱말 풀이와 같은 한국어 낱말), 인용문.
+- **첫 로드:** 명조 두 파일(약 420KB) 대신 Inter 79KB가 들어가서 가벼워졌습니다(아래 "v6 확인").
+
 ### 성능
 
 헤드리스 Chrome(소프트웨어 GPU)에서 잰 문제와 고친 방법입니다. 실제 GPU에서는 훨씬 빠르지만, 저사양 노트북에서도 같은 방향으로 도움이 됩니다.
@@ -152,7 +170,7 @@
 - **바닥에서 Tab을 이웃 걷기로 쓰는 것(블라인드 7):** 도슨트 진행의 핵심이라 남겼습니다. 확대는 `+` `−`, 지도 대신 `0`–`5`, 목록은 `L`로 키보드에서 닿습니다.
 - **UI 라이브러리 컴포넌트 목록 파일(Muse, 부):** 1.3GB 라이브러리가 저장소에 없어 컴포넌트 단위로 대응시킬 수 없습니다. 패턴 단위의 대응은 `v2-direction.md`에 있습니다.
 - **`css/base.css` 정리(블라인드 20):** 쓰지 않는 규칙이 있지만, 이 파일은 사이트의 `site/css/base.css`와 바이트까지 같게 두어 디자인 시스템과 비교하기 쉽게 했습니다(35KB).
-- **글꼴 수 줄이기(블라인드 19):** Gothic A1은 이제 내려받지 않습니다. JetBrains Mono(출처 상세의 파일 이름)와 Instrument Serif(2부 도식의 영어 등식)는 맡은 역할이 있어 남겼습니다.
+- **글꼴 수 줄이기(블라인드 19):** v6 글꼴 정리(아래 "글꼴")에서 여섯 가족을 넷으로 줄였습니다. JetBrains Mono(출처 상세의 파일 이름)와 Archivo(포스터 숫자)는 맡은 역할이 있어 남겼습니다.
 - **Dots의 D1/D3 다시 그린 그림, Muse의 재생성 그림:** 아직 작업 중이라는 지시대로 지금 그림을 유지하고 아무것도 새로 연결하지 않았습니다.
 
 ### v6에서 더하거나 바꾼 파일
@@ -181,6 +199,7 @@
 - **`tools/check.py`:** 모두 통과했습니다.
   - 조각 63, 실 74, 외부 링크 126개(x-from-drive 30, urls-ok 96), 낱말 34.
   - 이야기 조각 15개가 블록 순서이고, 비유 그림은 넷 모두 1개씩입니다. 사실 게이트 규칙 13개가 사이트 파일과 문서 16개를 검사합니다.
+  - 글꼴: CSS의 어떤 글꼴 묶음에도 serif, 명조, 바탕, 궁서, 붓글씨 꼴이 없고, `fonts/`에도 그런 파일이 없는지 확인합니다(세리프 묶음을 다시 넣은 사본에서 실패하는 것을 확인했습니다).
   - 비공개 자료(`refs/`)와 설치기 저장소가 없는 깨끗한 체크아웃에서는 그 검사만 `NOT_RUN`으로 적고 0으로 끝납니다.
 - **`tools/test_v6.py` 79/79:** 리뷰 항목별 검사 63개와 전사본 추가 검사 16개입니다.
   - 리뷰 항목: 첫 화면, 사례관과 `4`, `Esc` 정리, `M`, 출구, 낱말 풀이, 도슨트 포커스, 안내판, 방 닫기, 머리줄, 크롬과 겹침, 글자 크기, 출처 표기, 디시인사이드, 첫 로드, 깨끗한 체크아웃, Dots 브라우저 리뷰.
@@ -194,7 +213,7 @@
     - 금지 문장을 다시 넣으면 `check.py`가 실패하는지.
 - **`tools/test_explainers.py` 26/26, `tools/test_keys.py` 24/24, `tools/test_labels.py` 4/4.**
 - **`tools/test_console.py` 8/8:** 63개 방을 모두 열어 끝까지 스크롤했습니다. 여섯 구역, 사례관, 출구, 용어, 목록, 단축키, 도슨트, `M`도 거쳤습니다. 1440 모션 기본과 1920 모션 줄임 모두 콘솔 오류·경고·실패 요청 0, 가로 넘침 0입니다.
-- **첫 로드:** 2.10MB, 요청 85개입니다(리뷰 시점 6.25MB, 79개). 1부가 넓어진 뒤 10% 불투명도의 질감까지 원본을 받던 것을 막았습니다.
+- **첫 로드:** 1.72MB, 요청 82개입니다(리뷰 시점 6.25MB, 79개). 1부가 넓어진 뒤 10% 불투명도의 질감까지 원본을 받던 것을 막았고, 글꼴 정리로 명조 두 파일(약 420KB) 대신 Inter 하나(79KB)를 받습니다.
 - **헤드리스 측정에 대한 메모:** 이 환경은 소프트웨어 GPU(SwiftShader)라 바닥 전체를 다시 그리는 데 몇 초가 걸릴 수 있습니다. 검사는 고정 대기 대신 프레임이 다시 흐를 때까지 기다립니다(`settle()`).
 - **화면 (`shots/v6-*.png`, 1440×900, 18장):**
   - 첫 화면과 바닥: `entrance`(첫 화면과 출구 안내), `floor`, `intro`(1부 여는 이야기), `part1`(이야기 뒤의 근거들), `part2-step`.
@@ -202,7 +221,7 @@
   - 출구와 낱말 풀이: `exit-zone`, `exit-terms`, `exit-opencode`, `popover`.
   - `reduced-motion`.
   - 비유 넷: `metaphor-tide`, `metaphor-harness`, `metaphor-anatomy`, `metaphor-guardrail`.
-  - 찍는 스크립트는 `tools/shots_v6.py`이고, 찍는 동안 콘솔 오류는 0이었습니다.
+  - 찍는 스크립트는 `tools/shots_v6.py`이고, 찍는 동안 콘솔 오류는 0이었습니다. 글꼴 정리 뒤 18장을 모두 다시 찍었습니다.
 
 **v6에서 확인하지 못한 것:** 실제 GPU 기기와 프로젝터, Safari와 Firefox, 모바일(범위 밖), 스크린 리더 실사용, 외부 링크의 재요청(새로 더한 12개만 이번에 HTTP 200을 확인).
 
@@ -1040,25 +1059,25 @@ Muse와 Dots의 이미지는 작업 폴더와 Drive 어디에서도 찾지 못�
 
 ### 글꼴 (모두 SIL OFL 1.1)
 
-v6부터 모든 글꼴이 이 사이트가 쓰는 글자만 남긴 WOFF2입니다. 저작권 줄과 라이선스는 `fonts/OFL.txt`와 [`CREDITS-libs.md`](CREDITS-libs.md)에 있습니다.
+v6부터 모든 글꼴은 이 사이트가 쓰는 글자만 남긴 WOFF2입니다. 저작권 줄과 라이선스는 `fonts/OFL.txt`와 [`CREDITS-libs.md`](CREDITS-libs.md)에 있습니다. v6 글꼴 정리(민성 t1193u) 뒤로는 세리프, 명조, 궁서, 붓글씨 꼴이 하나도 없습니다.
 
 | 글꼴 | 쓰임 | 파일 |
 |---|---|---|
-| Archivo (가변, 폭 62–100, 굵기 400–900) | 숫자 포스터 | `fonts/Archivo-subset.woff2`, 44KB (원본 TTF 636KB) |
-| Noto Serif KR Bold, Regular | 한국어 문장, 제목 | `fonts/NotoSerifKR-*-subset.woff2`, 각 약 210KB. Noto Serif CJK의 한국어 면에서 한글 693자로 서브셋 |
-| Instrument Serif Regular, Italic | 영어 등식과 인용 | `fonts/InstrumentSerif-*-subset.woff2`, 각 17KB |
-| Pretendard Regular, Medium, Bold | v5부터 본문과 UI 글자 (dale-ui 규칙) | `fonts/Pretendard-*-subset.woff2`, 각 77KB. 시스템의 Pretendard 1.3.9 OTF에서 한글 693자로 서브셋 |
-| Gothic A1 | v4까지 본문 글자. v5부터는 쓰이지 않아 내려받지 않음 | `fonts/GothicA1-*-subset.woff2` |
-| JetBrains Mono (가변) | 파일 이름과 줄 번호 | `fonts/JetBrainsMono-subset.woff2`, 35KB |
+| Pretendard Regular, Medium, Bold | 한국어 전부: 본문, UI, 제목, 인용 (dale-ui 규칙) | `fonts/Pretendard-{Regular,Medium,Bold}-subset.woff2`, 각 77KB (76,648 / 76,732 / 76,668바이트). 시스템의 Pretendard 1.3.9 OTF에서 한글 693자로 서브셋 |
+| Inter (가변, 굵기 100–900, 광학 크기 14–32) | 영어 제목, 라벨, 등식, 키커 (헬베티카 계열 그로테스크) | `fonts/Inter-subset.woff2`, 79KB (78,940바이트). 시스템의 Inter 4.001에서 서브셋, 세운꼴만 |
+| Archivo (가변, 폭 62–100, 굵기 400–900) | 포스터 숫자 (압축 그로테스크) | `fonts/Archivo-subset.woff2`, 44KB (원본 TTF 636KB) |
+| JetBrains Mono (가변) | 파일 이름과 줄 번호, 도구 이름 | `fonts/JetBrainsMono-subset.woff2`, 35KB |
 
-라틴 글꼴은 `tools/subset_latin.py`로 다시 만듭니다. 원본 TTF는 `tools/fonts-src/`에 있고 사이트는 내려받지 않습니다.
+대체 글꼴 묶음은 한국어가 Pretendard → 나눔고딕 → Apple SD Gothic Neo → 맑은 고딕, 영어가 Inter → Helvetica Neue → Helvetica → Arial입니다. 어느 쪽도 serif로 끝나지 않습니다. 지운 글꼴: Noto Serif KR(명조, 2개 파일 약 420KB), Instrument Serif(세리프, 2개 파일), Gothic A1(쓰이지 않음, 3개 파일).
+
+라틴 글꼴은 `tools/subset_latin.py`로, 한글은 `tools/subset_ko.py`로 다시 만듭니다. 원본 TTF는 `tools/fonts-src/`(Archivo, JetBrains Mono, Inter)와 시스템 글꼴(Pretendard)에 있고 사이트는 내려받지 않습니다.
 한글 서브셋은 `tools/subset_ko.py`로 다시 만듭니다. `.ttc`는 `NotoSerifCJK-Bold.ttc#1`처럼 면 번호를 붙입니다.
 
 ## 디자인 시스템과 v2
 
 - `css/tokens.css`, `css/base.css`, `css/components.css`는 `site/css/`에서 바꾸지 않고 복사한 그대로입니다.
 - v2는 그 위의 `css/archive.css`에서 규칙을 깹니다. 미감이 우선이라는 지시를 따랐습니다. 깬 곳과 이유는 `v2-direction.md`의 "규칙을 깬 곳"에 있습니다:
-  - 세리프 글꼴을 더함
+  - 세리프 글꼴을 더함 (v6에서 걷어 냄: 민성 t1193u)
   - 한 화면에 액센트 둘 이상
   - 바닥 영상 반복
   - 생성 이미지를 더 진하게

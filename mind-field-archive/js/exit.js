@@ -56,7 +56,7 @@
       ${nodes.map(([x, y, f], i) => `<g class="ex-node" style="--i:${i}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="34"/><text x="${x.toFixed(1)}" y="${(y + 7).toFixed(1)}" text-anchor="middle">${esc(f.k)}</text></g>`).join("")}
       <text x="${cx}" y="${cy - 6}" text-anchor="middle" class="ex-loop-t">한 바퀴</text><text x="${cx}" y="${cy + 26}" text-anchor="middle" class="ex-loop-s">AGENTS.md</text></svg>`;
     wall.innerHTML = `
-      <p class="ex-kicker">출구</p>
+      <p class="ex-kicker" lang="en">Exit</p>
       <h2 class="ex-q">${esc(E.question)}</h2>
       <p class="ex-lead">${esc(E.lead)}</p>
       <div class="ex-paths">${E.paths.map((p) => `<span class="ex-path" data-exit="path-${p.id}">${glyph(p.glyph)}<b>${esc(p.name)}</b><small>${esc(p.sub)}</small></span>`).join("")}</div>

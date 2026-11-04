@@ -1,6 +1,6 @@
 /* Renderers, v2: hierarchy instead of lists.
    tier 1  work   one picture or one number at scale; each work has its own visual form
-   tier 2  plate  one figure or one image on top, a serif title, one line
+   tier 2  plate  one figure or one image on top, a bold title, one line
    tier 3  note   a fragment of text; corrections show the struck original and the fix
    Contracts kept from MIND FIELD: every piece carries a status (shape + word) and its source file, quietly;
    a pair renders both sides or refuses; derived pictures say how they were derived. */

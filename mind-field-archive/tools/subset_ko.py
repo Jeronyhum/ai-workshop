@@ -1,4 +1,4 @@
-"""Subset Gothic A1 to the characters this archive uses (copied from site/tools/subset_ko.py).
+"""Subset the Korean faces to the characters this archive uses (v6: Pretendard only; copied from site/tools/subset_ko.py).
 
 usage: python3 tools/subset_ko.py /path/to/GothicA1-Black.ttf fonts/GothicA1-Black-subset.woff [more src dst pairs]
        a .ttc source takes "#index", e.g. NotoSerifCJK-Bold.ttc#1 for the Korean face
