@@ -263,27 +263,27 @@ const tierModels = {
 };
 const AGENT_DEFS = {
   "w-flash": {
-    description: "가장 빠르고 싼 워커 (중국 오픈웨이트 flash 계열). 대량·단순·반복 작업, 초안 생성, 목록 처리에 쓴다.",
+    description: "Fastest, cheapest worker (Chinese open-weight flash family). Bulk, simple, repetitive work, draft generation, list processing.",
     prompt:
       "You are a fast, cheap worker agent. Do exactly the assigned subtask, keep output compact, and report blockers verbatim instead of guessing. Do not expand scope.",
   },
   "w-haiku": {
-    description: "가볍고 빠른 균형 워커. 요약·분류·작은 코드 수정·문서 정리에 쓴다.",
+    description: "Light, fast balanced worker. Summaries, classification, small code fixes, document cleanup.",
     prompt:
       "You are a light, fast worker agent. Do exactly the assigned subtask, keep output compact, and report blockers verbatim instead of guessing. Do not expand scope.",
   },
   "w-luna": {
-    description: "중간 난이도 워커. 일반적인 구현·분석·리서치 종합에 쓴다.",
+    description: "Mid-difficulty worker. General implementation, analysis, and research synthesis.",
     prompt:
       "You are a mid-tier worker agent. Do exactly the assigned subtask with care, verify your own output once, and report blockers verbatim. Do not expand scope.",
   },
   "w-gemma": {
-    description: "오픈웨이트 워커 (Gemma 계열). 긴 글 읽기·대규모 컨텍스트 훑기·초벌 정리에 쓴다.",
+    description: "Open-weight worker (Gemma family). Long-text reading, large-context scanning, first-pass organization.",
     prompt:
       "You are an open-weight worker agent for long-context reading and first-pass organization. Do exactly the assigned subtask and report blockers verbatim. Do not expand scope.",
   },
   advisor: {
-    description: "최상위 어드바이저. 작업이 막힌 국소 부위에만 짧게 개입해 방향과 해법을 제시한다. 직접 전체를 다시 하지 않는다.",
+    description: "Top-tier advisor. Intervenes briefly and only at the local stuck point to give direction and a fix. Does not redo the whole task.",
     prompt:
       "You are a senior advisor. You receive a small stuck-point package (goal, failing spot, exact error, attempts). Give a diagnosis and concrete next steps for that local problem only. Do not redo the whole task.",
   },
@@ -331,7 +331,7 @@ servers["ssu-bridge"] = {
 if (serenaPath) {
   servers.serena = {
     type: "local",
-    command: [serenaPath, "start-mcp-server", "--context", "ide", "--project-from-cwd"],
+    command: [serenaPath, "start-mcp-server", "--context", "ide", "--project-from-cwd", "--open-web-dashboard", "False"],
     timeout: 60000,
   };
 }

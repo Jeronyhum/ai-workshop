@@ -11,10 +11,8 @@ PAYLOAD="${SSU_PAYLOAD:-$DEF_PAYLOAD}"
 DRY=0
 [ "${SSU_DRY_RUN:-0}" = "1" ] && DRY=1
 
-# Defaults up front: the final message uses these even when a step was skipped
+# Default up front: used even when a step was skipped
 # (an unset variable here used to crash the dry run under `set -u`).
-LABEL="아직 모르겠음"
-NOTE="(아직 구체화되지 않음)"
 KEY=""
 
 say()  { printf '%s\n' "$*"; }
@@ -485,65 +483,48 @@ else
   say "    소스 실행: Node 24 + pnpm 필요 — https://github.com/nexu-io/open-design"
 fi
 
-# ---------------- 6. intent + hud ----------------
-head_ "6/6 시작 설정"
+# ---------------- 6. finale: hud + launch ----------------
+# Intent questions no longer live in the installer: OpenCode opens right
+# away and /start runs its Detective phase inside the app.
+head_ "6/6 마무리"
 if [ "$DRY" = "1" ]; then
-  warn "(연습 모드) 의도 입력 생략"
+  warn "(연습 모드) 마무리 생략"
 else
-  say ""
-  say "이번 워크숍에서 무엇을 만들고 싶나요? 번호를 고르거나 직접 적어주세요."
-  say "  1) 업무 자동화   2) 정보 수집 도구   3) 개인용 웹앱"
-  say "  4) 글쓰기 도우미  5) 데이터 분석      6) 아직 모르겠음"
-  printf '선택: '
-  read -r PICK
-  case "$PICK" in
-    1) LABEL="업무 자동화" ;; 2) LABEL="정보 수집 도구" ;; 3) LABEL="개인용 웹앱" ;;
-    4) LABEL="글쓰기 도우미" ;; 5) LABEL="데이터 분석" ;; ""|6) LABEL="아직 모르겠음" ;;
-    *) LABEL="$PICK" ;;
-  esac
-  say ""
-  say "한 문장으로 더 적어주세요. 예: '매일 아침 공지사항을 요약해서 메일로 받고 싶다'"
-  printf '만들고 싶은 것: '
-  read -r NOTE
-  [ -n "$NOTE" ] || NOTE="(아직 구체화되지 않음)"
-
-  {
-    printf '# 이번 워크숍에서 만들 것\n\n'
-    printf -- '- 분류: %s\n' "$LABEL"
-    printf -- '- 한 문장: %s\n\n' "$NOTE"
-    printf '## 첫 대화에서 할 일\n\n1. 위 한 문장을 확인하고, 빠진 것만 3개 이하로 묻는다.\n'
-    printf '2. 유사 제품 3개와 차별점을 정리한다.\n3. Must / Should / Won'"'"'t 로 범위를 자른다.\n'
-    printf '4. 스택과 예상 API 비용을 제시한다.\n5. 첫 30분 작업 하나를 정하고 시작한다.\n'
-  } > "$ROOT/PROJECT_INTENT.md"
-  ok "의도 저장: $ROOT/PROJECT_INTENT.md"
-
   chmod +x "$ROOT/hud/hud.sh" 2>/dev/null || true
-  if [ "$OS" = "Linux" ] && [ -d "$HOME/.config/autostart" ]; then
-    cat > "$HOME/.config/autostart/ssu-hud.desktop" <<EOF
+  if [ "$OS" = "Linux" ]; then
+    if [ -d "$HOME/.config/autostart" ]; then
+      cat > "$HOME/.config/autostart/ssu-hud.desktop" <<DESKEOF
 [Desktop Entry]
 Type=Application
 Name=SSU HUD
 Exec=bash $ROOT/hud/hud.sh
 X-GNOME-Autostart-enabled=true
-EOF
-    ok "HUD 자동 시작 등록 (~/.config/autostart)"
-  else
-    warn "HUD는 직접 실행하세요: bash $ROOT/hud/hud.sh"
+DESKEOF
+      ok "HUD 자동 시작 등록 (~/.config/autostart)"
+    else
+      warn "HUD는 직접 실행하세요: bash $ROOT/hud/hud.sh"
+    fi
+  elif [ "$OS" = "Darwin" ]; then
+    # /start on the clipboard: the student just pastes it into a new session.
+    printf '/start' | pbcopy 2>/dev/null || true
+    if [ -d "/Applications/OpenCode.app" ]; then
+      open -a OpenCode && ok "OpenCode 실행 중"
+    elif [ -d "$HOME/Applications/OpenCode.app" ]; then
+      open "$HOME/Applications/OpenCode.app" && ok "OpenCode 실행 중"
+    else
+      warn "OpenCode 앱을 찾지 못했습니다. 직접 실행하세요."
+    fi
   fi
 fi
 
-# Seed line: an untouched placeholder note would read as the student's own words,
-# so fall back to the chosen category label (same rule as install.ps1).
-SEED="$NOTE"
-case "$NOTE" in "(아직"*) SEED="$LABEL" ;; esac
-
 say ""
-say "설치가 끝났습니다."
+say "설치가 끝났습니다. OpenCode가 바로 열립니다."
 say ""
-say "  1) OpenCode를 실행하세요."
-say "  2) 모델 목록에서 'BAZE' 계열을 고르세요."
-say "  3) 첫 대화: \"$SEED\" 로 시작하고 싶어. 뭐부터 하면 돼?"
+say "  1) 열린 OpenCode에서 프로젝트 폴더를 고르세요. (처음이면 새 폴더를 만들어 선택)"
+say "  2) 새 세션 입력칸에 붙여넣기(Cmd+V) 하세요. '/start'가 클립보드에 들어 있습니다."
+say "  3) Enter — /start가 만들고 싶은 것부터 질문으로 파악합니다."
 say ""
+say "  모델은 목록의 'BAZE' 계열이 전부 SSU 게이트웨이입니다."
 say "  HUD: bash $ROOT/hud/hud.sh    (브라우저에 크레딧/컨텍스트 표시)"
 say "  명령: /credits /usage /websearch /decide"
 say "  스펙 주도 개발: /speckit.specify -> /speckit.plan -> /speckit.tasks"

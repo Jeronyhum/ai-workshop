@@ -1,168 +1,182 @@
-# SSU 워크숍 전역 지침
+# SSU Workshop Global Instructions
 
-이 파일은 이 컴퓨터의 모든 OpenCode 세션에 적용된다.
-구조는 세 겹이다: **OpenCode 하네스** 안에 **바이브코더 하네스**(아래
-워크플로)가 있고, 그 안에서 `/start`가 **자율 작업 프레임워크**를 돌린다.
-도구를 따로따로 쓰지 않는다.
+This file applies to every OpenCode session on this machine.
+The structure has three layers: the **OpenCode harness**, inside it the
+**vibe-coder harness** (the workflow below), and inside that `/start`
+running an **autonomous work framework**. Do not use the tools piecemeal.
 
-## /start — 자율 작업 프레임워크 (실전 진입점)
+## /start — Autonomous Work Framework (the practical entry point)
 
-사용자가 아이디어를 들고 오면 `/start`로 시작한다. `/start`는 탐정으로
-의도를 확정하고, 작업 프레임을 조립하고(Harness²의 8요소: 시스템 프롬프트·
-가드레일·메모리·도구 안내·서브에이전트·스킬·스크립트·플러그인), 명세 →
-분해 → 라우팅 → 실행 → 검증 → 회고까지 자율로 돈다. 단계는
-`commands/start.md`가 정본이다.
+When the user brings an idea, start with `/start`. `/start` fixes intent
+via Detective, assembles a work frame (Harness²'s 8 components: system
+prompt · guardrails · memory · tool guidance · subagents · skills ·
+scripts · plugins), then runs autonomously through spec → decomposition →
+routing → execution → verification → retrospective. `commands/start.md`
+is the canonical definition of the phases.
 
-### 서브에이전트 티어 (동적 라우팅)
+### Subagent Tiers (dynamic routing)
 
-서브태스크는 난이도·비용효율성·프롬프트 캐시 재사용을 고려해 티어로
-배정한다. 배정 판단은 Jev(`decide` 도구)가 하고, `jev-router` 플러그인이
-Task 호출마다 한 번 더 판정해 `routing-log.jsonl`에 기록한다.
+Assign each subtask to a tier by difficulty, cost efficiency, and prompt
+cache reuse. The assignment decision is made by Jev (the `decide` tool),
+and the `jev-router` plugin re-decides on every Task call and logs to
+`routing-log.jsonl`.
 
-- `w-flash` — 가장 빠르고 싼 워커. 대량·단순·반복, 초안 생성.
-- `w-gemma` — 긴 글 읽기, 대규모 컨텍스트 훑기, 초벌 정리.
-- `w-haiku` — 요약·분류·작은 수정 등 가벼운 판단.
-- `w-luna` — 일반적인 구현·분석 등 중간 난이도.
-- `advisor` — 최상위 모델. **막힌 국소 부위에만** 쓴다: 같은 태스크가
-  2회 실패하면 전체가 아니라 실패 패키지(목표·에러 원문·시도 목록)만
-  보내고, 조언을 받아 원래 티어가 재개한다.
+- `w-flash` — fastest, cheapest worker. Bulk, simple, repetitive work; draft generation.
+- `w-gemma` — long-text reading, sweeping large contexts, rough first-pass organization.
+- `w-haiku` — light judgment: summaries, classification, small edits.
+- `w-luna` — mid-difficulty work: general implementation and analysis.
+- `advisor` — top-tier model. Use it **only on a stuck local spot**: when
+  the same task fails twice, send only the failure package (goal, raw
+  error, list of attempts) — not the whole task — take the advice, and
+  let the original tier resume.
 
-캐시 원칙 (2026-11-04 실측으로 확정): 프롬프트 캐시는 같은 모델에서
-프리픽스(앞부분)가 동일할 때만 히트한다. 실측에서 동일 프롬프트 반복
-호출 시 입력의 92~99%가 캐시로 잡혔고, 캐시 단가는 입력의 1/5이다.
-- 같은 긴 컨텍스트를 반복 처리하는 태스크는 **모델을 바꾸지 않는다.**
-  바꾸면 캐시 리드가 전부 버려진다.
-- **노력 단계(variant)도 유지한다.** 단계를 바꾸면 캐시가 갈릴 수 있다.
-- 프롬프트는 **안정적인 내용을 앞에, 바뀌는 내용을 뒤에** 둔다. 공통
-  지시·컨텍스트는 바이트 단위로 동일하게 유지하고, 회차별 차이는 끝에
-  덧붙인다 (프리픽스가 흔들리면 그 뒤 전부가 캐시 미스가 된다).
-- 호출마다 **기본료 5크레딧**이 붙는다 (실측). 작은 호출을 자주 나누지
-  말고, 같은 컨텍스트를 공유하는 작업은 한 워커에게 묶어서 보낸다.
+Cache rules (confirmed by measurement, 2026-11-04): the prompt cache hits
+only when the prefix (the leading part) is identical on the same model.
+Measured: on repeated calls with an identical prompt, 92~99% of input was
+served from cache, and the cache price is 1/5 of the input price.
+- For tasks that repeatedly process the same long context, **do not
+  switch models.** Switching discards all cache reads.
+- **Keep the effort level (variant) too.** Changing it can split the cache.
+- Put **stable content first, changing content last**. Keep shared
+  instructions and context byte-identical, and append per-round
+  differences at the end (if the prefix wobbles, everything after it is a
+  cache miss).
+- Every call carries a **5-credit base fee** (measured). Do not split work
+  into many small calls; bundle tasks that share a context into one worker.
 
-노력 단계 운용 (2026-11-04 실측 + 운용 방침): flash 계열 모델은 max에서
-성능이 크게 뛴다 — 웬만큼 어려운 작업(난이도 L)에는 flash라도 max를
-쓴다. 단, max의 사고는 스스로 짧게 멈추지 않는다는 게 실측으로
-확인됐다: deepseek flash는 중간 난이도 문제 하나에 사고만으로 출력
-상한 16,000토큰을 전부 소진했고, glm flash는 180초 넘게 사고만 하다
-답이 시작되지 않았다. 그래서 max 호출의 전제는 셋이다.
-- 태스크에 맞는 **출력 예산**(사고+답변 몫)을 잡는다. 이 계열의 출력
-  한도는 13만~38만 토큰이라 여유는 있지만, 무한정 두면 그만큼 시간과
-  크레딧이 나간다.
-- "전 과정을 빠짐없이 보이라" 같은 무한 전개형 지시를 피한다. 사고가
-  폭증하는 주 원인이다.
-- max 호출은 **스트리밍으로 받고, 출력 토큰 상한을 넉넉히 키운다.**
-  긴 비스트리밍 호출은 응답이 오기 전에 연결이 끊길 수 있고 (실측),
-  상한이 작으면 사고가 그 상한을 전부 먹어 답이 안 나온다. 실측
-  기준값: 중간 난이도 셈 문제에서 deepseek flash의 max 자연 사고량은
-  약 37,000토큰·3.6분이었고, 그만큼 받아냈을 때 정답을 냈다 — 같은
-  문제를 가볍게 푼 모델은 오답이었다. 상한은 이 규모를 전제로 잡는다.
-- **노력 단계별 출력 예산 (벤더 공식 문서 기준, 일괄 적용)**:
+Effort-level operation (measured 2026-11-04 + operating policy): flash-class
+models gain a lot at max — for genuinely hard work (difficulty L), use max
+even on flash. But measurement also confirmed that at max, reasoning does
+not stop short on its own: deepseek flash burned an entire 16,000-token
+output cap on reasoning alone for one mid-difficulty problem, and glm
+flash reasoned for over 180 seconds without starting its answer. So a max
+call has three preconditions.
+- Set an **output budget** sized to the task (room for reasoning + answer).
+  This class allows 130K–380K output tokens, so there is headroom, but
+  leaving it unbounded costs that much time and credit.
+- Avoid open-ended instructions like "show every step without omission" —
+  the main cause of reasoning blowups.
+- Take max calls **via streaming, with a generous output-token cap.** A
+  long non-streaming call can lose its connection before the response
+  arrives (measured), and a small cap lets reasoning eat the whole cap so
+  no answer comes out. Measured reference: on a mid-difficulty counting
+  problem, deepseek flash's natural max reasoning was about 37,000 tokens
+  / 3.6 minutes, and given that much room it produced the correct answer —
+  a model that solved the same problem lightly got it wrong. Size caps
+  against this scale.
+- **Per-effort output budgets (from vendor docs, applied uniformly)**:
   low 8K · medium 16K · **high 64K · xhigh 96K · max 128K**.
-  근거: DeepSeek 공식 기본값이 사고 모드 64K·max 128K이고, Qwen의
-  사고 예산 프리셋이 low 4K·medium 16K·high 이상 무제한(기본 상한
-  약 128K)으로 수렴하며, GLM의 최대 출력이 128K다. 단계가 오르면
-  예산도 같이 키운다 — 단계를 올리고 예산을 그대로 두면 사고가
-  예산을 먹어 무답 종료된다.
-- 참고: GLM-5.3 계열의 공식 단계는 low·high·max뿐이다 (xhigh 자체가
-  없어서 400이 돌아온다). GLM에서 xhigh가 필요하면 max를 쓴다.
-- finish=length로 답 없이 끝나면, 노력 단계를 낮추기 전에 **예산을
-  늘리거나 프롬프트를 좁혀** 재시도한다.
-쉬운·반복 작업(S·M)은 high 이하로 충분하고, 그게 비용에 맞다.
+  Basis: DeepSeek's official defaults are 64K in thinking mode and 128K
+  at max; Qwen's thinking-budget presets converge to low 4K · medium 16K ·
+  high-and-above uncapped (default ceiling about 128K); GLM's max output
+  is 128K. Raise the budget together with the level — raising the level
+  while keeping the budget lets reasoning eat the budget and end with no
+  answer.
+- Note: the GLM-5.3 family officially has only low·high·max (xhigh does
+  not exist, so it returns 400). When you need xhigh on GLM, use max.
+- If a call ends finish=length with no answer, before lowering the effort
+  level, retry with a **larger budget or a narrower prompt**.
+For easy/repetitive work (S·M), high or below is enough, and matches the cost.
 
-## 바이브코더 하네스 — 전체 흐름 (한 바퀴)
+## Vibe-Coder Harness — The Full Loop (one round)
 
-1. **의도** — vibe-coach로 "무엇을, 왜"를 확정한다. 추측으로 시작하지 않는다.
-2. **명세** — 새 기능·제품은 spec-kit(`/speckit.*`)으로 명세 → 계획 → 작업 목록을 먼저 만든다.
-3. **지도** — graphify로 프로젝트 전체 구조와 영향 범위를 본다.
-4. **정밀 작업** — serena로 심볼 단위 탐색·편집을 한다.
-5. **규율** — pstack 스킬로 작업 방식을 잡는다 (아래 라우팅).
-6. **검증** — 실행 결과로 확인한다. 끝나면 graphify 지도를 갱신한다.
+1. **Intent** — fix "what, and why" with vibe-coach. Never start from a guess.
+2. **Spec** — for a new feature/product, use spec-kit (`/speckit.*`) to produce spec → plan → task list first.
+3. **Map** — use graphify to see the project's overall structure and impact scope.
+4. **Precision work** — use serena for symbol-level search and edits.
+5. **Discipline** — use pstack skills to set the working method (routing below).
+6. **Verification** — confirm with execution results. When done, update the graphify map.
 
-작은 수정(오타, 한 줄 변경)은 2~3단계를 건너뛰어도 된다. 새 기능은 건너뛰지 않는다.
+Small fixes (typos, one-line changes) may skip steps 2–3. New features may not.
 
-## 도구별 담당
+## Tool Ownership
 
-### vibe-coach (의도)
+### vibe-coach (intent)
 
-- 세션 시작과 의도 확정 전담. 아래 "첫 대화 규칙"을 따른다.
+- Owns session start and intent fixing. Follows the "first conversation rules" below.
 
-### spec-kit (명세)
+### spec-kit (spec)
 
-- 새 기능·제품: `/speckit.specify`(명세) → `/speckit.clarify`(모호한 곳 질문) →
-  `/speckit.plan`(계획) → `/speckit.tasks`(작업 목록) → `/speckit.implement`(구현) 순서.
-- 명세 없이 큰 코드를 쓰지 않는다. 구현 중 명세와 어긋나면 코드를 고치기 전에
-  사용자에게 알리고 명세를 갱신한다.
+- New feature/product: `/speckit.specify` (spec) → `/speckit.clarify` (questions on ambiguities) →
+  `/speckit.plan` (plan) → `/speckit.tasks` (task list) → `/speckit.implement` (implementation), in order.
+- Do not write large code without a spec. If implementation diverges from
+  the spec, tell the user and update the spec before changing the code.
 
-### graphify (구조 지도)
+### graphify (structure map)
 
-- "이 프로젝트 구조가 어떻게 돼?", "이걸 바꾸면 어디가 영향받아?", "A와 B가 어떻게
-  연결돼?" 같은 구조 질문은 graphify가 담당한다.
-- 프로젝트에 `graphify-out/graph.json` 이 있으면, 구조 질문에는 먼저
-  `graphify query "질문"` / `graphify path "A" "B"` / `graphify explain "X"` 로 답한다.
-- 지도가 없는데 한 번 찾고 끝날 질문("X가 어디 정의됐어?")이면 grep·serena가 더
-  싸다. 지도는 여러 번 물을 큰 프로젝트에서 `/graphify` 로 만든다.
-- 코드를 고친 뒤에는 `graphify update <경로>` 로 지도를 갱신한다 (LLM 불필요, 빠르다).
+- Structure questions — "How is this project structured?", "If I change
+  this, what is affected?", "How are A and B connected?" — belong to graphify.
+- If the project has `graphify-out/graph.json`, answer structure questions
+  first with `graphify query "<question>"` / `graphify path "A" "B"` /
+  `graphify explain "X"`.
+- If there is no map and the question is one-shot ("Where is X defined?"),
+  grep·serena are cheaper. Build the map with `/graphify` on large projects
+  you will query repeatedly.
+- After changing code, update the map with `graphify update <path>` (no LLM needed, fast).
 
-### serena (심볼 단위 손)
+### serena (symbol-level hands)
 
-- 실제 코드를 읽고 고치는 작업은 serena 도구로 한다: 심볼 개요 → 필요한 심볼만
-  읽기 → 심볼 단위 교체·삽입 → 참조 추적.
-- 구조 감을 잡는 건 graphify, 정확한 본문을 읽고 고치는 건 serena다.
-- 전체 파일 읽기는 마지막 수단으로 남긴다.
+- Actual code reading/editing uses serena tools: symbol overview → read
+  only the needed symbols → symbol-level replace/insert → trace references.
+- graphify gets the structural feel; serena reads and edits exact bodies.
+- Reading whole files is the last resort.
 
-### pstack (규율 레이어 — poteto의 플레이북)
+### pstack (discipline layer — poteto's playbooks)
 
-pstack은 poteto가 Cursor에서 쓰는 엔지니어링 스킬 모음(cursor/plugins)이다.
-철학은 "빠르게 많이"가 아니라 "깊게 파고, 적게, 검증 가능하게"와
-"두려움 없는 병렬 실행"이다. 이 하네스에서의 역할은 **규율 레이어**:
+pstack is poteto's engineering skill collection from Cursor (cursor/plugins).
+Its philosophy is not "fast and much" but "dig deep, do less, keep it
+verifiable" and "parallel execution without fear". Its role in this harness
+is the **discipline layer**:
 
-- 진입점은 `poteto-mode`다. 작업 유형(feature / bug-fix / research /
-  autonomous-run / orchestrate …)에 맞는 **플레이북**을 고르고, 그 단계를
-  todo로 열어 단계마다 스킬을 적용한다.
-- 단계 스킬 예: 시작은 `how`·`sharpen`, 원인 규명은 `why`·`interrogate`,
-  영향 범위는 `blast-radius`, 구현은 `tdd`, 정확성은 `correct`,
-  검증은 `verify-lever`·`benchmark-checklist`, 마무리는 `reflect`·
+- The entry point is `poteto-mode`. Pick the **playbook** matching the work
+  type (feature / bug-fix / research / autonomous-run / orchestrate …),
+  open its steps as todos, and apply skills at each step.
+- Step skill examples: start with `how`·`sharpen`, root-cause with
+  `why`·`interrogate`, impact scope with `blast-radius`, implementation
+  with `tdd`, correctness with `correct`, verification with
+  `verify-lever`·`benchmark-checklist`, wrap-up with `reflect`·
   `show-me-your-work`.
-- `principle-*` 스킬들은 항상 적용되는 원칙이다. poteto-mode가 부르면
-  함께 로드한다.
-- poteto-mode가 서브에이전트마다 effort를 고르는 개념은, 이 하네스에서는
-  위의 **티어 라우팅(Jev 판정)** 으로 구현돼 있다.
+- The `principle-*` skills are always-on principles. When poteto-mode calls
+  them, load them together.
+- poteto-mode's concept of picking an effort per subagent is implemented in
+  this harness as the **tier routing (Jev decisions)** above.
 
-### Open Design (디자인 작업)
+### Open Design (design work)
 
-- 디자인·프론트엔드 디자인·프로토타입·발표 덱이 필요하면 코드를 바로
-  짜지 말고 **Open Design을 먼저 띄운다**: 데스크톱 앱을 실행해 사용자가
-  화면을 보며 직접 다듬는 형태로 진행한다 (CLI `od`가 Open Design의
-  것으로 잡히는 환경이면 터미널 실행도 가능 — macOS의 시스템 `od`와
-  이름이 겹치니 앱 실행이 기본이다).
-- Open Design의 모델 연결에는 SSU 게이트웨이를 OpenAI 호환
-  엔드포인트(`https://factchat-cloud.mindlogic.ai/v1/gateway`)로 물릴
-  수 있다 (BYOK 방식). 모델은 게이트웨이 카탈로그의 것을 그대로 쓰고,
-  키는 사용자 본인 키를 설정 화면에서만 입력한다 — 채팅에 키를
-  붙여넣게 하지 않는다.
-- 이미지 에셋이 필요하면 ssu-bridge의 `image` 도구를 쓴다. 기본 모델은
-  `gpt-image-2.5-sunburst` (Artificial Analysis Image Arena 1위),
-  가성비를 우선하면 `gemini-nano-banana-2.1`.
+- When design, frontend design, a prototype, or a presentation deck is
+  needed, do not write code right away — **launch Open Design first**: run
+  the desktop app and proceed in a form where the user watches the screen
+  and refines directly. (In environments where the CLI `od` resolves to
+  Open Design's, terminal launch is also possible — the name collides with
+  macOS's system `od`, so launching the app is the default.)
+- Open Design's model connection can use the SSU gateway as an
+  OpenAI-compatible endpoint (`https://factchat-cloud.mindlogic.ai/v1/gateway`)
+  (BYOK style). Use gateway-catalog models as-is, and have the user enter
+  their own key only in the settings screen — never make them paste a key
+  into chat.
+- When image assets are needed, use ssu-bridge's `image` tool. The default
+  model is `gpt-image-2.5-sunburst` (Artificial Analysis Image Arena #1);
+  if cost matters more, `gemini-nano-banana-2.1`.
 
-## 첫 대화 규칙
+## First Conversation Rules
 
-새 세션의 첫 사용자 메시지를 받으면, 아래 순서로만 움직인다.
+On receiving the first user message of a new session, move only in this order.
 
-1. `~/.config/opencode/PROJECT_INTENT.md` 가 있으면 읽는다.
-2. `vibe-coach` 스킬을 로드한다.
-3. 인사만 하고 질문은 **3개 이하**로 시작한다. 코드를 쓰지 않는다.
+1. If the project's `PROJECT_INTENT.md` exists, read it.
+2. Load the `vibe-coach` skill.
+3. Greet only, and start with **at most 3 questions**. Do not write code.
 
-`PROJECT_INTENT.md` 에 사용자가 적어둔 만들고 싶은 것이 있으면, 그것을 첫 질문의 출발점으로 쓴다. 다시 처음부터 묻지 않는다.
+If `PROJECT_INTENT.md` records what the user wants to build, use it as the starting point for the first questions. Do not re-ask from scratch.
 
-## 공통 규칙
+## Common Rules
 
-- 모든 답변은 한국어.
-- 전문 용어는 처음 나올 때 한 줄 설명을 붙인다. 예: "MCP(모델이 외부 도구를 부르는 표준 규격)".
-- 웹 근거가 필요하면 `exa_search` / `exa_answer` 를 쓴다. 모델 지식으로 최신 정보를 단정하지 않는다.
-- 크레딧이 궁금하면 `credits`, 사용 내역은 `usage` 도구를 쓴다. 수치를 추측하지 않는다.
-- 검증 없이 "됐습니다"라고 말하지 않는다. 실행 결과나 출력을 근거로 말한다.
+- Reply in Korean at all times.
+- When a technical term first appears, attach a one-line explanation. Example: "MCP(모델이 외부 도구를 부르는 표준 규격)".
+- When web evidence is needed, use `exa_search` / `exa_answer`. Do not assert current information from model knowledge.
+- For credits use the `credits` tool; for usage history, `usage`. Do not guess figures.
+- Do not say "done" without verification. Speak from execution results or output.
 
-## 키와 비밀
+## Keys and Secrets
 
-- `SSU_API_KEY` 값을 화면에 출력하지 않는다. 파일 내용을 통째로 보여주는 명령도 쓰지 않는다.
-- 로그·커밋·스크린샷에 키가 들어가면 즉시 알린다.
+- Never print the `SSU_API_KEY` value on screen. Do not use commands that dump whole file contents.
+- If a key ends up in a log, commit, or screenshot, report it immediately.

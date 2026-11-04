@@ -1,32 +1,32 @@
 ---
-description: SSU 게이트웨이 Exa 웹 검색·본문 추출·출처 답변 (호출마다 크레딧 차감)
+description: SSU gateway Exa web search, page text extraction, and sourced answers (credits deducted per call)
 ---
 
-사용자가 웹 검색, 최신 정보, 페이지 본문, 출처가 달린 답변을 원할 때 `ssu-bridge` MCP 서버의 Exa 도구를 쓴다.
-모델 지식으로 답하지 말고 이 경로를 먼저 쓴다.
+When the user wants a web search, recent information, a page's full text, or an answer with sources, use the Exa tools of the `ssu-bridge` MCP server.
+Use this route first instead of answering from model knowledge.
 
-검색 주제: $ARGUMENTS
+Search topic: $ARGUMENTS
 
-주제가 비어 있으면 무엇을 찾을지 먼저 물어본다. URL만 주어지면 검색 대신 `exa_contents`로 본문부터 가져온다.
+If the topic is empty, ask what to look for first. If only a URL is given, fetch its text with `exa_contents` instead of searching.
 
-## 검색 → `exa_search`
+## Search → `exa_search`
 
-- `query` (필수), `num_results` 기본 10 (10 초과분은 추가 과금)
-- 깊은 검색은 `type: "deep"` (비용 증가), 빠른 검색은 `type: "fast"`
-- `summary: true` 는 페이지당 추가 과금
+- `query` (required), `num_results` default 10 (results beyond 10 cost extra)
+- Deep search: `type: "deep"` (costs more); fast search: `type: "fast"`
+- `summary: true` costs extra per page
 
-## 본문 추출 → `exa_contents`
+## Extract text → `exa_contents`
 
-- `urls` 최대 100개, `max_characters` 기본 4000
-- `summary_query` 를 주면 그 기준으로 요약
+- `urls` up to 100, `max_characters` default 4000
+- Pass `summary_query` to have it summarized against that query
 
-## 출처 답변 → `exa_answer`
+## Sourced answer → `exa_answer`
 
-- `query` 필수, `system_prompt` 로 답변 방식을 지정
+- `query` required; use `system_prompt` to set how the answer is written
 
-## 규칙
+## Rules
 
-- 모든 Exa 호출은 유료다. 결과에 `차감 크레딧` 줄이 있으면 사용자에게 함께 알린다.
-- 조직 한도는 초당 5건이다. 429가 오면 1초 뒤 재시도한다.
-- 결과는 원문 제목·URL·관련 구절을 그대로 보고한다. 없는 내용을 요약으로 채우지 않는다.
-- 검색 결과가 비어 있으면 "검색 결과 없음"이라고 말한다. 추측으로 메우지 않는다.
+- Every Exa call is paid. If a result includes a `차감 크레딧` line, report it to the user as well.
+- The org limit is 5 requests per second. On a 429, retry after 1 second.
+- Report results with the original titles, URLs, and relevant passages verbatim. Never fill gaps with summary content that isn't there.
+- If the search results are empty, say "검색 결과 없음". Never fill in with guesses.

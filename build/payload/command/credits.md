@@ -1,10 +1,10 @@
 ---
-description: BAZE 게이트웨이 크레딧 잔액과 오늘 사용량을 보여줍니다
+description: Show BAZE gateway credit balance and today's usage
 ---
 
-`ssu-bridge` MCP 서버의 `credits` 도구를 호출하고, 이어서 `usage` 도구를 `by=model`, `scope=key`로 호출해.
+Call the `credits` tool of the `ssu-bridge` MCP server, then call the `usage` tool with `by=model`, `scope=key`.
 
-그 다음 아래 형식으로 한국어 보고를 만든다. 숫자는 도구가 돌려준 값만 쓴다. 추측하거나 반올림해서 새 수치를 만들지 않는다.
+Then produce a report in Korean in the format below. Use only the values the tools returned. Never invent new figures or round numbers into different ones.
 
 ```
 BAZE 크레딧
@@ -17,4 +17,4 @@ BAZE 크레딧
   - {model}: {credits} cr ({call_count}회)
 ```
 
-도구 호출이 실패하면 실패 이유만 한 줄로 알리고 수치를 지어내지 않는다.
+If a tool call fails, state the reason in one line and never fabricate figures.

@@ -5,6 +5,14 @@
 $ErrorActionPreference = "Stop"
 try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch { }
 
+# Single instance: the installer launches the HUD immediately and the Startup
+# shortcut launches it again at boot; without this guard two bars stack and
+# closing one leaves the other behind (looks like it "won't close").
+if (-not $Once) {
+    $script:hudMutex = New-Object System.Threading.Mutex($false, "SSU_HUD_singleton")
+    if (-not $script:hudMutex.WaitOne(0, $false)) { exit 0 }
+}
+
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
@@ -156,18 +164,27 @@ $ctxLine.Margin = New-Object System.Windows.Thickness 0, 6, 0, 0
 $grid.Children.Add($ctxLine) | Out-Null
 
 $close = New-Object System.Windows.Controls.TextBlock
-$close.Text = "x"
-$close.FontSize = 12
-$close.Foreground = New-Object System.Windows.Media.SolidColorBrush ([Windows.Media.ColorConverter]::ConvertFromString("#6F7A8C"))
+$close.Text = "✕"
+$close.FontSize = 15
+$close.Padding = New-Object System.Windows.Thickness 12, 4, 12, 8
+$close.Foreground = New-Object System.Windows.Media.SolidColorBrush ([Windows.Media.ColorConverter]::ConvertFromString("#AEB9C9"))
 $close.HorizontalAlignment = "Right"
 $close.VerticalAlignment = "Top"
 $close.Cursor = [System.Windows.Input.Cursors]::Hand
-$close.ToolTip = "닫기"
+$close.ToolTip = "닫기 (Esc)"
 $close.Add_MouseLeftButtonUp({ $win.Close() })
 $grid.Children.Add($close) | Out-Null
 
 $border.Cursor = [System.Windows.Input.Cursors]::SizeAll
 $border.Add_MouseLeftButtonDown({ try { $win.DragMove() } catch { } })
+# Exit paths beyond the ✕: right-click menu anywhere on the bar, and Esc.
+$menu = New-Object System.Windows.Controls.ContextMenu
+$miClose = New-Object System.Windows.Controls.MenuItem
+$miClose.Header = "HUD 닫기"
+$miClose.Add_Click({ $win.Close() })
+$menu.Items.Add($miClose) | Out-Null
+$border.ContextMenu = $menu
+$win.Add_KeyDown({ if ($_.Key -eq [System.Windows.Input.Key]::Escape) { $win.Close() } })
 
 # ---------- update ----------
 function Apply-Status($s) {

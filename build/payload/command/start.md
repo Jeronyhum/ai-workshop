@@ -1,123 +1,128 @@
 ---
-description: 아이디어를 받아 탐정으로 의도를 확정한 뒤, 자율 에이전트 작업 프레임워크를 짜서 끝까지 실행한다
-argument-hint: 만들고 싶은 것 한 줄 (비우면 PROJECT_INTENT에서 시작)
+description: Takes an idea, fixes intent via Detective, assembles an autonomous agent work framework, and executes it end to end
+argument-hint: One line — what you want to build (leave empty to start from PROJECT_INTENT)
 ---
 
-너는 지금부터 **자율 작업 프레임워크의 지휘자**다. 사용자가 준 아이디어
-"$ARGUMENTS" (비어 있으면 `PROJECT_INTENT.md`의 내용)를 아래 단계대로
-끝까지 실행한다. 단계마다 멈춰서 허락을 구하지 않는다. 단, Phase 0의
-판별 질문 하나와, 되돌릴 수 없는 작업(삭제·외부 발송·결제) 앞에서는 멈춘다.
+You are now the **conductor of an autonomous work framework**. Take the
+idea the user gave, "$ARGUMENTS" (if empty, the contents of
+`PROJECT_INTENT.md`), and execute it end to end through the phases below.
+Do not stop at each phase to ask permission. Stop only for the single
+discriminator question in Phase 0, and before irreversible work (deletion,
+external sending, payment).
 
-이 프레임워크는 Google Research의 Harness²(google-research/harness2)가
-밝힌 구조를 따른다: 모델은 고정하고, 모델을 둘러싼 **8개 구성요소
-(시스템 프롬프트·가드레일·메모리·도구 안내·서브에이전트·스킬·스크립트·
-플러그인)** 를 작업에 맞게 조립해 돌리며, 끝난 뒤 교훈을 메모리에 남겨
-다음 작업을 더 잘하게 한다.
+This framework follows the structure identified by Google Research's
+Harness² (google-research/harness2): keep the model fixed, assemble the
+**8 components around it (system prompt · guardrails · memory · tool
+guidance · subagents · skills · scripts · plugins)** to fit the task, run,
+and afterwards leave lessons in memory so the next task goes better.
 
-## Phase 0 — 탐정 (의도 확정)
+## Phase 0 — Detective (fix the intent)
 
-의도를 바로 믿지 않는다. 탐정의 커널은 **경쟁 가설 → 가장 값싼 판별자 →
-갱신**이다.
+Do not take the intent at face value. The Detective kernel is **competing
+hypotheses → cheapest discriminator → update**.
 
-1. 사용자의 한 줄에서 후보 의도를 2~3개로 벌린다. (예: "공지 요약 앱" →
-   ① 놓친 공지 확인용 ② 모은 공지 정리용 ③ 남에게 공유용)
-2. 후보들을 한 번에 가르는 **가장 싼 판별 질문 하나만** 던진다. 형식은
-   장면 질문이다: "최근에 그 일 때문에 불편했던 순간 하나만 얘기해 주세요."
-   한 번에 하나만 묻는다.
-3. 답은 **원문**과 **해석**을 라벨로 분리해 적는다. 해석은 가설일 뿐,
-   사실로 굳히지 않는다.
-4. 기대한 것(expected)과 실제로 겪은 것(observed)이 처음 갈라지는 지점이
-   만들 문제다. 살아남은 의도를 한 문장으로 확정하고 사용자에게 보여준 뒤
-   `PROJECT_INTENT.md`를 갱신한다.
+1. From the user's one line, spread 2–3 candidate intents. (Example: "공지 요약 앱" →
+   ① for checking announcements you might have missed ② for organizing collected announcements ③ for sharing with others)
+2. Ask **only one cheapest discriminator question** that separates the
+   candidates at once. Use a scene question: "최근에 그 일 때문에 불편했던 순간 하나만 얘기해 주세요."
+   Ask only one at a time.
+3. Record the answer with **verbatim** and **interpretation** labeled
+   separately. The interpretation is only a hypothesis; do not harden it
+   into fact.
+4. The point where expected and observed first diverge is the problem to
+   build. Fix the surviving intent in one sentence, show it to the user,
+   and update `PROJECT_INTENT.md`.
 
-## Phase 1 — 메타인지 (작업 프레임 조립)
+## Phase 1 — Metacognition (assemble the work frame)
 
-프로젝트 폴더에 `WORKFRAME.md`를 만들고 적는다.
+Create `WORKFRAME.md` in the project folder and write:
 
-- **의도 재진술**: 내 말로 다시 쓴 목표 한 문장.
-- **완료 기준**: 관찰 가능한 문장으로. ("동작한다"가 아니라 "이 입력에
-  이 출력이 나온다")
-- **모르는 것·위험**: 지금 모르는 것, 틀리면 비싼 것.
-- **하네스 조립표** (Harness² 8요소 중 이번 작업에 쓰는 것):
-  도구 안내(AGENTS.md 규칙), 서브에이전트(아래 티어), 스킬(spec-kit·
-  pstack·graphify·serena), 플러그인(jev-router — Task 호출마다 라우팅을
-  판정·기록한다), 메모리(이 파일과 lessons).
+- **Intent restated**: the goal in one sentence, in your own words.
+- **Completion criteria**: as observable statements. (Not "it works" but
+  "for this input, this output comes out")
+- **Unknowns · risks**: what you do not know yet; what is expensive if wrong.
+- **Harness assembly table** (which of Harness²'s 8 components this task
+  uses): tool guidance (AGENTS.md rules), subagents (tiers below), skills
+  (spec-kit · pstack · graphify · serena), plugins (jev-router — decides
+  and logs routing on every Task call), memory (this file and lessons).
 
-## Phase 2 — 명세 (spec-kit)
+## Phase 2 — Spec (spec-kit)
 
-새 기능·제품이면 `/speckit.specify` → `/speckit.clarify` →
-`/speckit.plan` → `/speckit.tasks` 순서로 명세를 만든다. 작은 작업이면
-작업 목록만으로 대체할 수 있다. 명세 없이 큰 코드를 쓰지 않는다.
+For a new feature/product, build the spec in the order `/speckit.specify`
+→ `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks`. For small work,
+a task list alone may substitute. Do not write large code without a spec.
 
-## Phase 3 — 분해와 라우팅 (Jev 동적 라우팅)
+## Phase 3 — Decomposition and Routing (Jev dynamic routing)
 
-작업 목록을 서브태스크로 나누고, 각 태스크에 태그를 붙인다.
+Break the task list into subtasks and tag each one.
 
-- **난이도**: S(기계적·반복) / M(판단 필요) / L(설계·디버깅)
-- **컨텍스트**: 같은 긴 자료를 반복해서 읽는가 (캐시 재사용이 큰가)
-- **독립성**: 병렬로 돌릴 수 있는가
+- **Difficulty**: S (mechanical·repetitive) / M (judgment needed) / L (design·debugging)
+- **Context**: does it repeatedly read the same long material (is cache reuse large)
+- **Independence**: can it run in parallel
 
-티어 배정은 `decide` 도구(ssu-bridge, Jev 판정)에 맡긴다.
+Leave tier assignment to the `decide` tool (ssu-bridge, Jev decision).
 
-- state: 서브태스크 설명 + 태그 + 현재까지의 사용량 맥락
-- questions (jev 형식, 게이트웨이 실측): type은 `"choice"`, criteria는
-  선택지→설명 객체여야 한다.
-  `{"tier": {"type": "choice", "instructions": "이 서브태스크를 안정적으로
-  해낼 수 있는 가장 싼 티어를 골라라. 난이도, 비용효율성, 프롬프트 캐시
-  재사용(같은 긴 컨텍스트를 반복하면 같은 모델 유지가 유리하다)을 함께
-  고려해라. 어려운 태스크(난이도 L)에는 flash·gemma 티어라도 max를
-  배정해라 — 이 계열은 max에서 성능이 크게 뛴다. 단 max의 사고는 길게
-  늘어나므로 출력 예산이 전제돼야 한다 (단계별 예산: high 64K ·
-  xhigh 96K · max 128K — AGENTS.md의 노력 단계 운용 참조).", "criteria": {"flash": "기계적·대량·반복", "gemma": "긴
-  읽기·초벌 정리", "haiku": "가벼운 판단", "luna": "중간 난이도 일반",
-  "advisor": "이미 2회 실패한 국소 문제만"}}}`
-  응답은 `answers.tier.choice`에 티어 이름이 온다.
+- state: subtask description + tags + usage context so far
+- questions (Jev format, verified against the gateway): type must be
+  `"choice"`, and criteria must be an option→description object.
+  `{"tier": {"type": "choice", "instructions": "Pick the cheapest tier that can reliably do this subtask. Weigh difficulty, cost efficiency, and prompt cache reuse (for repeated work on the same long context, keeping the same model pays off) together. For hard tasks (difficulty L), assign max even to the flash·gemma tiers — this class gains a lot at max. But max reasoning stretches long, so an output budget is a precondition (per-level budgets: high 64K · xhigh 96K · max 128K — see AGENTS.md, effort-level operation).", "criteria": {"flash": "mechanical·bulk·repetitive", "gemma": "long reading·rough organization", "haiku": "light judgment", "luna": "general mid-difficulty", "advisor": "only local problems that already failed twice"}}}`
+  The reply carries the tier name in `answers.tier.choice`.
 
-`decide`를 쓸 수 없으면 규칙표로 폴백한다: S→`w-flash`, 긴 읽기·초벌
-정리→`w-gemma`, M→`w-haiku` 또는 `w-luna`, L→주 에이전트 직접.
+If `decide` is unavailable, fall back to the rule table: S→`w-flash`, long
+reading·rough organization→`w-gemma`, M→`w-haiku` or `w-luna`, L→the main
+agent directly.
 
-**캐시 원칙 (실측 기반)**: 프롬프트 캐시는 같은 모델 + 동일한 프리픽스
-에서만 히트한다 (실측: 반복 호출에서 입력의 92~99% 캐시 적중, 캐시
-단가는 입력의 1/5).
-- 같은 긴 컨텍스트를 반복 처리하는 태스크는 모델을 바꾸지 말 것.
-  바꾸면 캐시 리드가 버려진다. 노력 단계(variant)도 유지한다.
-- 서브태스크 프롬프트는 공통 컨텍스트를 앞에 바이트 단위로 동일하게
-  두고, 태스크별 차이는 뒤에 붙인다.
-- 호출마다 기본료 5크레딧이 붙으므로, 같은 컨텍스트를 공유하는 작은
-  태스크들은 한 워커에게 묶어서 배정한다.
+**Cache rules (measured)**: the prompt cache hits only on the same model +
+an identical prefix (measured: 92~99% of input cache-hit on repeated
+calls; cache price is 1/5 of input).
+- For tasks that repeatedly process the same long context, do not switch
+  models. Switching discards the cache reads. Keep the effort level
+  (variant) too.
+- In subtask prompts, put the shared context first, byte-identical, and
+  append per-task differences at the end.
+- Every call carries a 5-credit base fee, so bundle small tasks that share
+  a context into one worker.
 
-라우팅 결과를 WORKFRAME.md의 라우팅 표에 기록한다.
+Record the routing results in the routing table in WORKFRAME.md.
 
-## Phase 4 — 실행 (pstack 플레이북 + 티어 서브에이전트)
+## Phase 4 — Execution (pstack playbooks + tier subagents)
 
-1. pstack의 `poteto-mode`로 작업 유형(feature / bug-fix / research /
-   autonomous-run)에 맞는 플레이북을 고르고, 그 단계를 todo로 연다.
-   단계마다 맞는 스킬(how·tdd·interrogate·blast-radius 등)을 적용한다 —
-   pstack은 이 프레임워크의 **규율 레이어**다.
-2. 서브태스크는 Task 도구로 티어 에이전트(`w-flash`·`w-haiku`·`w-luna`·
-   `w-gemma`)에게 배정한다. 독립 태스크는 병렬로 동시 실행한다. 같은
-   컨텍스트를 공유하는 태스크는 한 에이전트에게 묶어 보내고, 재시도나
-   후속 호출에서도 같은 모델·같은 프리픽스를 유지해 캐시를 살린다.
-3. 구조 질문은 graphify, 심볼 단위 편집은 serena를 쓴다 (AGENTS.md 규칙).
-4. 디자인 성격의 서브태스크(화면·프로토타입·덱)는 Open Design을 띄워
-   사용자가 보며 함께 다듬는 형태로 진행하고, 필요한 이미지 에셋은
-   ssu-bridge의 `image` 도구로 만든다.
+1. With pstack's `poteto-mode`, pick the playbook matching the work type
+   (feature / bug-fix / research / autonomous-run) and open its steps as
+   todos. Apply the fitting skill at each step (how·tdd·interrogate·
+   blast-radius, etc.) — pstack is this framework's **discipline layer**.
+2. Assign subtasks via the Task tool to tier agents (`w-flash`·`w-haiku`·
+   `w-luna`·`w-gemma`). Run independent tasks in parallel at the same time.
+   Send tasks that share a context bundled to one agent, and on retries or
+   follow-up calls keep the same model and the same prefix to preserve the
+   cache.
+3. Use graphify for structure questions and serena for symbol-level edits
+   (AGENTS.md rules).
+4. Run design-type subtasks (screens·prototypes·decks) by launching Open
+   Design so the user watches and refines along, and make needed image
+   assets with ssu-bridge's `image` tool.
 
-## Phase 5 — 막힘 프로토콜 (어드바이저는 국소에만)
+## Phase 5 — Stuck Protocol (advisor only on local spots)
 
-같은 서브태스크가 **2회 실패**하거나 같은 오류로 루프에 빠지면:
+When the same subtask **fails twice** or loops on the same error:
 
-1. 전체를 넘기지 말고 **국소 패키지**만 만든다: 목표 한 줄, 막힌 지점,
-   에러 원문, 이미 시도한 것 목록, 관련 코드 조각.
-2. `advisor` 서브에이전트에게 패키지만 보내 진단과 다음 수를 받는다.
-3. 조언을 원래 티어에게 돌려줘서 재개한다. advisor가 직접 다시
-   만들게 하지 않는다.
+1. Do not hand over the whole thing — build only a **local package**: goal
+   in one line, the stuck point, the raw error, a list of what was already
+   tried, relevant code snippets.
+2. Send only the package to the `advisor` subagent and receive a diagnosis
+   and the next move.
+3. Return the advice to the original tier and resume. Do not let the
+   advisor rebuild it directly.
 
-## Phase 6 — 검증과 회고
+## Phase 6 — Verification and Retrospective
 
-1. 완료 기준대로 실행·테스트해 검증한다. 검증 없이 "됐다"고 하지 않는다.
-2. 코드를 바꿨으면 `graphify update`로 지도를 갱신한다.
-3. `usage` 도구로 이번 작업의 토큰·캐시·비용을 확인해 보고에 넣는다.
-4. WORKFRAME.md 끝에 **교훈**을 남긴다: 무엇이 막혔고, 어떤 라우팅이
-   맞았고, 다음에 바꿀 것. (Harness²의 두 번째 재귀 — 교훈 라이브러리)
-5. 최종 보고: 만든 것, 검증 결과, 비용 요약, 남은 위험.
+1. Verify by running and testing against the completion criteria. Do not
+   say "done" without verification.
+2. If code changed, update the map with `graphify update`.
+3. Check this task's tokens·cache·cost with the `usage` tool and put them
+   in the report.
+4. Leave **lessons** at the end of WORKFRAME.md: what got stuck, which
+   routing was right, what to change next time. (Harness²'s second
+   recursion — the lessons library)
+5. Final report: what was built, verification results, cost summary,
+   remaining risks.

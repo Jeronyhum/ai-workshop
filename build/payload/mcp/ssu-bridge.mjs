@@ -68,6 +68,48 @@ async function gw(path, { method = "POST", body } = {}) {
 const asText = (value) => ({ content: [{ type: "text", text: value }] });
 const asError = (message) => ({ content: [{ type: "text", text: message }], isError: true });
 
+// Binary gateway call for the speech endpoint: it answers with raw audio
+// bytes, not JSON, so gw() (text + JSON.parse) cannot be used for it.
+async function gwBinary(path, body) {
+  const res = await fetch(BASE + path, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + apiKey(), "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(90000),
+  });
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (!res.ok) throw new Error("HTTP " + res.status + ": " + buf.toString("utf8").slice(0, 700));
+  return {
+    buf,
+    contentType: res.headers.get("content-type") || "",
+    charged: res.headers.get("x-credits-charged") || null,
+  };
+}
+
+// Wrap raw PCM (the speech endpoint always returns L16 PCM — measured
+// 2026-11-04: response_format mp3/wav are ignored, content-type stays
+// audio/pcm) in a WAV container so the file plays anywhere.
+// Gemini TTS PCM is 24kHz, 16-bit, mono.
+function wavWrap(pcm, { sampleRate = 24000, channels = 1, bits = 16 } = {}) {
+  const header = Buffer.alloc(44);
+  const byteRate = (sampleRate * channels * bits) / 8;
+  const blockAlign = (channels * bits) / 8;
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bits, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
+}
+
 function trim(s, n) {
   const t = String(s ?? "").replace(/\s+/g, " ").trim();
   return t.length > n ? t.slice(0, n) + "..." : t;
@@ -75,26 +117,26 @@ function trim(s, n) {
 
 function billingLine(charged) {
   if (!charged) return "";
-  return "\n\n차감 크레딧: " + charged;
+  return "\n\nCredits charged: " + charged;
 }
 
 const tools = [
   {
     name: "exa_search",
     description:
-      "Exa 웹 검색. 결과 제목·URL·관련 구절을 돌려준다. 유료(검색 1건 약 $0.007 상당의 크레딧). 최신 정보나 웹 근거가 필요할 때 사용.",
+      "Exa web search. Returns titles, URLs, and relevant excerpts. Paid (~$0.007 in credits per search). Use when you need current information or web sources.",
     inputSchema: {
       type: "object",
       properties: {
-        query: { type: "string", description: "검색어" },
-        num_results: { type: "integer", minimum: 1, maximum: 100, description: "결과 수 (기본 10, 10 초과분은 추가 과금)" },
+        query: { type: "string", description: "Search query" },
+        num_results: { type: "integer", minimum: 1, maximum: 100, description: "Number of results (default 10; results beyond 10 cost extra)" },
         type: {
           type: "string",
           enum: ["auto", "fast", "instant", "deep-lite", "deep", "deep-reasoning"],
-          description: "검색 종류. 기본 auto. 깊은 검색일수록 비싸다",
+          description: "Search type. Default auto. Deeper searches cost more",
         },
-        highlights: { type: "boolean", description: "관련 구절 포함 (기본 true)" },
-        summary: { type: "boolean", description: "페이지 요약 포함 (페이지당 추가 과금)" },
+        highlights: { type: "boolean", description: "Include relevant excerpts (default true)" },
+        summary: { type: "boolean", description: "Include page summaries (extra charge per page)" },
       },
       required: ["query"],
       additionalProperties: false,
@@ -102,15 +144,15 @@ const tools = [
   },
   {
     name: "exa_contents",
-    description: "이미 아는 URL의 본문·관련 구절·요약을 가져온다. URL 최대 100개. 유료(내용 종류별 페이지당 과금).",
+    description: "Fetch body text, excerpts, and summaries for known URLs. Up to 100 URLs. Paid (per page, by content type).",
     inputSchema: {
       type: "object",
       properties: {
         urls: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 100 },
-        text: { type: "boolean", description: "본문 포함 (기본 true)" },
+        text: { type: "boolean", description: "Include body text (default true)" },
         highlights: { type: "boolean" },
-        summary_query: { type: "string", description: "요약 기준 질문. 주면 요약 포함" },
-        max_characters: { type: "integer", description: "본문 최대 글자 수 (기본 4000)" },
+        summary_query: { type: "string", description: "Question to summarize against. If given, a summary is included" },
+        max_characters: { type: "integer", description: "Max body characters (default 4000)" },
       },
       required: ["urls"],
       additionalProperties: false,
@@ -118,12 +160,12 @@ const tools = [
   },
   {
     name: "exa_answer",
-    description: "검색 결과를 근거로 출처가 달린 답변을 만든다. 유료(답변 1건). 인용이 필요한 질문에 사용.",
+    description: "Build a cited answer grounded in search results. Paid (per answer). Use for questions that need citations.",
     inputSchema: {
       type: "object",
       properties: {
-        query: { type: "string", description: "질문" },
-        system_prompt: { type: "string", description: "답변 방식 지시" },
+        query: { type: "string", description: "Question" },
+        system_prompt: { type: "string", description: "Instructions for how to answer" },
       },
       required: ["query"],
       additionalProperties: false,
@@ -132,13 +174,13 @@ const tools = [
   {
     name: "decide",
     description:
-      "판정 모델로 분류·채점한다. 입력 토큰만 과금. jev 모드는 questions가 객체 {이름:{type,instructions,criteria}}, luna 모드는 배열 [{name,type,instructions,choices|levels}].",
+      "Classify or score with a judgment model. Charged on input tokens only. jev mode: questions is an object {name:{type,instructions,criteria}}; luna mode: an array [{name,type,instructions,choices|levels}].",
     inputSchema: {
       type: "object",
       properties: {
-        state: { type: "string", description: "판정할 내용 (문장 또는 JSON 문자열)" },
-        questions: { description: "jev: 객체 / luna: 배열. JSON 문자열도 허용" },
-        model: { type: "string", enum: ["jev", "luna"], description: "기본 jev" },
+        state: { type: "string", description: "Content to judge (text or a JSON string)" },
+        questions: { description: "jev: object / luna: array. A JSON string is also accepted" },
+        model: { type: "string", enum: ["jev", "luna"], description: "Default jev" },
       },
       required: ["state", "questions"],
       additionalProperties: false,
@@ -146,7 +188,7 @@ const tools = [
   },
   {
     name: "usage",
-    description: "이 키의 크레딧 사용 내역. 무료. by=model|key|day, scope=key|member, 최대 92일.",
+    description: "Credit usage history for this key. Free. by=model|key|day, scope=key|member, up to 92 days.",
     inputSchema: {
       type: "object",
       properties: {
@@ -160,21 +202,36 @@ const tools = [
   },
   {
     name: "credits",
-    description: "남은 크레딧 잔액과 월 할당·구매분 내역. 무료.",
+    description: "Remaining credit balance, plus monthly allocation and purchased-credit breakdown. Free.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     name: "image",
     description:
-      "이미지를 생성한다. 유료(이미지 1장당 과금). 기본 모델은 gpt-image-2.5-sunburst (Artificial Analysis Image Arena 1위, Elo 1222). 응답이 b64면 현재 작업 폴더에 png 파일로 저장하고 경로를 돌려주고, url이면 url을 돌려준다.",
+      "Generate an image. Paid (charged per image). Default model is gpt-image-2.5-sunburst (Artificial Analysis Image Arena #1, Elo 1222). If the response is b64, saves a png file in the current working folder and returns its path; if it is a url, returns the url.",
     inputSchema: {
       type: "object",
       properties: {
-        prompt: { type: "string", description: "만들 이미지 설명" },
-        model: { type: "string", description: "이미지 모델 (기본 gpt-image-2.5-sunburst). 가성비는 gemini-nano-banana-2.1" },
-        size: { type: "string", description: "크기 (기본 1024x1024, 예: 1536x1024)" },
+        prompt: { type: "string", description: "Description of the image to create" },
+        model: { type: "string", description: "Image model (default gpt-image-2.5-sunburst). For value, gemini-nano-banana-2.1" },
+        size: { type: "string", description: "Size (default 1024x1024, e.g. 1536x1024)" },
       },
       required: ["prompt"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "speak",
+    description:
+      "Synthesize speech (TTS) from text, save it as a wav file in the current working folder, and return its path. Paid (charged per call). Use for narration, voice guidance, or reading presentation scripts aloud. Default model gemini-3.8-flash-tts.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        text: { type: "string", description: "Text to read aloud" },
+        model: { type: "string", description: "TTS model (default gemini-3.8-flash-tts). Alternatives: gemini-2.5-pro-preview-tts (high quality), gemini-2.5-flash-preview-tts" },
+        voice: { type: "string", description: "Voice name (per-model preset, e.g. Kore). Empty means the model default" },
+      },
+      required: ["text"],
       additionalProperties: false,
     },
   },
@@ -196,7 +253,7 @@ async function callTool(name, args) {
       const lines = (data.results || []).map((r, i) => {
         const parts = ["[" + (i + 1) + "] " + (r.title || "") + "\n    " + (r.url || "")];
         for (const h of r.highlights || []) parts.push("    > " + trim(h, 300));
-        if (r.summary) parts.push("    요약: " + trim(r.summary, 400));
+        if (r.summary) parts.push("    Summary: " + trim(r.summary, 400));
         return parts.join("\n");
       });
       return asText(lines.join("\n\n") + billingLine(charged));
@@ -211,7 +268,7 @@ async function callTool(name, args) {
         const parts = ["[" + (r.title || "") + "] " + (r.url || "")];
         if (r.text) parts.push(trim(r.text, 1200));
         for (const h of r.highlights || []) parts.push("> " + trim(h, 300));
-        if (r.summary) parts.push("요약: " + trim(r.summary, 400));
+        if (r.summary) parts.push("Summary: " + trim(r.summary, 400));
         return parts.join("\n    ");
       });
       return asText(lines.join("\n\n") + billingLine(charged));
@@ -225,7 +282,7 @@ async function callTool(name, args) {
         .filter(Boolean);
       return asText(
         String(data.answer ?? JSON.stringify(data)) +
-          (cites.length ? "\n\n출처:\n" + cites.map((c) => "- " + c).join("\n") : "") +
+          (cites.length ? "\n\nSources:\n" + cites.map((c) => "- " + c).join("\n") : "") +
           billingLine(charged),
       );
     }
@@ -266,7 +323,7 @@ async function callTool(name, args) {
         const suffix = items.length > 1 ? "-" + (i + 1) : "";
         const file = path.join(process.cwd(), "ssu-image-" + Date.now() + suffix + ".png");
         fs.writeFileSync(file, Buffer.from(b64, "base64"));
-        return "저장됨: " + file;
+        return "Saved: " + file;
       };
       items.forEach((item, i) => {
         if (item?.b64_json) {
@@ -282,6 +339,21 @@ async function callTool(name, args) {
       // 예상과 다른 응답 형식이면 추측으로 버리지 않고 원문을 그대로 돌려준다.
       if (!lines.length) return asText(JSON.stringify(data, null, 2) + billingLine(charged));
       return asText(lines.join("\n") + billingLine(charged));
+    }
+    case "speak": {
+      const body = {
+        model: args.model || "gemini-3.8-flash-tts",
+        input: args.text,
+      };
+      if (args.voice) body.voice = args.voice;
+      const { buf, contentType, charged } = await gwBinary("/audio/speech/", body);
+      // JSON이 돌아오면 (에러 형식이거나 b64 인코딩인 경우) 원문을 그대로 보여준다.
+      if (contentType.includes("json")) return asText(buf.toString("utf8").slice(0, 2000) + billingLine(charged));
+      const wav = contentType.includes("wav") ? buf : wavWrap(buf);
+      const file = path.join(process.cwd(), "ssu-tts-" + Date.now() + ".wav");
+      fs.writeFileSync(file, wav);
+      const seconds = (buf.length / (24000 * 2)).toFixed(1);
+      return asText("Saved: " + file + " (approx. " + seconds + " seconds)" + billingLine(charged));
     }
     default:
       return asError("unknown tool: " + name);

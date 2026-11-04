@@ -1,16 +1,16 @@
 ---
-description: 모델별·일자별 크레딧 사용 내역을 조회합니다 (무료)
+description: Look up credit usage by model and by day (free)
 ---
 
-`ssu-bridge` MCP 서버의 `usage` 도구를 호출한다.
+Call the `usage` tool of the `ssu-bridge` MCP server.
 
-사용자 입력: $ARGUMENTS
+User input: $ARGUMENTS
 
-입력이 비어 있으면 아래 기본값으로 조회한다. "이번 달", "지난주", "10월"처럼 기간이 적혀 있으면 `start_date`/`end_date`로 변환해 넣는다. "일자별"이 적혀 있으면 `by=day`를 쓴다.
+If the input is empty, query with the defaults below. If a period is written in — e.g. "이번 달", "지난주", "10월" — convert it into `start_date`/`end_date`. If "일자별" is written in, use `by=day`.
 
-- 기본: `by=model`, `scope=key`
-- 일자별: `by=day`
-- 기간 지정: `start_date` / `end_date` (YYYY-MM-DD, 최대 92일)
+- Default: `by=model`, `scope=key`
+- By day: `by=day`
+- Period: `start_date` / `end_date` (YYYY-MM-DD, max 92 days)
 
-사용자가 기간을 말하지 않으면 도구 기본값을 쓴다. 결과는 표로 정리하고, 합계와 호출 수를 함께 적는다.
-가장 많이 쓴 모델 3개를 짚어주고, 직전 기간과 비교할 수 있으면 증감을 한 줄로 덧붙인다.
+If the user names no period, use the tool's defaults. Present the results as a table, with the total and the call count included.
+Point out the 3 most-used models, and if a comparison with the previous period is possible, add one line on the increase or decrease.

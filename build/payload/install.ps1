@@ -219,42 +219,13 @@ function Test-Key($k) {
     }
 }
 
-function Ask-Intent {
-    if ($DryRun) { return @{ label = "dry-run"; note = "테스트" } }
-    Say ""
-    Say "이번 워크숍에서 무엇을 만들고 싶나요? 번호를 고르거나 직접 적어주세요."
-    Say "  1) 업무 자동화 (엑셀·메일·보고서 반복 작업 줄이기)"
-    Say "  2) 정보 수집 도구 (뉴스·공고·논문·부동산을 모아 요약)"
-    Say "  3) 개인용 웹앱 (가계부·할일·습관·기록)"
-    Say "  4) 글쓰기 도우미 (초안·요약·번역·교정)"
-    Say "  5) 데이터 분석 (CSV·공공데이터로 표와 그래프)"
-    Say "  6) 아직 모르겠음 (같이 정하기)"
-    $pick = Read-Host "선택"
-    if (-not $pick) { $pick = "6" }
-    $map = @{
-        "1" = "업무 자동화"
-        "2" = "정보 수집 도구"
-        "3" = "개인용 웹앱"
-        "4" = "글쓰기 도우미"
-        "5" = "데이터 분석"
-        "6" = "아직 모르겠음"
-    }
-    $label = $map[$pick.Trim()]
-    if (-not $label) { $label = if ($pick.Trim()) { $pick.Trim() } else { "아직 모르겠음" } }
-    Say ""
-    Say "한 문장으로 더 적어주세요. 예: '매일 아침 공지사항을 요약해서 메일로 받고 싶다'"
-    $note = Read-Host "만들고 싶은 것"
-    if (-not $note) { $note = "(아직 구체화되지 않음)" }
-    return @{ label = $label; note = $note }
-}
-
 # =====================================================================
 Head "SSU x OpenCode 원클릭 설치"
 Say "  대상 폴더: $Root"
 if ($DryRun) { Warn "연습 모드입니다. 실제 파일을 쓰지 않습니다." }
 
 # ---------------- 1. 기반 프로그램 ----------------
-Head "1/7 기반 프로그램 확인"
+Head "1/6 기반 프로그램 확인"
 
 if ($SkipApps) {
     Warn "앱 설치를 건너뜁니다 (-SkipApps)"
@@ -321,7 +292,7 @@ if (-not (Have node)) {
 }
 
 # ---------------- 2. 키 ----------------
-Head "2/7 SSU API 키"
+Head "2/6 SSU API 키"
 $apiKey = Ask-Key
 if (-not $apiKey) { Fail "키가 비어 있습니다."; exit 1 }
 $check = Test-Key $apiKey
@@ -351,7 +322,7 @@ else {
 }
 
 # ---------------- 3. 파일 ----------------
-Head "3/7 설정 파일 배치"
+Head "3/6 설정 파일 배치"
 $payload = Join-Path $PSScriptRoot "payload"
 if (-not (Test-Path $payload)) { $payload = $PSScriptRoot }
 if (-not (Test-Path (Join-Path $payload "gen_config.mjs"))) {
@@ -400,7 +371,7 @@ else {
 }
 
 # ---------------- 4. 모델 설정 ----------------
-Head "4/7 모델 설정 생성 (61개 모델 + 게이트웨이 MCP)"
+Head "4/6 모델 설정 생성 (61개 모델 + 게이트웨이 MCP)"
 $cfgPath = Join-Path $Root "opencode.jsonc"
 if ($DryRun) {
     Step "(dry-run) gen_config.mjs 생략"
@@ -425,7 +396,7 @@ else {
 }
 
 # ---------------- 5. 코드 도구 ----------------
-Head "5/7 코드 도구 (Serena + graphify)"
+Head "5/6 코드 도구 (Serena + graphify)"
 if ($SkipTools) {
     Warn "건너뜁니다 (-SkipTools)"
 }
@@ -476,6 +447,28 @@ else {
     else { Warn "graphify 설치 실패 (code $($r.code)): $(Tail $r.out 2)" }
 }
 
+function Find-OdCli {
+    if (Have od) { return (Get-Command od).Source }
+    $cands = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\od.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\Open Design\od.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\resources\od.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\Open Design\resources\od.exe"),
+        (Join-Path $env:ProgramFiles "OpenDesign\od.exe")
+    )
+    $hit = $cands | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($hit) { return $hit }
+    # The real install layout differs from the guessed paths on some builds
+    # (seen on a real machine, 2026-11-04: app installed, od.exe elsewhere).
+    # Search the actual install roots instead of giving up.
+    foreach ($rootDir in @((Join-Path $env:LOCALAPPDATA "Programs"), $env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if (-not $rootDir -or -not (Test-Path $rootDir)) { continue }
+        $foundFile = Get-ChildItem $rootDir -Recurse -Filter "od.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($foundFile) { return $foundFile.FullName }
+    }
+    return $null
+}
+
 # Open Design (선택 구성요소): 로컬 퍼스트 AI 디자인 데스크톱 앱 (nexu-io/open-design).
 # 실패해도 전체 설치를 중단하지 않고 Warn으로 끝낸다.
 function Install-OpenDesign {
@@ -492,6 +485,7 @@ function Install-OpenDesign {
         $appDirs += (Join-Path $pf86 "Open Design")
     }
     $found = $appDirs | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $found) { $preOd = Find-OdCli; if ($preOd) { $found = Split-Path $preOd } }
     if ($found) {
         Ok "Open Design 이미 설치됨"
     }
@@ -506,10 +500,8 @@ function Install-OpenDesign {
             # electron-builder NSIS 설치 파일: /S 무인 설치를 시도한다.
             $p = Start-Process $exe -ArgumentList "/S" -Wait -PassThru
             if ($p.ExitCode -eq 0) { Ok "Open Design 설치 ($($rel.tag_name))" }
-            else {
-                Warn "Open Design 무인 설치 실패 (code $($p.ExitCode)). 설치 파일을 직접 실행해 설치하세요: $exe"
-                return
-            }
+            else { Warn "Open Design 무인 설치 실패 (code $($p.ExitCode)) — 아래에서 설치 창 방식으로 재시도합니다" }
+            $script:odSetupExe = $exe
         }
         catch {
             Warn "Open Design 설치를 건너뜁니다: $($_.Exception.Message)"
@@ -520,17 +512,16 @@ function Install-OpenDesign {
 
     # OpenCode에 Open Design MCP 연결 (best-effort). od가 없으면 건너뛴다.
     Refresh-Path
-    $od = $null
-    if (Have od) { $od = (Get-Command od).Source }
-    if (-not $od) {
-        $cands = @(
-            (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\od.exe"),
-            (Join-Path $env:LOCALAPPDATA "Programs\Open Design\od.exe"),
-            (Join-Path $env:LOCALAPPDATA "Programs\OpenDesign\resources\od.exe"),
-            (Join-Path $env:LOCALAPPDATA "Programs\Open Design\resources\od.exe"),
-            (Join-Path $env:ProgramFiles "OpenDesign\od.exe")
-        )
-        $od = $cands | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $od = Find-OdCli
+    # 무인 설치 직후에는 파일이 늦게 나타날 수 있어 잠시 기다리며 다시 찾는다.
+    for ($i = 0; -not $od -and $i -lt 12; $i++) { Start-Sleep -Seconds 5; $od = Find-OdCli }
+    if (-not $od -and $script:odSetupExe -and (Test-Path $script:odSetupExe)) {
+        # 최후의 자동 수단: 설치 창을 직접 띄운다 (학생은 안내대로 설치만 마르면 된다).
+        Warn "자동 설치로 CLI를 찾지 못해 설치 창을 띄웁니다. 설치를 마쳐주세요."
+        try {
+            Start-Process $script:odSetupExe -Wait
+            $od = Find-OdCli
+        } catch {}
     }
     if ($od) {
         $r = Invoke-Native $od @("mcp", "install", "opencode")
@@ -550,7 +541,7 @@ else {
 }
 
 # ---------------- 6. 스킬 팩 (pstack / spec-kit) ----------------
-Head "6/7 워크플로 스킬 (pstack, spec-kit)"
+Head "6/6 워크플로 스킬 (pstack, spec-kit)"
 $workDir = Join-Path $env:USERPROFILE "ssu-workshop"
 if ($DryRun) {
     Step "(dry-run) pstack 복제와 spec-kit 초기화 생략"
@@ -608,28 +599,11 @@ else {
     else { Warn "uv가 없어 spec-kit을 건너뜁니다" }
 }
 
-# ---------------- 7. 의도 + HUD ----------------
-Head "7/7 시작 설정"
-$intent = Ask-Intent
+# ---------------- 마무리: HUD + OpenCode 바로 실행 ----------------
+# 의도 입력(구 7단계)은 설치기에서 받지 않는다. OpenCode가 바로 열리고,
+# /start가 앱 안에서 탐정 단계로 의도를 파악하는 것이 정식 흐름이다.
+Head "마무리"
 if (-not $DryRun) {
-    $intentPath = Join-Path $Root "PROJECT_INTENT.md"
-    $body = @(
-        "# 이번 워크숍에서 만들 것",
-        "",
-        "- 분류: $($intent.label)",
-        "- 한 문장: $($intent.note)",
-        "",
-        "## 첫 대화에서 할 일",
-        "",
-        "1. 위 한 문장을 확인하고, 빠진 것만 3개 이하로 묻는다.",
-        "2. 유사 제품 3개와 차별점을 정리한다.",
-        "3. Must / Should / Won't 로 범위를 자른다.",
-        "4. 스택과 예상 API 비용을 제시한다.",
-        "5. 첫 30분 작업 하나를 정하고 시작한다."
-    )
-    [IO.File]::WriteAllLines($intentPath, $body, (New-Object Text.UTF8Encoding($false)))
-    Ok "의도 저장: $intentPath"
-
     # HUD 시작프로그램 등록
     $hud = Join-Path $Root "hud\hud.ps1"
     if (Test-Path $hud) {
@@ -647,23 +621,32 @@ if (-not $DryRun) {
         }
         catch { Warn "HUD 등록 실패: $($_.Exception.Message)" }
     }
+
+    # /start를 클립보드에 넣어 둔다: 학생은 새 세션 입력칸에 붙여넣기만 하면 된다.
+    try { Set-Clipboard "/start" } catch {}
+
+    # OpenCode Desktop 바로 실행 — 프로젝트 폴더 고르는 화면이 첫 화면이 된다.
+    $ocExe = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\OpenCode\OpenCode.exe"),
+        (Join-Path $env:LOCALAPPDATA "OpenCode\OpenCode.exe")
+    ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($ocExe) {
+        Start-Process $ocExe
+        Ok "OpenCode Desktop 실행 중"
+    }
+    else { Warn "OpenCode Desktop 실행 파일을 찾지 못했습니다. 시작 메뉴에서 OpenCode를 실행하세요." }
 }
 
 # ---------------- 끝 ----------------
 Say ""
-Say "설치가 끝났습니다." -ForegroundColor Green
+Say "설치가 끝났습니다. OpenCode가 바로 열립니다." -ForegroundColor Green
 Say ""
-Say "  1) OpenCode Desktop을 실행하세요."
-Say "  2) 모델을 고르세요. 목록의 'BAZE (Claude)' 또는 'BAZE' 아래 모델이 전부 SSU 게이트웨이입니다."
-Say "  3) 첫 대화에 이렇게 입력하세요:"
-$seed = if ($intent.note -and $intent.note -notlike "(아직*") { $intent.note } else { $intent.label }
-Say "       `"$seed`" 로 시작하고 싶어. 뭐부터 하면 돼?"
-Say "     코치 스킬이 먼저 질문부터 합니다. 코드를 바로 쓰지 않습니다."
+Say "  1) 열린 OpenCode에서 프로젝트 폴더를 고르세요. (처음이면 새 폴더를 만들어 선택)"
+Say "  2) 새 세션 입력칸에 붙여넣기(Ctrl+V) 하세요. '/start'가 클립보드에 들어 있습니다."
+Say "  3) Enter — /start가 만들고 싶은 것부터 질문으로 파악합니다."
 Say ""
-Say "  HUD(크레딧/컨텍스트): 화면 우측 상단 막대. 안 보이면:"
-Say "     powershell -NoProfile -ExecutionPolicy Bypass -File `"$Root\hud\hud.ps1`""
-Say ""
+Say "  모델은 목록의 'BAZE' 계열이 전부 SSU 게이트웨이입니다."
+Say "  HUD(크레딧/컨텍스트): 화면 우측 상단 막대. 끄려면 막대 우측 위 ✕, 우클릭 메뉴, 또는 Esc."
 Say "  명령: /credits  /usage  /websearch  /decide"
 Say "  스펙 주도 개발: 프로젝트 폴더에서 /speckit.specify -> /speckit.plan -> /speckit.tasks"
-if ($script:projectDir) { Say "  이번 프로젝트 폴더: $script:projectDir" }
 Say ""
